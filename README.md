@@ -3,7 +3,7 @@ Based on [amod-abm](https://github.com/wenjian0202/amod-abm).
 
 ## `Illustration`
 
-<img src="https://github.com/Leot6/AMoD-Simulation/blob/master/demo.gif" width="1024">
+<img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
 
 
 ## Installation 
