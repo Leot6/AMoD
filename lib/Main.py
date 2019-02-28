@@ -123,6 +123,8 @@ class Model(object):
                           dt if self.N == 0 else self.reqs[-1].Tr + dt,
                           m[0], m[1], m[2], m[3])
                 break
+
+        print("req", req.id, " Ts:", req.Ts)
         return req
 
     # visualize
