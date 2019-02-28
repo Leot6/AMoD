@@ -29,14 +29,16 @@ class OsrmEngine(object):
                  ghost='0.0.0.0',
                  gport=5000,
                  cst_speed=CST_SPEED):
-        if not os.path.isfile(exe_loc):
-            raise Exception("Could not find the routing server at %s" % exe_loc)
-        else:
-            self.exe_loc = exe_loc
-        if not os.path.isfile(map_loc):
-            raise Exception("Could not find osrm road network data at %s" % map_loc)
-        else:
-            self.map_loc = map_loc
+        # if not os.path.isfile(exe_loc):
+        #     raise Exception("Could not find the routing server at %s" % exe_loc)
+        # else:
+        #     self.exe_loc = exe_loc
+        # if not os.path.isfile(map_loc):
+        #     raise Exception("Could not find osrm road network data at %s" % map_loc)
+        # else:
+        #     self.map_loc = map_loc
+        self.exe_loc = exe_loc
+        self.map_loc = map_loc
         self.ghost = ghost
         self.gport = gport
         self.cst_speed = cst_speed

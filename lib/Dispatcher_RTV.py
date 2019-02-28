@@ -198,20 +198,20 @@ def single_vehicle_rtv_generation(osrm, veh, reqs, T):
                     # # debug code ends
 
                 if time.time() - start_time > CUTOFF:
-                    # debug code starts
-                    print("   number of trip size", k - 1, "is", len(trip_list[k - 2]))
-                    print("   number of trip size", k, "in test1 is", n1)
-                    print("   number of trip size", k, "in test2 is", n2)
-                    print("   number of trip size", k, "pass test is", n3)
-                    # debug code ends
+                    # # debug code starts
+                    # print("   number of trip size", k - 1, "is", len(trip_list[k - 2]))
+                    # print("   number of trip size", k, "in test1 is", n1)
+                    # print("   number of trip size", k, "in test2 is", n2)
+                    # print("   number of trip size", k, "pass test is", n3)
+                    # # debug code ends
                     print("veh", veh.id, ", trip size:", k, ", num of trips:", len(trip_list[k - 1]), "(time out)")
                     return trip_list, schedule_list, cost_list
-        # debug code starts
-        print("   number of trip size", k-1, "is", l)
-        print("   number of trip size", k, "in test1 is", n1)
-        print("   number of trip size", k, "in test2 is", n2)
-        print("   number of trip size", k, "pass test is", n3)
-        # debug code ends
+        # # debug code starts
+        # print("   number of trip size", k-1, "is", l)
+        # print("   number of trip size", k, "in test1 is", n1)
+        # print("   number of trip size", k, "in test2 is", n2)
+        # print("   number of trip size", k, "pass test is", n3)
+        # # debug code ends
         print("veh", veh.id, ", trip size:", k, ", num of trips:", len(trip_list[k-1]))
         if len(trip_list[k-1]) == 0:
             trip_list.pop()
