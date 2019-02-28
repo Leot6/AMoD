@@ -55,7 +55,7 @@ cmake ../
 make -j
 cd ..
 ```
-The `osrm-routed` executable should be working now. The next step is to grab a `.osm.pbf` OpenStreetMap extract from [Geofabrik](http://download.geofabrik.de/index.html). Here, we use areas of London as a toy case:
+The `osrm-routed` executable should be working now. The next step is to grab a `.osm.pbf` OpenStreetMap extract from [Geofabrik](http://download.geofabrik.de/index.html) or [BBBike](https://extract.bbbike.org/). Here, we use areas of London as a toy case:
 ```
 wget http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf
 ```
