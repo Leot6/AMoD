@@ -2,7 +2,14 @@
 defination of routes for the AMoD system
 """
 
+import time
+import math
+import requests
+import numpy as np
 from collections import deque
+from math import radians, cos, sin, asin, sqrt
+
+from lib.Configure import CST_SPEED
 
 
 class Step(object):
@@ -20,7 +27,7 @@ class Step(object):
         self.geo = geo
 
     def __str__(self):
-        return "step: distance = %.1f, duration = %.1f" % (self.d, self.t)
+        return 'step: distance = %.1f, duration = %.1f' % (self.d, self.t)
 
 
 class Leg(object):
@@ -49,5 +56,63 @@ class Leg(object):
         self.steps = deque(steps)
 
     def __str__(self):
-        return "leg: distance = %.1f, duration = %.1f, number of steps = %d" % (self.d, self.t, len(self.steps))
+        return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
+
+
+# get the best route from origin to destination
+def get_routing(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['legs'][0]
+    else:
+        return None
+
+
+# get the duration of the best route from origin to destination
+def get_duration(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['duration']
+    else:
+        return None
+
+
+def get_duration_haversine(olng, olat, dlng, dlat):
+    dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
+                                                   * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
+    return dist / CST_SPEED
+
+
+# generate the request in url format
+def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
+    ghost = '0.0.0.0'
+    gport = 5000
+    return 'http://{0}:{1}/route/v1/driving/{2},{3};{4},{5}?alternatives=false&steps=' \
+           '{6}&annotations={7}&geometries=geojson'.format(
+            ghost, gport, olng, olat, dlng, dlat, steps, annotations)
+
+
+# send the request and get the response in Json format
+def call_url(url):
+    while True:
+        try:
+            response = requests.get(url, timeout=1)
+            json_response = response.json()
+            code = json_response['code']
+            if code == 'Ok':
+                return json_response, True
+            else:
+                print('Error: %s' % (json_response['message']))
+                return json_response, False
+        except requests.exceptions.Timeout:
+            # print('Time out: %s' % url)
+            time.sleep(2)
+        except Exception as err:
+            print('Failed: %s' % url)
+            # return None
+            time.sleep(2)
+
+
 

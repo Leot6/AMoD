@@ -36,13 +36,13 @@ class Veh(object):
         Ld: accumulated load, weighed by service distance
     """
 
-    def __init__(self, id, rs, K=4, S=6, T=0.0):
+    def __init__(self, id, lng, lat, K=4, S=6, T=0.0):
         self.id = id
         self.idle = True
         self.rebl = False
         self.T = T
-        self.lng = (Olng + Dlng) / 2 + (Dlng - Olng) * rs.uniform(-0.35, 0.35)
-        self.lat = (Olat + Dlat) / 2 + (Dlat - Olat) * rs.uniform(-0.35, 0.35)
+        self.lng = lng
+        self.lat = lat
         self.tlng = self.lng
         self.tlat = self.lat
         self.K = K
@@ -110,7 +110,7 @@ class Veh(object):
                     # the vehicle has to stop somewhere within the step
                     else:
                         pct = dT / step.t
-                        if self.T >= T_WARM_UP and self.T <= T_WARM_UP + T_STUDY:
+                        if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
                             self.Ts += dT if leg.rid != -1 else 0
                             self.Ds += step.d * pct if leg.rid != -1 else 0
                             self.Tr += dT if leg.rid == -1 else 0
@@ -131,6 +131,9 @@ class Veh(object):
         self.T = T
         self.d = 0.0
         self.t = 0.0
+        if len(self.route) == 0:
+            self.idle = True
+            # print('change to ilde')
         return done
 
     # pop the first leg from the route list
@@ -186,7 +189,7 @@ class Veh(object):
     # build the route of the vehicle based on a series of quadruples (rid, pod, tlng, tlat)
     # update t, d, c, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
-    def build_route(self, osrm, schedule, reqs=None, T=None):
+    def build_route(self, schedule, reqs=None, T=None):
         self.clear_route()
         # if the route is null, vehicle is idle
         if len(schedule) == 0:
@@ -198,7 +201,7 @@ class Veh(object):
             return
         else:
             for (rid, pod, tlng, tlat, ddl) in schedule:
-                self.add_leg(osrm, rid, pod, tlng, tlat, ddl, reqs, T)
+                self.add_leg(rid, pod, tlng, tlat, ddl, reqs, T)
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True
@@ -221,33 +224,27 @@ class Veh(object):
             self.c = c
 
     # add a leg based on (rid, pod, tlng, tlat, ddl)
-    def add_leg(self, osrm, rid, pod, tlng, tlat, ddl, reqs, T):
-        if IS_ROAD_ENABLED:
-            l = osrm.get_routing(self.tlng, self.tlat, tlng, tlat)
-            leg = Leg(rid, pod, tlng, tlat, ddl,
-                      l['distance'], l['duration'], steps=[])
-            t_leg = 0.0
-            for s in l['steps']:
-                step = Step(s['distance'], s['duration'], s['geometry']['coordinates'])
-                t_leg += s['duration']
-                leg.steps.append(step)
-            assert np.isclose(t_leg, leg.t)
-            # the last step of a leg is always of length 2,
-            # consisting of 2 identical points as a flag of the end of the leg
-            assert len(step.geo) == 2
-            assert step.geo[0] == step.geo[1]
-            # if pickup and the vehicle arrives in advance, add an extra wait
-            if pod == 1:
-                if T + self.t + leg.t < reqs[rid].Cep:
-                    wait = reqs[rid].Cep - (T + self.t + leg.t)
-                    leg.steps[-1].t += wait
-                    leg.t += wait
-            self.route.append(leg)
-        else:
-            d_, t_ = osrm.get_distance_duration(self.tlng, self.tlat, tlng, tlat)
-            leg = Leg(rid, pod, tlng, tlat, ddl, d_, t_, steps=[])
-            leg.steps.append(Step(d_, t_, [[self.tlng, self.tlat], [tlng, tlat]]))
-            self.route.append(leg)
+    def add_leg(self, rid, pod, tlng, tlat, ddl, reqs, T):
+        l = get_routing(self.tlng, self.tlat, tlng, tlat)
+        leg = Leg(rid, pod, tlng, tlat, ddl,
+                  l['distance'], l['duration'], steps=[])
+        t_leg = 0.0
+        for s in l['steps']:
+            step = Step(s['distance'], s['duration'], s['geometry']['coordinates'])
+            t_leg += s['duration']
+            leg.steps.append(step)
+        assert np.isclose(t_leg, leg.t)
+        # the last step of a leg is always of length 2,
+        # consisting of 2 identical points as a flag of the end of the leg
+        assert len(step.geo) == 2
+        assert step.geo[0] == step.geo[1]
+        # if pickup and the vehicle arrives in advance, add an extra wait
+        if pod == 1:
+            if T + self.t + leg.t < reqs[rid].Cep:
+                wait = reqs[rid].Cep - (T + self.t + leg.t)
+                leg.steps[-1].t += wait
+                leg.t += wait
+        self.route.append(leg)
         self.tlng = leg.steps[-1].geo[1][0]
         self.tlat = leg.steps[-1].geo[1][1]
         self.d += leg.d
@@ -264,17 +261,17 @@ class Veh(object):
 
     # visualize
     def draw(self):
-        color = "0.50"
+        color = '0.50'
         if self.id == 0:
-            color = "red"
+            color = 'red'
         elif self.id == 1:
-            color = "orange"
+            color = 'orange'
         elif self.id == 2:
-            color = "yellow"
+            color = 'yellow'
         elif self.id == 3:
-            color = "green"
+            color = 'green'
         elif self.id == 4:
-            color = "blue"
+            color = 'blue'
         plt.plot(self.lng, self.lat, color=color, marker='o', markersize=4, alpha=0.5)
         count = 0
         for leg in self.route:
@@ -286,16 +283,16 @@ class Veh(object):
                 plt.plot(geo[0], geo[1], color=color, linestyle='-' if count <= 1 else '--', alpha=0.5)
 
     def __str__(self):
-        str = "veh %d at (%.7f, %.7f) when t = %.3f; %s; occupancy = %d/%d" % (
-            self.id, self.lng, self.lat, self.T, "rebalancing" if self.rebl else "idle" if self.idle else "in service",
+        str = 'veh %d at (%.7f, %.7f) when t = %.3f; %s; occupancy = %d/%d' % (
+            self.id, self.lng, self.lat, self.T, 'rebalancing' if self.rebl else 'idle' if self.idle else 'in service',
             self.n, self.K)
-        str += "\n  service dist/time: %.1f, %.1f; rebalancing dist/time: %.1f, %.1f" % (
+        str += '\n  service dist/time: %.1f, %.1f; rebalancing dist/time: %.1f, %.1f' % (
             self.Ds, self.Ts, self.Dr, self.Tr)
-        str += "\n  has %d leg(s), dist = %.1f, dura = %.1f，cost = %.1f" % (
+        str += '\n  has %d leg(s), dist = %.1f, dura = %.1f，cost = %.1f' % (
             len(self.route), self.d, self.t, self.c)
         for leg in self.route:
-            str += "\n    %s req %d at (%.7f, %.7f), dist = %.1f, dura = %.1f" % (
-                "pickup" if leg.pod == 1 else "dropoff" if leg.pod == -1 else "rebalancing",
+            str += '\n    %s req %d at (%.7f, %.7f), dist = %.1f, dura = %.1f' % (
+                'pickup' if leg.pod == 1 else 'dropoff' if leg.pod == -1 else 'rebalancing',
                 leg.rid, leg.tlng, leg.tlat, leg.d, leg.t)
         return str
 
