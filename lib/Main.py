@@ -1,47 +1,48 @@
 """
-initialization for the AMoD system
+main structure for the AMoD simulator
 """
 
 from lib.Request import*
 from lib.Dispatcher_FIFO import *
 from lib.Dispatcher_RTV import *
+from lib.Rebalancer import *
 
 
 class Model(object):
     """
     Model is the initial class for the AMoD system
     Attributes:
-        rs1: a seeded random generator for requests
-        rs2: a seeded random generator for vehicle locations
         T: system time at current state
-        M: demand matrix
-        D: demand volume (trips/hour)
+        stn_loc: locations (lng, lat) of stations
+        reqs_data: the list of collected real taxi requests data
+        req_init_idx: init index to read reqs_data
+        D: demand volume (percentage of total)
         V: number of vehicles
         K: capacity of vehicles
         vehs: the list of vehicles
-        N: number of requests
+        N: number of requests received
         queue: requests in the queue
-        reqs: the list of requests
+        reqs: the list of all received requests
         reqs_served: the list of completed requests
         reqs_serving: the list of requests on board
         reqs_picking: the list of requests being picked up
+        reqs_unassigned: the list of requests unassigned in the planning pool
         rejs: the list of rejected requests
         assign: assignment method
         rebl: rebalancing method
     """
 
-    def __init__(self, M, D, V=2, K=4, assign="ins", rebl="no"):
-        # two random generators, the seed of which could be modified for debug use
-        self.rs1 = np.random.RandomState(np.random.randint(0, 1000000))
-        self.rs2 = np.random.RandomState(np.random.randint(0, 1000000))
+    def __init__(self, stn_loc=None, reqs_data=None, D=1, V=2, K=4, assign='ins', rebl='no'):
         self.T = 0.0
-        self.M = M
+        self.stn_loc = stn_loc
+        self.reqs_data = reqs_data
+        self.req_init_idx = 0
+        while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
+            self.req_init_idx += 1
         self.D = D
         self.V = V
         self.K = K
         self.vehs = []
-        for i in range(V):
-            self.vehs.append(Veh(i, self.rs2, K=K))
         self.N = 0
         self.queue = []
         self.queue_ = []  # for plotting requests only
@@ -49,18 +50,20 @@ class Model(object):
         self.reqs_served = set()
         self.reqs_serving = set()
         self.reqs_picking = set()
+        self.reqs_unassigned = set()
         self.rejs = []
         self.assign = assign
         self.rebl = rebl
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
-    def dispatch_at_time(self, osrm, T):
+    def dispatch_at_time(self, T):
         self.T = T
-        noi = 0
+        noi = 0  # number of idle vehicles
+        print('updating vehicle status...')
         for veh in self.vehs:
+            done = veh.move_to_time(T)
             if veh.idle:
                 noi += 1
-            done = veh.move_to_time(T)
             for (rid, pod, t) in done:
                 if pod == 1:
                     self.reqs[rid].Tp = t
@@ -68,6 +71,7 @@ class Model(object):
                     self.reqs[rid].Td = t
                     self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
 
+        print('updating served reqs status...')
         picked = set()
         dropped = set()
         for req in self.reqs_picking:
@@ -81,51 +85,45 @@ class Model(object):
         self.reqs_serving.difference_update(dropped)
         self.reqs_served.update(dropped)
 
-        self.generate_requests_to_time(osrm, T)
-
+        print('loading new reqs ...')
+        self.generate_requests_to_time(T)
         self.queue_ = copy.deepcopy(self.queue)
-        if T >= 30:
-            print(self, ", idle vehs:", noi, "/", self.V)
-            if np.isclose(T % INT_ASSIGN, 0):
-                if self.assign == "ins":
-                    # print("Running insertion_heuristics...")
-                    # stime_assign = time.clock()
-                    insertion_heuristics(self, osrm, T)
-                    # runtime_assign = time.clock() - stime_assign
-                    # print("...running time of assign: %.05f seconds" % runtime_assign)
-                elif self.assign == "rtv":
-                    build_rtv_graph(self, osrm, T)
-#            if np.isclose(T % INT_REBL, 0):
-#                self.rebalance_sar(osrm)
+        print(self, ', idle vehs:', noi, '/', self.V)
 
-    # generate requests up to time T, following Poisson process
-    def generate_requests_to_time(self, osrm, T):
-        if self.N == 0:
-            req = self.generate_request(osrm)
-            self.reqs.append(req)
-            self.N += 1
-            self.queue.append(self.reqs[-1])
-        while self.reqs[-1].Tr <= T:
-            req = self.generate_request(osrm)
-            self.reqs.append(req)
-            self.N += 1
-            self.queue.append(self.reqs[-1])
+        if np.isclose(T % INT_ASSIGN, 0):
+            if self.assign == 'ins':
+                insertion_heuristics(self, T)
+            elif self.assign == 'rtv':
+                vehicle_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
+                greedy_assign(self, vehicle_trip_edges, T)
+        if np.isclose(T % INT_REBL, 0):
+            if self.rebl == 'sar':
+                rebalance(self, T)
+
+    def init_vehicles(self):
+        coef = len(self.stn_loc) / self.V
+        for i in range(self.V):
+            idx = int(i * coef)
+            self.vehs.append(Veh(i, self.stn_loc.iloc[idx]['lng'], self.stn_loc.iloc[idx]['lat'], K=self.K))
+
+    # generate requests up to time T, loading from reqs data file
+    def generate_requests_to_time(self, T):
+        req_idx = self.req_init_idx + int(self.N / self.D)
+        while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds <= T:
+            req = Req(self.N,  (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds,
+                      self.reqs_data.iloc[req_idx]['olng'], self.reqs_data.iloc[req_idx]['olat'],
+                      self.reqs_data.iloc[req_idx]['dlng'], self.reqs_data.iloc[req_idx]['dlat'])
+            # print('req_idx:', req_idx, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds, req.Ts)
+
+            # check the travel time of a trip is not zero
+            if req.Ts > 1:
+                self.reqs.append(req)
+                self.N += 1
+                req_idx = self.req_init_idx + int(self.N / self.D)
+                self.queue.append(self.reqs[-1])
+            else:
+                print('bad data found: req', self.N, req.olng, req.olat)
         assert self.N == len(self.reqs)
-
-    # generate one request, following exponential arrival interval
-    def generate_request(self, osrm):
-        dt = 3600.0 / self.D * self.rs1.exponential()
-        rand = self.rs1.rand()
-        for m in self.M:
-            if m[5] > rand:
-                req = Req(osrm,
-                          0 if self.N == 0 else self.reqs[-1].id + 1,
-                          dt if self.N == 0 else self.reqs[-1].Tr + dt,
-                          m[0], m[1], m[2], m[3])
-                break
-
-        print("req", req.id, " Ts:", req.Ts)
-        return req
 
     # visualize
     def draw(self):
@@ -139,7 +137,7 @@ class Model(object):
         plt.show()
 
     def __str__(self):
-        str = "AMoD system at t = %.3f: %d requests in queue" % (self.T, len(self.queue))
+        str = 'AMoD system at t = %.3f: %d requests in queue' % (self.T, len(self.queue))
         # for r in self.queue:
-        #     str += "\n" + r.__str__()
+        #     str += '\n' + r.__str__()
         return str

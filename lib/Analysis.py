@@ -5,7 +5,6 @@ utility functions are found here
 import csv
 import datetime
 import matplotlib.image as mpimg
-# import networkx as nx
 
 from matplotlib import animation
 from lib.Main import *
@@ -24,7 +23,7 @@ def print_results(model, runtime):
     for req in model.reqs:
         if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
             count_reqs += 1
-            # count as "served" only when the request is complete, i.e. the dropoff time is not -1
+            # count as 'served' only when the request is complete, i.e. the dropoff time is not -1
             if not np.isclose(req.Td, -1.0):
                 count_served += 1
                 wait_time += (req.Tp - req.Cep)
@@ -64,32 +63,32 @@ def print_results(model, runtime):
     veh_load_by_dist /= model.V
     veh_load_by_time /= model.V
 
-    print("*" * 80)
-    print("scenario: %s" % (DMD_STR))
-    print("simulation starts at %s, runtime time: %d s" % (datetime.datetime.now().strftime("%Y-%m-%d_%H:%M"), runtime))
-    print("system settings:")
-    print("  - period of study: %d s, with warm-up %d s, cool-down %d s" % (T_STUDY, T_WARM_UP, T_COOL_DOWN))
-    print("  - fleet size: %d; capacity: %d" % (model.V, model.K))
-    print("  - demand Rate: %.1f trips/h" % (model.D))
-    print("  - assignment method: %s, interval: %.1f s" % (MET_ASSIGN, INT_ASSIGN))
-    print("  - rebalancing method: %s, interval: %.1f s" % (MET_REBL, INT_REBL))
-    print("simulation results:")
-    print("  - requests:")
+    print('*' * 80)
+    print('scenario: %s' % (DMD_STR))
+    print('simulation starts at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
+    print('system settings:')
+    print('  - period of study: %d s, with warm-up %d s, cool-down %d s' % (T_STUDY, T_WARM_UP, T_COOL_DOWN))
+    print('  - fleet size: %d; capacity: %d' % (model.V, model.K))
+    print('  - demand Rate: %.1f trips/h' % (model.D))
+    print('  - assignment method: %s, interval: %.1f s' % (MET_ASSIGN, INT_ASSIGN))
+    print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('simulation results:')
+    print('  - requests:')
     print(
-        "    + service rate: %.1f%% (%d/%d), , wait time: %.1f s" % (service_rate, count_served, count_reqs, wait_time))
-    print("    + in-vehicle travel time: %.1f s" % (in_veh_time))
-    print("    + detour factor: %.2f" % (detour_factor))
-    print("  - vehicles:")
-    print("    + vehicle service distance travelled: %.1f m" % (veh_service_dist))
-    print("    + vehicle service time travelled: %.1f s" % (veh_service_time))
-    print("    + vehicle service time percentage: %.1f%%" % (veh_service_time_percent))
-    print("    + vehicle rebalancing distance travelled: %.1f m" % (veh_rebl_dist))
-    print("    + vehicle rebalancing time travelled: %.1f s" % (veh_rebl_time))
-    print("    + vehicle rebalancing time percentage: %.1f%%" % (veh_rebl_time_percent))
+        '    + service rate: %.1f%% (%d/%d), , wait time: %.1f s' % (service_rate, count_served, count_reqs, wait_time))
+    print('    + in-vehicle travel time: %.1f s' % (in_veh_time))
+    print('    + detour factor: %.2f' % (detour_factor))
+    print('  - vehicles:')
+    print('    + vehicle service distance travelled: %.1f m' % (veh_service_dist))
+    print('    + vehicle service time travelled: %.1f s' % (veh_service_time))
+    print('    + vehicle service time percentage: %.1f%%' % (veh_service_time_percent))
+    print('    + vehicle rebalancing distance travelled: %.1f m' % (veh_rebl_dist))
+    print('    + vehicle rebalancing time travelled: %.1f s' % (veh_rebl_time))
+    print('    + vehicle rebalancing time percentage: %.1f%%' % (veh_rebl_time_percent))
     print(
-        "    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)" % (
+        '    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)' % (
             veh_load_by_dist, veh_load_by_time))
-    print("*" * 80)
+    print('*' * 80)
 
     # write and save the result analysis
     f = open('output/results.csv', 'a')
@@ -104,7 +103,7 @@ def print_results(model, runtime):
     # write and save data of all requests
     f = open('output/requests.csv', 'w')
     writer = csv.writer(f)
-    writer.writerow(["id", "olng", "olat", "dlng", "dlat", "Ts", "OnD", "Tr", "Cep", "Tp", "Td", "WT", "VT", "D"])
+    writer.writerow(['id', 'olng', 'olat', 'dlng', 'dlat', 'Ts', 'OnD', 'Tr', 'Cep', 'Tp', 'Td', 'WT', 'VT', 'D'])
     for req in model.reqs:
         if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
             row = [req.id, req.olng, req.olat, req.dlng, req.dlat, req.Ts, req.Tr, req.Cep, req.Tp, req.Td,
@@ -193,11 +192,11 @@ def anim(frames, frames_reqs):
         # reqs_o = []
         # reqs_d = []
         # for i in range(len(frames_reqs[n])):
-        #     color = "0.50"
+        #     color = '0.50'
         #     if not frames_reqs[n][i].served:
-        #         color = "#FF0000"
-        #     reqs_o.append(plt.plot([], [], color=color, marker="+", markersize=8, alpha=2)[0])
-        #     reqs_d.append(plt.plot([], [], color=color, marker="x", markersize=8, alpha=2)[0])
+        #         color = '#FF0000'
+        #     reqs_o.append(plt.plot([], [], color=color, marker='+', markersize=8, alpha=2)[0])
+        #     reqs_d.append(plt.plot([], [], color=color, marker='x', markersize=8, alpha=2)[0])
         #     reqs_o[i].set_data([frames_reqs[n][i].olng], [frames_reqs[n][i].olat])
         #     reqs_d[i].set_data([frames_reqs[n][i].dlng], [frames_reqs[n][i].dlat])
         return vehs, routes1, routes2, routes3, reqs_o, reqs_d
@@ -205,7 +204,7 @@ def anim(frames, frames_reqs):
     fig = plt.figure(figsize=(MAP_WIDTH, MAP_HEIGHT))
     plt.xlim((Olng, Dlng))
     plt.ylim((Olat, Dlat))
-    img = mpimg.imread("map.png")
+    img = mpimg.imread('map.png')
     plt.imshow(img, extent=[Olng, Dlng, Olat, Dlat], aspect=(Dlng - Olng) / (Dlat - Olat) * MAP_HEIGHT / MAP_WIDTH)
     fig.subplots_adjust(left=0.00, bottom=0.00, right=1.00, top=1.00)
     vehs = []
@@ -216,27 +215,40 @@ def anim(frames, frames_reqs):
     reqs_d = []
     reqs = []
     for v in frames[0]:
-        color = "0.50"
-        if v.id == 0:
-            color = "#dc241f"
-        elif v.id == 1:
-            color = "#9b0058"
-        elif v.id == 2:
-            color = "#0019a8"
-        elif v.id == 3:
-            color = "#0098d8"
-        elif v.id == 4:
-            color = "#b26300"
-        vehs.append(plt.plot([], [], color=color, marker="o", markersize=6, alpha=2)[0])
-        routes1.append(plt.plot([], [], linestyle='--', color=color, alpha=0.7)[0])
-        routes2.append(plt.plot([], [], linestyle='-', color=color, alpha=0.7)[0])
-        routes3.append(plt.plot([], [], linestyle=':', color=color, alpha=0.4)[0])
+        color = '0.50'
+        size = 7
+        if v.id == 1:
+            color = '#FF5733'
+        elif v.id == int(FLEET_SIZE*2/10):
+            color = '#FAD91E'
+        elif v.id == int(FLEET_SIZE*3/10):
+            color = '#1EFA35'
+        elif v.id == int(FLEET_SIZE*4/10):
+            color = '#6DDCFD'
+        elif v.id == int(FLEET_SIZE*5/10):
+            color = '#A89BFA'
+        elif v.id == int(FLEET_SIZE*6/10):
+            color = '#EE9BFA'
+        elif v.id == int(FLEET_SIZE*7/10):
+            color = '#F3FFCA'
+        elif v.id == int(FLEET_SIZE*8/10):
+            color = '#9BFAC6'
+        elif v.id == int(FLEET_SIZE*9/10):
+            color = '#FACC9B'
+        elif v.id == FLEET_SIZE - 1:
+            color = '#9BFAF3'
+        else:
+            size = 6
+        vehs.append(plt.plot([], [], color=color, marker='o', markersize=size, alpha=1)[0])
+        routes1.append(plt.plot([], [], linestyle='--', color=color, alpha=0.3)[0])
+        routes2.append(plt.plot([], [], linestyle='-', color=color, alpha=0.3)[0])
+        routes3.append(plt.plot([], [], linestyle=':', color=color, alpha=0.2)[0])
     # for req in frames_reqs[0]:
-    #     color = "0.50"
+    #     color = '0.50'
     #     if not req.served:
-    #         color = "#FF0000"
-    #     reqs_o.append(plt.plot([], [], color=color, marker="+", markersize=8, alpha=2)[0])
-    #     reqs_d.append(plt.plot([], [], color=color, marker="x", markersize=8, alpha=2)[0])
+    #         color = '#FF0000'
+    #     reqs_o.append(plt.plot([], [], color=color, marker='+', markersize=8, alpha=2)[0])
+    #     reqs_d.append(plt.plot([], [], color=color, marker='x', markersize=8, alpha=2)[0])
     #     reqs.append(plt.plot([], [], linestyle=':', color=color, alpha=0.4)[0])
     anime = animation.FuncAnimation(fig, animate, init_func=init, frames=len(frames), interval=100)
     return anime
