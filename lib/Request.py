@@ -3,7 +3,7 @@ defination of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.Configure import *
+from lib.Configure import MAX_WAIT, MAX_DELAY
 from lib.Route import get_duration
 
 

@@ -12,7 +12,7 @@ DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 200
+FLEET_SIZE = 100
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
