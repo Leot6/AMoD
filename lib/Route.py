@@ -7,7 +7,6 @@ import math
 import requests
 import numpy as np
 from collections import deque
-from math import radians, cos, sin, asin, sqrt
 
 from lib.Configure import CST_SPEED
 

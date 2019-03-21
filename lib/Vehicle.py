@@ -3,10 +3,11 @@ defination of vehicles for the AMoD system
 """
 
 import numpy as np
+from collections import deque
 import matplotlib.pyplot as plt
 
-from lib.Configure import *
-from lib.Route import *
+from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH
+from lib.Route import Step, Leg, get_routing
 
 
 class Veh(object):

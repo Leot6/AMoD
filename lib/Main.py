@@ -2,10 +2,18 @@
 main structure for the AMoD simulator
 """
 
-from lib.Request import*
-from lib.Dispatcher_FIFO import *
-from lib.Dispatcher_RTV import *
-from lib.Rebalancer import *
+import time
+import copy
+import numpy as np
+import matplotlib.pyplot as plt
+from dateutil.parser import parse
+
+from lib.Configure import DMD_SST, INT_ASSIGN, INT_REBL
+from lib.Vehicle import Veh
+from lib.Request import Req
+from lib.RTVgenerator import build_rtv_graph
+from lib.AssignPlanner import greedy_assign, ILP_assign
+from lib.Rebalancer import rebalance
 
 
 class Model(object):
@@ -91,12 +99,9 @@ class Model(object):
         print(self, ', idle vehs:', noi, '/', self.V)
 
         if np.isclose(T % INT_ASSIGN, 0):
-            if self.assign == 'ins':
-                insertion_heuristics(self, T)
-            elif self.assign == 'rtv':
-                veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
-                greedy_assign(self, veh_trip_edges, T)
-                # ILP_assign(self, veh_trip_edges, self.queue, T)
+            veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
+            greedy_assign(self, veh_trip_edges, T)
+            # ILP_assign(self, veh_trip_edges, self.queue, T)
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'sar':
                 rebalance(self, T)
