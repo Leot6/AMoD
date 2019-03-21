@@ -12,7 +12,7 @@ DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 100
+FLEET_SIZE = 200
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
@@ -23,7 +23,7 @@ MAX_WAIT = 60 * 3
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 0
-T_STUDY = 30 + 30 * 8
+T_STUDY = 30 + 30 * 60
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 

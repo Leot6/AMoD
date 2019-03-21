@@ -94,8 +94,9 @@ class Model(object):
             if self.assign == 'ins':
                 insertion_heuristics(self, T)
             elif self.assign == 'rtv':
-                vehicle_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
-                greedy_assign(self, vehicle_trip_edges, T)
+                veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
+                greedy_assign(self, veh_trip_edges, T)
+                # ILP_assign(self, veh_trip_edges, self.queue, T)
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'sar':
                 rebalance(self, T)
