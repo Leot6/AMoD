@@ -4,11 +4,13 @@ utility functions are found here
 
 import csv
 import datetime
+import numpy as np
+import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-
 from matplotlib import animation
-from lib.Main import *
-from lib.Configure import *
+
+from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, FLEET_SIZE, \
+    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT
 
 
 # print and save results

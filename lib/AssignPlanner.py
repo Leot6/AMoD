@@ -1,22 +1,20 @@
 """
-compute a assignment plan from edges in RTV
+compute an assignment plan from edges in RTV
 """
 
 import mosek
 import numpy as np
+from lib.Configure import CUTOFF_ILP
 
 
-def greedy_assign(model, veh_trip_edges, T):
-    print('    -start greedy assign with %d edges:' % len(veh_trip_edges))
+def greedy_assign(veh_trip_edges):
     R_id_assigned = []
     T_id_assigned = []
     V_id_assigned = []
     schedule_assigned = []
 
-    # # debug code starts
-    # for (veh, trip, schedule, cost) in veh_trip_edges:
-    #     print('veh %d, trip %s, cost %.02f' % (veh.id, [r.id for r in trip], cost))
-    # # debug code ends
+    # debug
+    cost_a = 0
 
     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
     for (veh, trip, schedule, cost) in edges:
@@ -35,23 +33,20 @@ def greedy_assign(model, veh_trip_edges, T):
         schedule_assigned.append(schedule)
         print('     *trip %s is assigned to veh %d' % ([req.id for req in trip], veh_id))
 
-    # return R_id_assigned, V_id_assigned, schedule_assigned
-    R_assigned = set()
-    for req_id in R_id_assigned:
-        R_assigned.add(model.reqs[req_id])
-    model.reqs_picking.update(R_assigned)
-    R_unassigned = set(model.queue) - R_assigned
-    model.reqs_unassigned.update(R_unassigned)
-    model.queue.clear()
-    for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-        model.vehs[veh_id].build_route(schedule, model.reqs, T)
+        # debug
+        cost_a += cost
+
+    print('        greedy assign cost:', cost_a, 'num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+    return R_id_assigned, V_id_assigned, schedule_assigned
 
 
-def ILP_assign(model, veh_trip_edges, reqs_pool, T):
-    print('    -start ILP assign with %d edges:' % len(veh_trip_edges))
+def ILP_assign(veh_trip_edges, reqs_pool):
     R_id_assigned = []
     V_id_assigned = []
     schedule_assigned = []
+
+    # debug
+    cost_a = 0
 
     # # debug code starts
     # for (veh, trip, schedule, cost) in veh_trip_edges:
@@ -140,7 +135,7 @@ def ILP_assign(model, veh_trip_edges, reqs_pool, T):
                 task.putvartypelist(list(range(numvar)),
                                     [mosek.variabletype.type_int] * numvar)
                 # Set max solution time
-                task.putdouparam(mosek.dparam.mio_max_time, 20.0)
+                task.putdouparam(mosek.dparam.mio_max_time, CUTOFF_ILP)
                 # Optimize the task
                 task.optimize()
                 # Output a solution
@@ -153,13 +148,10 @@ def ILP_assign(model, veh_trip_edges, reqs_pool, T):
                 V_id_assigned.append(veh.id)
                 schedule_assigned.append(schedule)
                 print('     *trip %s is assigned to veh %d' % ([req.id for req in trip], veh.id))
-    # return R_id_assigned, V_id_assigned, schedule_assigned
-    R_assigned = set()
-    for req_id in R_id_assigned:
-        R_assigned.add(model.reqs[req_id])
-    model.reqs_picking.update(R_assigned)
-    R_unassigned = set(model.queue) - R_assigned
-    model.reqs_unassigned.update(R_unassigned)
-    model.queue.clear()
-    for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-        model.vehs[veh_id].build_route(schedule, model.reqs, T)
+
+                # debug
+                cost_a += cost
+
+    print('        ILP assign cost:', cost_a, 'num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+    return R_id_assigned, V_id_assigned, schedule_assigned
+

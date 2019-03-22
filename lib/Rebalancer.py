@@ -8,13 +8,12 @@ from lib.Route import get_duration
 
 
 def rebalance(model, T):
-    print('  rebalancing...')
-
     # debug code starts
     noi = 0  # number of idle vehicles
     for veh in model.vehs:
         if veh.idle:
             noi += 1
+    print('  idle vehs:', noi)
     # debug code ends
 
     for veh in model.vehs:
@@ -39,7 +38,6 @@ def rebalance(model, T):
                       % ([req_re.id], veh.id, min_dt))
             if len(model.reqs_unassigned) == 0:
                 break
-    print('  idle vehs:', noi)
     if len(model.reqs_unassigned) != 0:
         model.rejs.extend(list(model.reqs_unassigned))
         model.reqs_unassigned.clear()

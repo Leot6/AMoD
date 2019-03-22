@@ -1,8 +1,17 @@
-import pandas as pd
 
-from lib.Analysis import *
+import time
+import datetime
+import copy
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from lib.Main import Model
+from lib.Configure import DMD_PATH, STN_PATH, DMD_VOL, FLEET_SIZE, VEH_CAPACITY, \
+    MET_ASSIGN, MET_REBL, T_TOTAL, INT_ASSIGN, IS_ANIMATION, DMD_SST, IS_ANALYSIS
+from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
+    print('initializing the model...')
     # start time of initialization
     istime = time.time()
     # frames record the states of the AMoD model for animation purpose
@@ -13,7 +22,6 @@ if __name__ == '__main__':
     stations = pd.read_csv(STN_PATH)
     model = Model(stn_loc=stations, reqs_data=taxi_trips, D=DMD_VOL, V=FLEET_SIZE,
                   K=VEH_CAPACITY, assign=MET_ASSIGN, rebl=MET_REBL)
-    model.init_vehicles()
     print('...running time of initialization: %.05f seconds' % (time.time() - istime))
 
     # start time of simulation
@@ -54,4 +62,5 @@ if __name__ == '__main__':
         plt.show()
 
     # output the simulation results and save data
-    # print_results(model, runtime)
+    if IS_ANALYSIS:
+        print_results(model, runtime)
