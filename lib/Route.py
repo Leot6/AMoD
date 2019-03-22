@@ -77,7 +77,7 @@ def get_duration(olng, olat, dlng, dlat):
     else:
         return None
 
-
+# get the duration based on Euclidean distance
 def get_duration_haversine(olng, olat, dlng, dlat):
     dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
                                                    * (olng - dlng)) ** 2 + (olat - dlat) ** 2))

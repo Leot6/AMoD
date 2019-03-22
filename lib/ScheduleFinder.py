@@ -23,43 +23,45 @@ def compute_schedule(veh, trip, _trip, _schedules):
         req = tuple(set(trip) - set(_trip))[0]
 
     for schedule in _schedules:
-        # # check if the req has same origin-destination as any other req in the schedule
-        # p = set()
-        # d = set()
-        # for (rid, pod, tlng, tlat, ddl) in schedule:
-        #     if pod == 1 and req.olng == tlng and req.olat == tlat:
-        #         p.add(rid)
-        #     if pod == -1 and req.dlng == tlng and req.dlat == tlat:
-        #         d.add(rid)
-        # same_req = p & d
-        # if len(same_req) > 0:
-        #     print(' # check if the req has same origin-destination as any other req in the schedule')
-        #     time.sleep(100)
-        #     i = 0
-        #     i_p = 0
-        #     i_d = 0
-        #     for (rid, pod, tlng, tlat, ddl) in schedule:
-        #         i += 1
-        #         if pod == 1 and rid in same_req:
-        #             if req.Clp <= ddl:
-        #                 i_p = i-1
-        #             else:
-        #                 i_p = i
-        #         if pod == -1 and rid in same_req:
-        #             if req.Cld <= ddl:
-        #                 i_d = i
-        #             else:
-        #                 i_d = i+1
-        #     schedule.insert(i_p, (req.id, 1, req.olng, req.olat, req.Clp))
-        #     schedule.insert(i_d, (req.id, -1, req.dlng, req.dlat, req.Cld))
-        #     flag, c, viol = test_constraints_get_cost(schedule, veh, req, i_d)
-        #     if flag:
-        #         feasible_schedules.append(copy.deepcopy(schedule))
-        #         best_schedule = copy.deepcopy(schedule)
-        #         min_cost = c
-        #     schedule.pop(i_d)
-        #     schedule.pop(i_p)
-        #     return best_schedule, min_cost, feasible_schedules
+        # check if the req has same origin-destination as any other req in the schedule
+        p = set()
+        d = set()
+        for (rid, pod, tlng, tlat, ddl) in schedule:
+            if pod == 1 and req.olng == tlng and req.olat == tlat:
+                p.add(rid)
+                print(' # check if the req has same origin as any other req in the schedule')
+            if pod == -1 and req.dlng == tlng and req.dlat == tlat:
+                d.add(rid)
+                print(' # check if the req has same destination as any other req in the schedule')
+        same_req = p & d
+        if len(same_req) > 0:
+            print(' # check if the req has same origin-destination as any other req in the schedule')
+            time.sleep(100)
+            i = 0
+            i_p = 0
+            i_d = 0
+            for (rid, pod, tlng, tlat, ddl) in schedule:
+                i += 1
+                if pod == 1 and rid in same_req:
+                    if req.Clp <= ddl:
+                        i_p = i-1
+                    else:
+                        i_p = i
+                if pod == -1 and rid in same_req:
+                    if req.Cld <= ddl:
+                        i_d = i
+                    else:
+                        i_d = i+1
+            schedule.insert(i_p, (req.id, 1, req.olng, req.olat, req.Clp))
+            schedule.insert(i_d, (req.id, -1, req.dlng, req.dlat, req.Cld))
+            flag, c, viol = test_constraints_get_cost(schedule, veh, req, i_d)
+            if flag:
+                feasible_schedules.append(copy.deepcopy(schedule))
+                best_schedule = copy.deepcopy(schedule)
+                min_cost = c
+            schedule.pop(i_d)
+            schedule.pop(i_p)
+            return best_schedule, min_cost, feasible_schedules
 
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constrain of a req already in the schedule,

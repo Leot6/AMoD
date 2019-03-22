@@ -3,8 +3,9 @@ filter out the trips starts/ends outside Manhattan area
 """
 
 import time
-# import requests
 import pandas as pd
+import sys
+sys.path.append('..')
 from lib.Route import get_duration
 
 
@@ -117,6 +118,9 @@ if __name__ == '__main__':
     # df10.sort_values('ptime', inplace=True)
     # print('number of all taxi trips:', df10.shape[0])
     # df10.to_csv('Manhattan-taxi-20160501.csv', index=False)
+
+    df11 = pd.read_csv('Manhattan-taxi-20160501.csv')
+    print('number of all taxi trips in 20160501:', df11.shape[0])
 
     runtime = time.time() - stime
     print('...running time : %.05f seconds' % runtime)
