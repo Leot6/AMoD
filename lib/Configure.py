@@ -17,7 +17,7 @@ RIDESHARING_SIZE = 6
 
 # maximum wait time window and maximum total delay
 MAX_WAIT = 60 * 5
-MAX_DELAY = 60 * 10
+MAX_DELAY = MAX_WAIT * 2
 # MAX_DETOUR = 1.5
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
