@@ -240,7 +240,7 @@ def anim(frames, frames_reqs):
         elif v.id == FLEET_SIZE - 1:
             color = '#9BFAF3'
         else:
-            size = 6
+            size = 3
         vehs.append(plt.plot([], [], color=color, marker='o', markersize=size, alpha=1)[0])
         routes1.append(plt.plot([], [], linestyle='--', color=color, alpha=0.3)[0])
         routes2.append(plt.plot([], [], linestyle='-', color=color, alpha=0.3)[0])
