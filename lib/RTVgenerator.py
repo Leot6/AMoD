@@ -4,6 +4,7 @@ dispatch algorithms for the AMoD system
 
 import copy
 import time
+from tqdm import tqdm
 from joblib import Parallel, delayed
 
 from lib.Configure import RIDESHARING_SIZE, CUTOFF_RTV
@@ -16,20 +17,21 @@ def build_rtv_graph(vehs, reqs_pool, T):
     veh_trip_edges = []
 
     # # parallel
-    # trip_list_all = Parallel(n_jobs=-1)(delayed(feasible_trips_search)(veh, reqs_in_queue, T)
-    #                                     for veh in model.vehs)
-    # for veh, (trip_list, schedule_list, cost_list) in zip(model.vehs, trip_list_all):
+    # trip_list_all = Parallel(n_jobs=-1)(delayed(feasible_trips_search)(veh, reqs_pool, T)
+    #                                     for veh in vehs)
+    #
+    # for veh, (trip_list, schedule_list, cost_list) in zip(vehs, trip_list_all):
     #     for trips, schedules, costs in zip(trip_list, schedule_list, cost_list):
     #         for trip, schedule, cost in zip(trips, schedules, costs):
     #             veh_trip_edges.append([veh, trip, schedule, cost])
 
     # non-parallel
-    for veh in vehs:
+    for veh in tqdm(vehs, desc='RTV'):
         trip_list, schedule_list, cost_list = feasible_trips_search(veh, reqs_pool, T)
         for trips, schedules, costs in zip(trip_list, schedule_list, cost_list):
             for trip, schedule, cost in zip(trips, schedules, costs):
                 veh_trip_edges.append([veh, trip, schedule, cost])
-        print('veh %d is finished' % veh.id)
+        # print('veh %d is finished' % veh.id)
 
     # # debug code starts
     # for veh in model.vehs:
@@ -49,10 +51,10 @@ def build_rtv_graph(vehs, reqs_pool, T):
     #             print('  trip:', reqid, ', schedule:', legid, ', cost:', cost_list[i][j])
     # # debug code ends
 
-    # debug code starts
-    for (veh, trip, schedule, cost) in veh_trip_edges:
-        print('veh %d, trip %s, cost %.02f' % (veh.id, [r.id for r in trip], cost))
-    # debug code ends
+    # # debug code starts
+    # for (veh, trip, schedule, cost) in veh_trip_edges:
+    #     print('veh %d, trip %s, cost %.02f' % (veh.id, [r.id for r in trip], cost))
+    # # debug code ends
 
     return veh_trip_edges
 
@@ -91,8 +93,8 @@ def feasible_trips_search(veh, reqs, T):
                 cost_list[0].append(min_cost)
                 schedules_k.append(schedules)
                 # print('size 1 add', req.id, 'schedules_num', len(schedules))
-    print('veh', veh.id, ', trip size:', 1, ', num of trips:', len(trip_list[0]),
-          ', running time:', round((time.time() - time1), 2))
+    # print('veh', veh.id, ', trip size:', 1, ', num of trips:', len(trip_list[0]),
+    #       ', running time:', round((time.time() - time1), 2))
 
     # trips of size k (k >= 2)
     for k in range(2, RIDESHARING_SIZE + 1):
@@ -203,8 +205,8 @@ def feasible_trips_search(veh, reqs, T):
         # print('   number of trip size', k, 'in test2 is', n2)
         # print('   number of trip size', k, 'pass test is', n3)
         # # debug code ends
-        print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k-1]),
-              ', running time:', round((time.time() - time2), 2))
+        # print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k-1]),
+        #       ', running time:', round((time.time() - time2), 2))
         if len(trip_list[k-1]) == 0:
             trip_list.pop()
             schedule_list.pop()

@@ -1,143 +1,75 @@
-##
-#  Copyright : Copyright (c) MOSEK ApS, Denmark. All rights reserved.
-#
-#  File :      lo2.py
-#
-#  Purpose :   Demonstrates how to solve small linear
-#              optimization problem using the MOSEK Python API.
-##
-import sys
 import mosek
-
-# Since the actual value of Infinity is ignores, we define it solely
-# for symbolic purposes:
-inf = 0.0
-
-# Define a stream printer to grab output from MOSEK
-# def streamprinter(text):
-#     sys.stdout.write(text)
-#     sys.stdout.flush()
+import time
+import requests
+import numpy as np
+import pandas as pd
+from tqdm import trange
+from time import sleep
 
 
-def main():
-    # Make a MOSEK environment
-    with mosek.Env() as env:
-        # Attach a printer to the environment
-        # env.set_Stream(mosek.streamtype.log, streamprinter)
+# get the best route from origin to destination
+def get_routing(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['legs'][0]
+    else:
+        return None
 
-        # Create a task
-        with env.Task(0, 0) as task:
-            # Attach a printer to the task
-            # task.set_Stream(mosek.streamtype.log, streamprinter)
 
-            # Objective coefficients
-            c = [3.0, 1.0, 5.0, 1.0]
-            # Bound keys for variables
-            bkx = [mosek.boundkey.lo,
-                   mosek.boundkey.ra,
-                   mosek.boundkey.lo,
-                   mosek.boundkey.lo]
-            # Bound values for variables
-            blx = [0.0, 0.0, 0.0, 0.0]
-            bux = [+inf, 10.0, +inf, +inf]
-            numvar = len(bkx)
-            # Append 'numvar' variables.
-            # The variables will initially be fixed at zero (x=0).
-            task.appendvars(numvar)
-            for j in range(numvar):
-                # Set the linear term c_j in the objective.
-                task.putcj(j, c[j])
-                # Set the bounds on variable j
-                # blx[j] <= x_j <= bux[j]
-                task.putbound(mosek.accmode.var, j, bkx[j], blx[j], bux[j])
+# get the duration of the best route from origin to destination
+def get_duration(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['duration']
+    else:
+        return None
 
-            # We input the A matrix column-wise
-            # asub contains row indexes
-            asub = [[0, 1, 2],
-                    [0, 1, 2, 3],
-                    [0, 3]]
-            # acof contains coefficients
-            aval = [[3.0, 1.0, 2.0],
-                    [2.0, 1.0, 3.0, 1.0],
-                    [2.0, 3.0]]
-            # Bound keys for constraints
-            bkc = [mosek.boundkey.fx,
-                   mosek.boundkey.lo,
-                   mosek.boundkey.up]
-            # Bound values for constraints
-            blc = [30.0, 15.0, -inf]
-            buc = [30.0, +inf, 25.0]
-            numcon = len(bkc)
-            # Append 'numcon' empty constraints.
-            # The constraints will initially have no bounds.
-            task.appendcons(numcon)
-            for i in range(numcon):
-                task.putbound(mosek.accmode.con, i, bkc[i], blc[i], buc[i])
-                # Input row i of A
-                task.putarow(i,                     # Row index.
-                             # Column indexes of non-zeros in row i.
-                             asub[i],
-                             aval[i])              # Non-zero Values of row i.
 
-            # Input the objective sense (minimize/maximize)
-            task.putobjsense(mosek.objsense.maximize)
+# generate the request in url format
+def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
+    ghost = '0.0.0.0'
+    gport = 5000
+    return 'http://{0}:{1}/route/v1/driving/{2},{3};{4},{5}?alternatives=false&steps=' \
+           '{6}&annotations={7}&geometries=geojson'.format(
+            ghost, gport, olng, olat, dlng, dlat, steps, annotations)
 
-            # Define variables to be integers
-            task.putvartypelist([0, 1, 2, 3],
-                                [mosek.variabletype.type_int,
-                                 mosek.variabletype.type_int,
-                                 mosek.variabletype.type_int,
-                                 mosek.variabletype.type_int])
 
-            # Set max solution time
-            task.putdouparam(mosek.dparam.mio_max_time, 60.0)
-
-            # Optimize the task
-            task.optimize()
-
-            prosta = task.getprosta(mosek.soltype.itg)
-            solsta = task.getsolsta(mosek.soltype.itg)
-
-            # Output a solution
-            xx = [0.] * numvar
-            task.getxx(mosek.soltype.itg, xx)
-
-            if solsta in [mosek.solsta.integer_optimal, mosek.solsta.near_integer_optimal]:
-                # print("Optimal solution: %s" % xx)
-                for i in range(numvar):
-                    print("x[" + str(i) + "]=" + str(xx[i]))
-            elif solsta == mosek.solsta.dual_infeas_cer:
-                print("Primal or dual infeasibility.\n")
-            elif solsta == mosek.solsta.prim_infeas_cer:
-                print("Primal or dual infeasibility.\n")
-            elif solsta == mosek.solsta.near_dual_infeas_cer:
-                print("Primal or dual infeasibility.\n")
-            elif solsta == mosek.solsta.near_prim_infeas_cer:
-                print("Primal or dual infeasibility.\n")
-            elif mosek.solsta.unknown:
-                if prosta == mosek.prosta.prim_infeas_or_unbounded:
-                    print("Problem status Infeasible or unbounded.\n")
-                elif prosta == mosek.prosta.prim_infeas:
-                    print("Problem status Infeasible.\n")
-                elif prosta == mosek.prosta.unkown:
-                    print("Problem status unkown.\n")
-                else:
-                    print("Other problem status.\n")
+# send the request and get the response in Json format
+def call_url(url):
+    while True:
+        try:
+            response = requests.get(url, timeout=1)
+            json_response = response.json()
+            code = json_response['code']
+            if code == 'Ok':
+                return json_response, True
             else:
-                print("Other solution status")
+                print('Error: %s' % (json_response['message']))
+                return json_response, False
+        except requests.exceptions.Timeout:
+            # print('Time out: %s' % url)
+            time.sleep(2)
+        except Exception as err:
+            print('Failed: %s' % url)
+            # return None
+            time.sleep(2)
 
 
 if __name__ == "__main__":
-    # call the main function
-    try:
-        main()
-    except mosek.Error as e:
-        print("ERROR: %s" % str(e.errno))
-        if e.msg is not None:
-            print("\t%s" % e.msg)
-            sys.exit(1)
-    except:
-        import traceback
+    a = get_duration(-73.958875, 40.820005, -73.958871, 40.820003)
+    # b = get_routing(-73.958875, 40.820005, -73.958871, 40.820003)
+    # # print(a, b['distance'])
+    # #
+    # # for i in trange(4, desc='1st loop'):
+    # #     for j in trange(5, desc='2nd loop'):
+    # #         for k in trange(50, desc='3nd loop', leave=False):
+    # #             sleep(0.01)
+    #
+    # dates = pd.date_range('20130101', periods=6)
+    # df = pd.DataFrame(np.arange(24).reshape((6, 4)), index=dates, columns=['A', 'B', 'C', 'D'])
+    # print(df)
+    # df.loc['20130101', 'B'] = 2
+    # print(df.loc['20130101', 'B'])
 
-        traceback.print_exc()
-        sys.exit(1)

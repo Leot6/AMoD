@@ -58,7 +58,7 @@ if __name__ == '__main__':
     if IS_ANIMATION:
         print('...Outputing simulation video...')
         anime = anim(frames, frames_reqs)
-        anime.save('output/anim.mp4', dpi=150, fps=None, extra_args=['-vcodec', 'libx264'])
+        anime.save('output/anim.mp4', dpi=120, fps=None, extra_args=['-vcodec', 'libx264'])
         plt.show()
 
     # output the simulation results and save data
