@@ -9,12 +9,12 @@ REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160501.csv')
 STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
 NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
-DMD_VOL = 0.1
+DMD_VOL = 1
 DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 100
+FLEET_SIZE = 2000
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 2
 
@@ -25,14 +25,14 @@ MAX_DELAY = MAX_WAIT * 2
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 0
-T_STUDY = 30 + 30 * 100
+T_STUDY = 30 + 30 * 200
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
 # MET_ASSIGN = 'greedy'
 MET_ASSIGN = 'ILP'
-MET_REBL = 'simple1'
+MET_REBL = 'simple'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 1000
