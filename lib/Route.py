@@ -7,8 +7,7 @@ import math
 import requests
 import numpy as np
 from collections import deque
-
-from lib.Configure import CST_SPEED
+from lib.Configure import NOD_LOC, NOD_TTT
 
 
 class Step(object):
@@ -58,37 +57,6 @@ class Leg(object):
         return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
 
 
-# get the best route from origin to destination
-def get_routing(olng, olat, dlng, dlat):
-    url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
-    response, code = call_url(url)
-    if code:
-        return response['routes'][0]['legs'][0]
-    else:
-        return None
-
-
-# get the duration of the best route from origin to destination
-def get_duration(olng, olat, dlng, dlat):
-    url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
-    response, code = call_url(url)
-    if code:
-        return response['routes'][0]['duration']
-    else:
-        return None
-
-    # dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
-    #                                                * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
-    # return dist / CST_SPEED * 7
-
-
-# get the duration based on Euclidean distance
-def get_duration_haversine(olng, olat, dlng, dlat):
-    dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
-                                                   * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
-    return dist / CST_SPEED
-
-
 # generate the request in url format
 def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
     ghost = '0.0.0.0'
@@ -117,6 +85,53 @@ def call_url(url):
             print('Failed: %s' % url)
             # return None
             time.sleep(2)
+
+
+# get the best route from origin to destination
+def get_routing(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['legs'][0]
+    else:
+        return None
+
+
+# get the duration of the best route from origin to destination
+def get_duration(olng, olat, dlng, dlat):
+    url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
+    response, code = call_url(url)
+    if code:
+        return response['routes'][0]['duration']
+    else:
+        return None
+
+    # onid = find_nearest_node(olng, olat)
+    # dnid = find_nearest_node(dlng, dlat)
+    # return NOD_TTT[onid-1, dnid-1]
+
+
+def get_duration_from_table(onid, dnid):
+    return NOD_TTT.iloc[onid - 1, dnid - 1]
+
+
+# get the duration based on Euclidean distance
+def get_euclidean_distance(olng, olat, dlng, dlat):
+    dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
+                                                   * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
+    return dist
+
+
+def find_nearest_node(lng, lat):
+    nearest_node_id = None
+    d = np.inf
+    for nid, nlng, nlat in NOD_LOC:
+        # d_ = get_euclidean_distance(lng, lat, nlng, nlat)
+        d_ = abs(lng-nlng) + abs(lat-nlat)
+        if d_ < d:
+            d = d_
+            nearest_node_id = nid
+    return int(nearest_node_id)
 
 
 

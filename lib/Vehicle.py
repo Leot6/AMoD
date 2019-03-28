@@ -7,7 +7,7 @@ from collections import deque
 import matplotlib.pyplot as plt
 
 from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH
-from lib.Route import Step, Leg, get_routing
+from lib.Route import Step, Leg, get_routing, find_nearest_node
 
 
 class Veh(object):
@@ -20,6 +20,7 @@ class Veh(object):
         T: system time at current state
         lat: current lngitude
         lng: current longtitude
+        nid: current node id
         tlat: target (end of route) lngitude
         tlng: target (end of route) longtitude
         K: capacity
@@ -44,6 +45,7 @@ class Veh(object):
         self.T = T
         self.lng = lng
         self.lat = lat
+        self.nid = find_nearest_node(lng, lat)
         self.tlng = self.lng
         self.tlat = self.lat
         self.K = K

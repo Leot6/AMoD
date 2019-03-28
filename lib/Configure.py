@@ -1,19 +1,22 @@
 """
 constants are found here
 """
+import pandas as pd
 from dateutil.parser import parse
 
-# demand file paths, demand volume (percentage of total), simulation start time and its nickname
-DMD_PATH = './data/Manhattan-taxi-20160501.csv'
-STN_PATH = './data/stations-630.csv'
+# demand files, demand volume (percentage of total), simulation start time and its nickname
+REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160501.csv')
+STN_LOC = pd.read_csv('./data/stations-630.csv')
+NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
+NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
 DMD_VOL = 1
 DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 1000
+FLEET_SIZE = 2000
 VEH_CAPACITY = 4
-RIDESHARING_SIZE = 4
+RIDESHARING_SIZE = 2
 
 # maximum wait time window and maximum total delay
 MAX_WAIT = 60 * 5
@@ -22,7 +25,7 @@ MAX_DELAY = MAX_WAIT * 2
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 0
-T_STUDY = 30 + 30 * 1
+T_STUDY = 30 + 30 * 100
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
@@ -36,8 +39,8 @@ CUTOFF_RTV = 1000
 CUTOFF_ILP = 100
 
 # if true, activate the animation / analysis
-IS_ANIMATION = False
-IS_ANALYSIS = False
+IS_ANIMATION = True
+IS_ANALYSIS = True
 
 # intervals for vehicle-request assignment and rebalancing
 INT_ASSIGN = 30
@@ -46,9 +49,6 @@ INT_REBL = 60
 # coefficients for wait time and in-vehicle travel time in the cost function
 COEF_WAIT = 1.5
 COEF_INVEH = 1.0
-
-# constant vehicle speed when road network is disabled (in meters/second)
-CST_SPEED = 40
 
 
 # # parameters for Manhattan map

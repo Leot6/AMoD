@@ -56,7 +56,7 @@ def ILP_assign(veh_trip_edges, reqs_pool):
     numedges = len(veh_trip_edges)
     if numedges > 0:
         numreqs = len(reqs_pool)
-        cost_ignore = 1000000
+        cost_ignore = 999999999999
         inf = 0.0  # Since the actual value of Infinity is ignores, we define it solely for symbolic purposes
 
         # for matrix A of coefficients of constraints
