@@ -4,7 +4,7 @@ defination of requests for the AMoD system
 
 import matplotlib.pyplot as plt
 from lib.Configure import MAX_WAIT, MAX_DELAY
-from lib.Route import get_duration
+from lib.Route import get_duration, find_nearest_node
 
 
 class Req(object):
@@ -17,6 +17,8 @@ class Req(object):
         olat: origin latitude
         dlng: destination longtitude
         dlat: destination latitude
+        onid: origin node id
+        dnid: destination node id
         Ts: shortest travel time
         Cep: constraint - earliest pickup
         Clp: constraint - latest pickup
@@ -33,6 +35,8 @@ class Req(object):
         self.olat = olat
         self.dlng = dlng
         self.dlat = dlat
+        self.onid = find_nearest_node(olng, olat)
+        self.dnid = find_nearest_node(dlng, dlat)
         self.Ts = get_duration(olng, olat, dlng, dlat)
         self.Cep = Tr
         self.Clp = Tr + MAX_WAIT

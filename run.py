@@ -2,32 +2,27 @@
 import time
 import datetime
 import copy
-import pandas as pd
 import matplotlib.pyplot as plt
-
+# start time of initialization
+istime = time.time()
+print('initializing the model...')
+from tqdm import tqdm
 from lib.Main import Model
-from lib.Configure import DMD_PATH, STN_PATH, DMD_VOL, FLEET_SIZE, VEH_CAPACITY, \
-    MET_ASSIGN, MET_REBL, T_TOTAL, INT_ASSIGN, IS_ANIMATION, DMD_SST, IS_ANALYSIS
+from lib.Configure import T_TOTAL, INT_ASSIGN, IS_ANIMATION, DMD_SST, IS_ANALYSIS
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
-    print('initializing the model...')
-    # start time of initialization
-    istime = time.time()
     # frames record the states of the AMoD model for animation purpose
     frames = []
     frames_reqs = []
     # initialize the AMoD model
-    taxi_trips = pd.read_csv(DMD_PATH)
-    stations = pd.read_csv(STN_PATH)
-    model = Model(stn_loc=stations, reqs_data=taxi_trips, D=DMD_VOL, V=FLEET_SIZE,
-                  K=VEH_CAPACITY, assign=MET_ASSIGN, rebl=MET_REBL)
+    model = Model()
     print('...running time of initialization: %.05f seconds' % (time.time() - istime))
 
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in range(30, T_TOTAL, INT_ASSIGN):
+    for T in tqdm(range(30, T_TOTAL, INT_ASSIGN), desc='AMoD'):
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)

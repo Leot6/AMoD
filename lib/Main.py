@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
-from lib.Configure import DMD_SST, INT_ASSIGN, INT_REBL
+from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, \
+    STN_LOC, REQ_DATA, DMD_SST, INT_ASSIGN, INT_REBL
 from lib.Vehicle import Veh
 from lib.Request import Req
 from lib.RTVgenerator import build_rtv_graph
@@ -21,14 +22,15 @@ class Model(object):
     Model is the initial class for the AMoD system
     Attributes:
         T: system time at current state
-        stn_loc: locations (lng, lat) of stations
-        reqs_data: the list of collected real taxi requests data
-        req_init_idx: init index to read reqs_data
         D: demand volume (percentage of total)
         V: number of vehicles
         K: capacity of vehicles
-        vehs: the list of vehicles
         N: number of requests received
+        assign: assignment method
+        rebl: rebalancing method
+        vehs: the list of vehicles
+        reqs_data: the list of collected real taxi requests data
+        req_init_idx: init index to read reqs_data
         queue: requests in the queue
         reqs: the list of all received requests
         reqs_served: the list of completed requests
@@ -36,25 +38,25 @@ class Model(object):
         reqs_picking: the list of requests being picked up
         reqs_unassigned: the list of requests unassigned in the planning pool
         rejs: the list of rejected requests
-        assign: assignment method
-        rebl: rebalancing method
+
     """
 
-    def __init__(self, stn_loc=None, reqs_data=None, D=1, V=2, K=4, assign='greedy', rebl='no'):
+    def __init__(self):
         self.T = 0.0
-        self.stn_loc = stn_loc
-        self.reqs_data = reqs_data
+        self.D = DMD_VOL
+        self.V = FLEET_SIZE
+        self.K = VEH_CAPACITY
+        self.N = 0
+        self.assign = MET_ASSIGN
+        self.rebl = MET_REBL
+        self.vehs = []
+        for i in range(self.V):
+            idx = int(i * len(STN_LOC) / self.V)
+            self.vehs.append(Veh(i, STN_LOC.iloc[idx]['lng'], STN_LOC.iloc[idx]['lat'], K=self.K))
+        self.reqs_data = REQ_DATA
         self.req_init_idx = 0
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
             self.req_init_idx += 1
-        self.D = D
-        self.V = V
-        self.K = K
-        self.vehs = []
-        for i in range(self.V):
-            idx = int(i * len(self.stn_loc) / self.V)
-            self.vehs.append(Veh(i, self.stn_loc.iloc[idx]['lng'], self.stn_loc.iloc[idx]['lat'], K=self.K))
-        self.N = 0
         self.queue = []
         self.queue_ = []  # for plotting requests only
         self.reqs = []
@@ -63,8 +65,6 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = []
-        self.assign = assign
-        self.rebl = rebl
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
