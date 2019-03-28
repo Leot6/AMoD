@@ -3,9 +3,10 @@ compute all feasible schedules of given vehicle v and trip T.
 """
 
 import copy
+import time
 import numpy as np
 from lib.Configure import COEF_WAIT, COEF_INVEH
-from lib.Route import get_duration
+from lib.Route import get_duration, get_duration_from_osrm
 
 
 # (schedules of trip T of size k are computed based on schedules of its subtrip of size k-1)
@@ -65,15 +66,15 @@ def compute_schedule(veh, trip, _trip, _schedules):
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constrain of a req already in the schedule,
         # it cannot be picked-up before that req.
-        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat)
+        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
         for i in reversed(range(l)):
-            if veh.T + dt > schedule[i][4]:
+            if veh.T + dt > schedule[i][5]:
                 ealist_pick_up_point = i + 1
                 break
         # if the shortest travel time of req is longer than the time constrain of a leg in the schedule,
         # it cannot be dropped-off before that leg.
         for i in reversed(range(l)):
-            if veh.T + req.Ts > schedule[i][4]:
+            if veh.T + req.Ts > schedule[i][5]:
                 ealist_drop_off_point = i + 2
                 break
 
@@ -86,8 +87,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
                 viol = 0
                 if j < ealist_drop_off_point:
                     continue
-                schedule.insert(i, (req.id, 1, req.olng, req.olat, req.Clp))
-                schedule.insert(j, (req.id, -1, req.dlng, req.dlat, req.Cld))
+                schedule.insert(i, (req.id, 1, req.olng, req.olat, req.onid, req.Clp))
+                schedule.insert(j, (req.id, -1, req.dlng, req.dlat, req.dnid, req.Cld))
                 flag, c, viol = test_constraints_get_cost(schedule, veh, req, j)
                 if flag:
                     feasible_schedules.append(copy.deepcopy(schedule))
@@ -100,6 +101,10 @@ def compute_schedule(veh, trip, _trip, _schedules):
                     break
             if viol == 3:
                 break
+
+    # calibrate the min_cost to osrm result, instead using the travel time table
+    if best_schedule is not None:
+        min_cost = compute_schedule_cost(best_schedule, veh)
     return best_schedule, min_cost, feasible_schedules
 
 
@@ -112,19 +117,20 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
     K = veh.K
     lng = veh.lng
     lat = veh.lat
+    nid = veh.nid
 
     # test the capacity constraint during the whole schedule
-    for (rid, pod, tlng, tlat, ddl) in schedule:
+    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
         n += pod
         if n > K:
             return False, None, 1  # over capacity
     n = veh.n
 
     # test the pick-up and drop-off time constraint for each passenger on board
-    k = 0
-    for (rid, pod, tlng, tlat, ddl) in schedule:
-        k += 1
-        dt = get_duration(lng, lat, tlng, tlat)
+    idx = 0
+    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        idx += 1
+        dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
         if dt is None:
             return False, None, 1  # no route found between points
         t += dt
@@ -133,8 +139,8 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
                 return False, None, 2 if pod == -1 else 3
-            if k <= drop_point:
-                # k<=drop_point means the violation is caused by the pick-up of req,
+            if idx <= drop_point:
+                # idx<=drop_point means the violation is caused by the pick-up of req,
                 # since the violation happens before the drop-off of req
                 return False, None, 4
             return False, None, 0
@@ -144,5 +150,24 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
         c += t * COEF_WAIT if pod == 1 else 0
         lng = tlng
         lat = tlat
+        nid = tnid
 
     return True, c, -1
+
+
+# compute the schedule cost using osrm
+def compute_schedule_cost(schedule, veh):
+    c = 0.0
+    t = 0.0
+    n = veh.n
+    lng = veh.lng
+    lat = veh.lat
+    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        dt = get_duration_from_osrm(lng, lat, tlng, tlat)
+        t += dt
+        c += n * dt * COEF_INVEH
+        n += pod
+        c += t * COEF_WAIT if pod == 1 else 0
+        lng = tlng
+        lat = tlat
+    return c

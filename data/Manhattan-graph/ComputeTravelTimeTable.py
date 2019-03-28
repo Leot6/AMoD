@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 sys.path.append('../..')
 
-from lib.Route import get_duration
+from lib.Route import get_duration_from_osrm
 
 
 def load_Manhattan_graph():
@@ -69,7 +69,7 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
         for d in tqdm(nodes_id):
             dlng = nodes.iloc[d - 1]['lng']
             dlat = nodes.iloc[d - 1]['lat']
-            duration = get_duration(olng, olat, dlng, dlat)
+            duration = get_duration_from_osrm(olng, olat, dlng, dlat)
             if duration is not None:
                 travel_time_table.iloc[o - 1, d - 1] = round(duration, 2)
 

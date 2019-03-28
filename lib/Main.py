@@ -7,7 +7,6 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
-
 from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, \
     STN_LOC, REQ_DATA, DMD_SST, INT_ASSIGN, INT_REBL
 from lib.Vehicle import Veh
