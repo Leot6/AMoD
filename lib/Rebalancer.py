@@ -22,15 +22,15 @@ def rebalance(model, T):
             min_dt = np.inf
             req_re = None
             for req in model.reqs_unassigned:
-                dt = get_duration(veh.lng, veh.lat, req.olng, req.olat)
+                dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
                 if dt is None:  # no available route is found
                     continue
                 if dt < min_dt:
                     min_dt = dt
                     req_re = req
             if min_dt != np.inf:
-                schedule.insert(0, (req_re.id, 1, req_re.olng, req_re.olat, req_re.Clp))
-                schedule.insert(1, (req_re.id, -1, req_re.dlng, req_re.dlat, req_re.Cld))
+                schedule.insert(0, (req_re.id, 1, req_re.olng, req_re.olat, req_re.onid, req_re.Clp))
+                schedule.insert(1, (req_re.id, -1, req_re.dlng, req_re.dlat, req_re.dnid, req_re.Cld))
                 veh.build_route(copy.deepcopy(schedule), model.reqs, T)
                 model.reqs_picking.add(req_re)
                 model.reqs_unassigned.remove(req_re)

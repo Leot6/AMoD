@@ -120,7 +120,7 @@ def find_nearest_node(lng, lat):
 
 
 if __name__ == "__main__":
-    travel_time_table = pd.read_csv('data/travel-time-table.csv', index_col=0).values
+    # travel_time_table = pd.read_csv('data/travel-time-table.csv', index_col=0).values
 
     # print(travel_time_table[0, 0])
     # print(travel_time_table[0, 1])
@@ -228,6 +228,15 @@ if __name__ == "__main__":
     # t1 = get_duration_from_table1(olng, olat, dlng, dlat)
     # print('table1 running time:', (time.time() - ttt1))
 
+    sche = [(1, 2, 3), (2, 2, 3), (3, 2, 3)]
+
+    idx = 0
+    for (a, b, c) in sche:
+        idx += 1
+        if a == 2:
+            sche[idx-1][2]
+
+    print(sche)
 
 
 

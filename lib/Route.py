@@ -37,20 +37,22 @@ class Leg(object):
         pod: pickup (+1) or dropoff (-1), rebalancing (0)
         tlng: target (end of leg) longitude
         tlat: target (end of leg) latitude
+        nid: target nearest node id in network
         ddl: latest arriving time
-        d: total distance
         t: total duration
+        d: total distance
         steps: a list of steps
     """
 
-    def __init__(self, rid, pod, tlng, tlat, ddl, d=0.0, t=0.0, steps=[]):
+    def __init__(self, rid, pod, tlng, tlat, tnid, ddl, t=0.0, d=0.0, steps=[]):
         self.rid = rid
         self.pod = pod
         self.tlng = tlng
         self.tlat = tlat
+        self.tnid = tnid
         self.ddl = ddl
-        self.d = d
         self.t = t
+        self.d = d
         self.steps = deque(steps)
 
     def __str__(self):
@@ -98,7 +100,7 @@ def get_routing(olng, olat, dlng, dlat):
 
 
 # get the duration of the best route from origin to destination
-def get_duration(olng, olat, dlng, dlat):
+def get_duration_from_osrm(olng, olat, dlng, dlat):
     url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
     response, code = call_url(url)
     if code:
@@ -106,13 +108,17 @@ def get_duration(olng, olat, dlng, dlat):
     else:
         return None
 
-    # onid = find_nearest_node(olng, olat)
-    # dnid = find_nearest_node(dlng, dlat)
-    # return NOD_TTT[onid-1, dnid-1]
 
-
+# get the duration of the best route from origin to destination
 def get_duration_from_table(onid, dnid):
-    return NOD_TTT.iloc[onid - 1, dnid - 1]
+    return NOD_TTT[onid - 1, dnid - 1]
+
+
+# get the duration of the best route from origin to destination
+def get_duration(olng, olat, dlng, dlat, onid, dnid):
+    # duration = get_duration_from_osrm(olng, olat, dlng, dlat)
+    duration = get_duration_from_table(onid, dnid)
+    return duration
 
 
 # get the duration based on Euclidean distance
@@ -122,6 +128,7 @@ def get_euclidean_distance(olng, olat, dlng, dlat):
     return dist
 
 
+# find the nearest node to[lng, lat] in Manhattan network
 def find_nearest_node(lng, lat):
     nearest_node_id = None
     d = np.inf

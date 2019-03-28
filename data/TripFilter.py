@@ -6,7 +6,7 @@ import time
 import pandas as pd
 import sys
 sys.path.append('..')
-from lib.Route import get_duration
+from lib.Route import get_duration_from_osrm
 
 
 def IsPtInPoly(lng, lat):
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # df5 = df4[df4.apply(lambda x: IsPtInPoly(x[dlng], x[dlat]), axis=1)]
     # print('number of trips in Manhattan:', df5.shape[0])
     # # filter out the trips longer than 2 min
-    # df6 = df5[df5.apply(lambda x: get_duration(x[olng], x[olat], x[dlng], x[dlat]) > 120, axis=1)]
+    # df6 = df5[df5.apply(lambda x: get_duration_from_osrm(x[olng], x[olat], x[dlng], x[dlat]) > 120, axis=1)]
     # print('number of trips longer than 2 min :', df6.shape[0])
     # df6.to_csv('Manhattan-green-taxi-20160507.csv', index=False)
 

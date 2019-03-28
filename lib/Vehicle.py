@@ -20,7 +20,7 @@ class Veh(object):
         T: system time at current state
         lat: current lngitude
         lng: current longtitude
-        nid: current node id
+        nid: current nearest node id in network
         tlat: target (end of route) lngitude
         tlng: target (end of route) longtitude
         K: capacity
@@ -188,6 +188,7 @@ class Veh(object):
     def jump_to_location(self, lng, lat):
         self.lng = lng
         self.lat = lat
+        self.nid = find_nearest_node(lng, lat)
 
     # build the route of the vehicle based on a series of quadruples (rid, pod, tlng, tlat)
     # update t, d, c, idle, rebl accordingly
@@ -203,8 +204,8 @@ class Veh(object):
             self.c = 0.0
             return
         else:
-            for (rid, pod, tlng, tlat, ddl) in schedule:
-                self.add_leg(rid, pod, tlng, tlat, ddl, reqs, T)
+            for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+                self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True
@@ -227,10 +228,9 @@ class Veh(object):
             self.c = c
 
     # add a leg based on (rid, pod, tlng, tlat, ddl)
-    def add_leg(self, rid, pod, tlng, tlat, ddl, reqs, T):
+    def add_leg(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
         l = get_routing(self.tlng, self.tlat, tlng, tlat)
-        leg = Leg(rid, pod, tlng, tlat, ddl,
-                  l['distance'], l['duration'], steps=[])
+        leg = Leg(rid, pod, tlng, tlat, tnid, ddl, l['duration'], l['distance'], steps=[])
         t_leg = 0.0
         for s in l['steps']:
             step = Step(s['distance'], s['duration'], s['geometry']['coordinates'])

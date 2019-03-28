@@ -33,6 +33,7 @@ def build_rtv_graph(vehs, reqs_pool, T):
                 veh_trip_edges.append([veh, trip, schedule, cost])
         # print('veh %d is finished' % veh.id)
 
+
     # # debug code starts
     # for veh in model.vehs:
     #     trip_list, schedule_list, cost_list = feasible_trips_search(veh, reqs_pool, T)
@@ -74,10 +75,10 @@ def feasible_trips_search(veh, reqs, T):
     # trips of size 1
     for req in reqs:
         # filter the req which can not be served even when the veh is idle
-        dt_rough = get_euclidean_distance(veh.lng, veh.lat, req.olng, req.olat)
-        if dt_rough + T > req.Clp:
-            continue
-        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat)
+        # dt_rough = get_euclidean_distance(veh.lng, veh.lat, req.olng, req.olat)
+        # if dt_rough + T > req.Clp:
+        #     continue
+        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
         if dt is None:  # no available route is found
             continue
         if dt + T <= req.Clp:
@@ -85,7 +86,7 @@ def feasible_trips_search(veh, reqs, T):
             _schedule = []
             if not veh.idle:
                 for leg in veh.route:
-                    _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.ddl))
+                    _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
             best_schedule, min_cost, schedules = compute_schedule(veh, trip, [], [_schedule])
             if best_schedule:
                 trip_list[0].append(trip)

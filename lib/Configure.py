@@ -9,12 +9,12 @@ REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160501.csv')
 STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
 NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
-DMD_VOL = 1
+DMD_VOL = 0.1
 DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
+FLEET_SIZE = 100
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 2
 
