@@ -102,9 +102,9 @@ def compute_schedule(veh, trip, _trip, _schedules):
             if viol == 3:
                 break
 
-    # calibrate the min_cost to osrm result, instead using the travel time table
-    if best_schedule is not None:
-        min_cost = compute_schedule_cost(best_schedule, veh)
+    # # calibrate the min_cost to osrm result, instead using the travel time table
+    # if best_schedule is not None:
+    #     min_cost = compute_schedule_cost(best_schedule, veh)
     return best_schedule, min_cost, feasible_schedules
 
 
