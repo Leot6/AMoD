@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+data/Manhattan-graph/time-table-osrm.csv
+data/Manhattan-graph/time-table-sat.csv
+data/travel-time-table.csv
