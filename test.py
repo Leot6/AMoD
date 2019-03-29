@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-nodes = pd.read_csv('data/nodes.csv').values.tolist()
+# nodes = pd.read_csv('data/nodes.csv').values.tolist()
 
 
 # generate the request in url format
@@ -117,9 +117,25 @@ def find_nearest_node(lng, lat):
     #     print('distance of', [lng, lat], 'to node', nearest_node_id, 'is larger than 100m!!!!!!!!')
     return int(nearest_node_id)
 
+def test(a):
+    if a > 3:
+        return
+    if a == 3:
+        return {1,2}
+    else:
+        a = 3
+        print('no returen')
 
 
 if __name__ == "__main__":
+
+    a = 1
+    b = test(a)
+    print(b)
+    if b:
+        print('not None')
+
+
     # travel_time_table = pd.read_csv('data/travel-time-table.csv', index_col=0).values
 
     # print(travel_time_table[0, 0])
@@ -227,18 +243,6 @@ if __name__ == "__main__":
     # ttt1 = time.time()
     # t1 = get_duration_from_table1(olng, olat, dlng, dlat)
     # print('table1 running time:', (time.time() - ttt1))
-
-    sche = [(1, 2, 3), (2, 2, 3), (3, 2, 3)]
-
-    idx = 0
-    for (a, b, c) in sche:
-        idx += 1
-        if a == 2:
-            sche[idx-1][2]
-
-    print(sche)
-
-
 
 
 

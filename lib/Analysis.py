@@ -18,6 +18,7 @@ def print_results(model, runtime):
     count_reqs = 0
     count_served = 0
     wait_time = 0.0
+    travel_delay = 0.0
     in_veh_time = 0.0
     detour_factor = 0.0
 
@@ -29,12 +30,14 @@ def print_results(model, runtime):
             if not np.isclose(req.Td, -1.0):
                 count_served += 1
                 wait_time += (req.Tp - req.Cep)
+                travel_delay += (req.Td - req.Ts)
                 in_veh_time += (req.Td - req.Tp)
                 detour_factor += req.D
     if not count_served == 0:
         in_veh_time /= count_served
         detour_factor /= count_served
         wait_time /= count_served
+        travel_delay /= count_served
 
     # service rate
     service_rate = 0.0
@@ -77,7 +80,7 @@ def print_results(model, runtime):
     print('simulation results:')
     print('  - requests:')
     print(
-        '    + service rate: %.1f%% (%d/%d), , wait time: %.1f s' % (service_rate, count_served, count_reqs, wait_time))
+        '    + service rate: %.1f%% (%d/%d), wait time: %.1f s' % (service_rate, count_served, count_reqs, wait_time))
     print('    + in-vehicle travel time: %.1f s' % (in_veh_time))
     print('    + detour factor: %.2f' % (detour_factor))
     print('  - vehicles:')
@@ -115,7 +118,7 @@ def print_results(model, runtime):
 
 
 # animation
-def anim(frames, frames_reqs):
+def anim(frames):
     def init():
         for i in range(len(vehs)):
             vehs[i].set_data([frames[0][i].lng], [frames[0][i].lat])
@@ -145,18 +148,14 @@ def anim(frames, frames_reqs):
                         r2x.extend(geo[0])
                         r2y.extend(geo[1])
                 count += leg.pod
-            routes1[i].set_data(r1x, r1y)
-            routes2[i].set_data(r2x, r2y)
-            routes3[i].set_data(r3x, r3y)
-        # for i in range(len(frames_reqs[0])):
-        #     olng = frames_reqs[0][i].olng
-        #     olat = frames_reqs[0][i].olat
-        #     dlng = frames_reqs[0][i].dlng
-        #     dlat = frames_reqs[0][i].dlat
-        #     reqs_o[i].set_data([olng], [olat])
-        #     reqs_d[i].set_data([dlng], [dlat])
-        #     reqs[i].set_data([olng, dlng], [olat, dlat])
-        return vehs, routes1, routes2, routes3, reqs_o, reqs_d
+            if i == int(FLEET_SIZE * 4 / 10) or i == int(FLEET_SIZE * 3 / 10) or i == int(FLEET_SIZE * 5 / 10):
+                routes1[i].set_data(r1x, r1y)
+                routes2[i].set_data(r2x, r2y)
+                routes3[i].set_data(r3x, r3y)
+            # routes1[i].set_data(r1x, r1y)
+            # routes2[i].set_data(r2x, r2y)
+            # routes3[i].set_data(r3x, r3y)
+        return vehs, routes1, routes2, routes3
 
     def animate(n):
         for i in range(len(vehs)):
@@ -188,20 +187,13 @@ def anim(frames, frames_reqs):
                         r2y.extend(geo[1])
                 # count += leg.pod
                 count += 1
-            routes1[i].set_data(r1x, r1y)
-            routes2[i].set_data(r2x, r2y)
-            routes3[i].set_data(r3x, r3y)
-        # reqs_o = []
-        # reqs_d = []
-        # for i in range(len(frames_reqs[n])):
-        #     color = '0.50'
-        #     if not frames_reqs[n][i].served:
-        #         color = '#FF0000'
-        #     reqs_o.append(plt.plot([], [], color=color, marker='+', markersize=8, alpha=2)[0])
-        #     reqs_d.append(plt.plot([], [], color=color, marker='x', markersize=8, alpha=2)[0])
-        #     reqs_o[i].set_data([frames_reqs[n][i].olng], [frames_reqs[n][i].olat])
-        #     reqs_d[i].set_data([frames_reqs[n][i].dlng], [frames_reqs[n][i].dlat])
-        return vehs, routes1, routes2, routes3, reqs_o, reqs_d
+
+            if i == int(FLEET_SIZE * 4 / 10) or i == int(FLEET_SIZE * 3 / 10) or i == int(FLEET_SIZE * 5 / 10):
+                routes1[i].set_data(r1x, r1y)
+                routes2[i].set_data(r2x, r2y)
+                routes3[i].set_data(r3x, r3y)
+
+        return vehs, routes1, routes2, routes3
 
     fig = plt.figure(figsize=(MAP_WIDTH, MAP_HEIGHT))
     plt.xlim((Olng, Dlng))
@@ -213,9 +205,6 @@ def anim(frames, frames_reqs):
     routes1 = []
     routes2 = []
     routes3 = []
-    reqs_o = []
-    reqs_d = []
-    reqs = []
     for v in frames[0]:
         color = '0.50'
         size = 7
@@ -245,12 +234,5 @@ def anim(frames, frames_reqs):
         routes1.append(plt.plot([], [], linestyle='--', color=color, alpha=0.3)[0])
         routes2.append(plt.plot([], [], linestyle='-', color=color, alpha=0.3)[0])
         routes3.append(plt.plot([], [], linestyle=':', color=color, alpha=0.2)[0])
-    # for req in frames_reqs[0]:
-    #     color = '0.50'
-    #     if not req.served:
-    #         color = '#FF0000'
-    #     reqs_o.append(plt.plot([], [], color=color, marker='+', markersize=8, alpha=2)[0])
-    #     reqs_d.append(plt.plot([], [], color=color, marker='x', markersize=8, alpha=2)[0])
-    #     reqs.append(plt.plot([], [], linestyle=':', color=color, alpha=0.4)[0])
     anime = animation.FuncAnimation(fig, animate, init_func=init, frames=len(frames), interval=100)
     return anime

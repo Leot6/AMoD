@@ -14,12 +14,12 @@ DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
+FLEET_SIZE = 1500
 VEH_CAPACITY = 4
-RIDESHARING_SIZE = 2
+RIDESHARING_SIZE = 4
 
 # maximum wait time window and maximum total delay
-MAX_WAIT = 60 * 5
+MAX_WAIT = 60 * 7
 MAX_DELAY = MAX_WAIT * 2
 # MAX_DETOUR = 1.5
 

@@ -14,7 +14,6 @@ from lib.Analysis import anim, print_results
 if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
     frames = []
-    frames_reqs = []
     # initialize the AMoD model
     model = Model()
     print('...running time of initialization: %.05f seconds' % (time.time() - istime))
@@ -28,7 +27,6 @@ if __name__ == '__main__':
         model.dispatch_at_time(T)
         if IS_ANIMATION:
             frames.append(copy.deepcopy(model.vehs))
-            frames_reqs.append(copy.deepcopy(model.queue_))
         print('System situation at %s : %d reqs have been received, %d have been served (%.02f%%), %d are on board '
               '(%.02f%%), %d are being picked-up (%.02f%%), %d are unassigned (%.02f%%), %d are rejected (%.02f%%).'
               % (DMD_SST + datetime.timedelta(seconds=T),
@@ -52,7 +50,7 @@ if __name__ == '__main__':
     # generate, show and save the animation of this simulation
     if IS_ANIMATION:
         print('...Outputing simulation video...')
-        anime = anim(frames, frames_reqs)
+        anime = anim(frames)
         anime.save('output/anim.mp4', dpi=130, fps=None, extra_args=['-vcodec', 'libx264'])
         plt.show()
 

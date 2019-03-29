@@ -57,7 +57,6 @@ class Model(object):
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
             self.req_init_idx += 1
         self.queue = []
-        self.queue_ = []  # for plotting requests only
         self.reqs = []
         self.reqs_served = set()
         self.reqs_serving = set()
@@ -74,7 +73,6 @@ class Model(object):
         self.upd_reqs_stat_to_time()
         print('loading new reqs ...')
         self.gen_reqs_to_time()
-        self.queue_ = copy.deepcopy(self.queue)
 
         # debug code starts
         noi = 0  # number of idle vehicles
@@ -150,11 +148,16 @@ class Model(object):
 
     # execute the assignment from AssignPlanner
     def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
+        R_assigned_failed = set()
         for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-            self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
+            rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
+            if rid_fail:
+                for req_id in rid_fail:
+                    R_assigned_failed.add(self.reqs[req_id])
         R_assigned = set()
         for req_id in R_id_assigned:
             R_assigned.add(self.reqs[req_id])
+        R_assigned = R_assigned - R_assigned_failed
         self.reqs_picking.update(R_assigned)
         R_unassigned = set(self.queue) - R_assigned
         self.reqs_unassigned.update(R_unassigned)
