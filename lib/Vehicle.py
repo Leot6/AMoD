@@ -2,9 +2,10 @@
 defination of vehicles for the AMoD system
 """
 
+import copy
 import numpy as np
-from collections import deque
 import matplotlib.pyplot as plt
+from collections import deque
 
 from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH
 from lib.Route import Step, Leg, get_routing, find_nearest_node
@@ -52,6 +53,7 @@ class Veh(object):
         self.S = S
         self.n = 0
         self.route = deque([])
+        self.route_backup = deque([])
         self.t = 0.0
         self.d = 0.0
         self.c = 0.0
@@ -194,6 +196,12 @@ class Veh(object):
     # update t, d, c, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
     def build_route(self, schedule, reqs=None, T=None):
+        route_backup = copy.deepcopy(self.route)
+        tlng_backup = copy.deepcopy(self.tlng)
+        tlat_backup = copy.deepcopy(self.tlat)
+        d_backup = copy.deepcopy(self.d)
+        t_backup = copy.deepcopy(self.t)
+
         self.clear_route()
         # if the route is null, vehicle is idle
         if len(schedule) == 0:
@@ -205,7 +213,20 @@ class Veh(object):
             return
         else:
             for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
-                self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
+                try:
+                    self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
+                # when osrm cannot find a route for the new schedule, we give up on this new schedule
+                except:
+                    self.route = route_backup
+                    self.tlng = tlng_backup
+                    self.tlat = tlat_backup
+                    self.d = d_backup
+                    self.t = t_backup
+                    rid_in_route = [rid for (rid, pod, tlng, tlat, tnid, ddl) in self.route]
+                    rid_in_schedule = [rid for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
+                    rid_new = set(rid_in_schedule) - set(rid_in_route)
+                    return rid_new
+
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True

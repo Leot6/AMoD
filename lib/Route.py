@@ -111,7 +111,11 @@ def get_duration_from_osrm(olng, olat, dlng, dlat):
 
 # get the duration of the best route from origin to destination
 def get_duration_from_table(onid, dnid):
-    return NOD_TTT[onid - 1, dnid - 1]
+    duration = NOD_TTT[onid - 1, dnid - 1]
+    if duration != -1:
+        return duration
+    else:
+        None
 
 
 # get the duration of the best route from origin to destination
