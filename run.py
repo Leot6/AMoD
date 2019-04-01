@@ -17,11 +17,12 @@ if __name__ == '__main__':
     # initialize the AMoD model
     model = Model()
     print('...running time of initialization: %.05f seconds' % (time.time() - istime))
+    print('')
 
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in tqdm(range(30, T_TOTAL, INT_ASSIGN), desc='AMoD'):
+    for T in tqdm(range(INT_ASSIGN, T_TOTAL, INT_ASSIGN), desc='AMoD'):
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)
@@ -35,7 +36,7 @@ if __name__ == '__main__':
                  len(model.reqs_picking), (len(model.reqs_picking) / model.N * 100),
                  len(model.reqs_unassigned), (len(model.reqs_unassigned) / model.N * 100),
                  len(model.rejs), (len(model.rejs) / model.N * 100)))
-        print('...running time of simulation: %.02f seconds (last episode:%.02f)'
+        print('...running time of simulation: %.02f seconds (last interval:%.02f)'
               % ((time.time() - stime), (time.time() - estime)))
         print('')
 

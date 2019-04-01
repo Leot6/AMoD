@@ -36,7 +36,7 @@ def greedy_assign(veh_trip_edges):
         # debug
         cost_a += cost
 
-    print('        greedy assign cost:', cost_a, 'num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+    print('        greedy assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
     return R_id_assigned, V_id_assigned, schedule_assigned
 
 
@@ -152,6 +152,6 @@ def ILP_assign(veh_trip_edges, reqs_pool):
                 # debug
                 cost_a += cost
 
-    print('        ILP assign cost:', cost_a, 'num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+    print('        ILP assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
     return R_id_assigned, V_id_assigned, schedule_assigned
 

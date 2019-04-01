@@ -33,7 +33,6 @@ def build_rtv_graph(vehs, reqs_pool, T):
                 veh_trip_edges.append([veh, trip, schedule, cost])
         # print('veh %d is finished' % veh.id)
 
-
     # # debug code starts
     # for veh in model.vehs:
     #     trip_list, schedule_list, cost_list = feasible_trips_search(veh, reqs_pool, T)
