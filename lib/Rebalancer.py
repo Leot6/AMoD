@@ -13,7 +13,7 @@ def rebalance(model, T):
     for veh in model.vehs:
         if veh.idle:
             noi += 1
-    print('  idle vehs:', noi)
+    print('        idle vehs:', noi)
     # debug code ends
 
     for veh in model.vehs:
@@ -34,8 +34,8 @@ def rebalance(model, T):
                 veh.build_route(copy.deepcopy(schedule), model.reqs, T)
                 model.reqs_picking.add(req_re)
                 model.reqs_unassigned.remove(req_re)
-                print('     *trip %s is assigned to veh %d (rebalancing, wait time %.02f)'
-                      % ([req_re.id], veh.id, min_dt))
+                # print('     *trip %s is assigned to veh %d (rebalancing, wait time %.02f)'
+                #       % ([req_re.id], veh.id, min_dt))
             if len(model.reqs_unassigned) == 0:
                 break
     if len(model.reqs_unassigned) != 0:

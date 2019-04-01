@@ -14,19 +14,22 @@ DMD_SST = parse('2016-05-01 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 1500
+FLEET_SIZE = 2000
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
 # maximum wait time window and maximum total delay
 MAX_WAIT = 60 * 7
 MAX_DELAY = MAX_WAIT * 2
-# MAX_DETOUR = 1.5
+
+# intervals for vehicle-request assignment and rebalancing
+INT_ASSIGN = 30
+INT_REBL = INT_ASSIGN * 2
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 0
-T_STUDY = 30 + 30 * 200
-T_COOL_DOWN = 60 * 0
+T_WARM_UP = INT_ASSIGN * 0
+T_STUDY = INT_ASSIGN + INT_ASSIGN * 200
+T_COOL_DOWN = INT_ASSIGN * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
@@ -36,15 +39,11 @@ MET_REBL = 'simple'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 1000
-CUTOFF_ILP = 100
+CUTOFF_ILP = 10000
 
 # if true, activate the animation / analysis
-IS_ANIMATION = True
+IS_ANIMATION = False
 IS_ANALYSIS = True
-
-# intervals for vehicle-request assignment and rebalancing
-INT_ASSIGN = 30
-INT_REBL = 60
 
 # coefficients for wait time and in-vehicle travel time in the cost function
 COEF_WAIT = 1.5

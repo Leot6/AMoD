@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, FLEET_SIZE, \
+from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, DMD_SST, FLEET_SIZE, \
     MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT
 
 
@@ -40,9 +40,9 @@ def print_results(model, runtime):
         travel_delay /= count_served
 
     # service rate
-    service_rate = 0.0
+    served_rate = 0.0
     if not count_reqs == 0:
-        service_rate = 100.0 * count_served / count_reqs
+        served_rate = 100.0 * count_served / count_reqs
 
     # vehicle performance
     veh_service_dist = 0.0
@@ -72,34 +72,32 @@ def print_results(model, runtime):
     print('scenario: %s' % (DMD_STR))
     print('simulation starts at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
     print('system settings:')
-    print('  - period of study: %d s, with warm-up %d s, cool-down %d s' % (T_STUDY, T_WARM_UP, T_COOL_DOWN))
     print('  - fleet size: %d; capacity: %d' % (model.V, model.K))
-    print('  - demand Rate: %.1f trips/h' % (model.D))
+    print('  - demand rate: %.2f%% of total requests ' % (model.D*100))
     print('  - assignment method: %s, interval: %.1f s' % (MET_ASSIGN, INT_ASSIGN))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
     print('simulation results:')
     print('  - requests:')
-    print(
-        '    + service rate: %.1f%% (%d/%d), wait time: %.1f s' % (service_rate, count_served, count_reqs, wait_time))
-    print('    + in-vehicle travel time: %.1f s' % (in_veh_time))
-    print('    + detour factor: %.2f' % (detour_factor))
+    print('    + served rate: %.2f%% (%d/%d), wait time: %.1f s' % (served_rate, count_served, count_reqs, wait_time))
+    print('    + in-vehicle travel time: %.1f s' % in_veh_time)
+    print('    + detour factor: %.2f' % detour_factor)
+    print('    + total service rate: %.2f%%' % (served_rate+(len(model.reqs_serving)+len(model.reqs_picking))/model.N*100))
     print('  - vehicles:')
-    print('    + vehicle service distance travelled: %.1f m' % (veh_service_dist))
-    print('    + vehicle service time travelled: %.1f s' % (veh_service_time))
-    print('    + vehicle service time percentage: %.1f%%' % (veh_service_time_percent))
-    print('    + vehicle rebalancing distance travelled: %.1f m' % (veh_rebl_dist))
-    print('    + vehicle rebalancing time travelled: %.1f s' % (veh_rebl_time))
-    print('    + vehicle rebalancing time percentage: %.1f%%' % (veh_rebl_time_percent))
-    print(
-        '    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)' % (
-            veh_load_by_dist, veh_load_by_time))
+    print('    + vehicle service distance travelled: %.1f m' % veh_service_dist)
+    print('    + vehicle service time travelled: %.1f s' % veh_service_time)
+    print('    + vehicle service time percentage: %.1f%%' % veh_service_time_percent)
+    print('    + vehicle rebalancing distance travelled: %.1f m' % veh_rebl_dist)
+    print('    + vehicle rebalancing time travelled: %.1f s' % veh_rebl_time)
+    print('    + vehicle rebalancing time percentage: %.1f%%' % veh_rebl_time_percent)
+    print('    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)' % (veh_load_by_dist, veh_load_by_time))
     print('*' * 80)
 
     # write and save the result analysis
     f = open('output/results.csv', 'a')
     writer = csv.writer(f)
     row = [DMD_STR, MET_ASSIGN, MET_REBL, T_STUDY, model.V, model.K, model.D,
-           service_rate, count_served, count_reqs, wait_time,
+           served_rate, count_served, count_reqs, wait_time,
            in_veh_time, detour_factor, veh_service_dist, veh_service_time, veh_service_time_percent,
            veh_rebl_dist, veh_rebl_time, veh_rebl_time_percent, veh_load_by_dist, veh_load_by_time, None]
     writer.writerow(row)

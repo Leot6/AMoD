@@ -67,11 +67,11 @@ class Model(object):
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
         self.T = T
-        print('updating vehicle status...')
+        print('    -updating vehicle status...')
         self.upd_vehs_stat_to_time()
-        print('updating served reqs status...')
+        print('    -updating served reqs status...')
         self.upd_reqs_stat_to_time()
-        print('loading new reqs ...')
+        print('    -loading new reqs ...')
         self.gen_reqs_to_time()
 
         # debug code starts
@@ -79,23 +79,24 @@ class Model(object):
         for veh in self.vehs:
             if veh.idle:
                 noi += 1
-        print(self, ', idle vehs:', noi, '/', self.V)
+        print('        T = %.0f, reqs in queue: %d , idle vehs: %d / %d' % (self.T, len(self.queue), noi, self.V))
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
-            print('  building RTV-graph...')
+            print('    -building RTV-graph...')
             veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
             if self.assign == 'ILP':
+                print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
                 R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)
-                print('    -start ILP assign with %d edges:' % len(veh_trip_edges))
                 R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue)
             elif self.assign == 'greedy':
-                print('    -start greedy assign with %d edges:' % len(veh_trip_edges))
+                print('    -start greedy assign with %d edges...' % len(veh_trip_edges))
                 R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)
+            print('    -execute the assignments...')
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'simple':
-                print('  -start rebalancing...')
+                print('    -start rebalancing...')
                 rebalance(self, T)
             else:
                 self.rejs.extend(list(self.reqs_unassigned))
@@ -175,7 +176,7 @@ class Model(object):
         plt.show()
 
     def __str__(self):
-        str = 'AMoD system at t = %.3f: %d requests in queue' % (self.T, len(self.queue))
+        str = 'AMoD system at t = %.2f: %d requests in queue' % (self.T, len(self.queue))
         # for r in self.queue:
         #     str += '\n' + r.__str__()
         return str
