@@ -2,23 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5ee899f-d42d-4c4b-a527-9b398d4ed0fd" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/.travel-time-table.csv.icloud" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/.time-table-osrm.csv.icloud" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/.time-table-sat.csv.icloud" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/TripFilter.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/TripFilter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/AssignPlanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/AssignPlanner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/Configure.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configure.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/RTVgenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/RTVgenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Request.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Request.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/Route.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Route.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Vehicle.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Vehicle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/requests.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/requests.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,11 +17,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/Configure.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="18" column="17" lean-forward="true" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
+            <state relative-caret-position="236">
+              <caret line="50" column="26" lean-forward="true" selection-start-line="50" selection-start-column="26" selection-end-line="50" selection-end-column="26" />
               <folding>
                 <element signature="e#33#52#0" expanded="true" />
               </folding>
@@ -56,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/Route.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-173">
-              <caret line="46" column="46" lean-forward="true" selection-start-line="46" selection-start-column="46" selection-end-line="46" selection-end-column="46" />
+            <state relative-caret-position="188">
+              <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
               <folding>
                 <element signature="e#50#61#0" expanded="true" />
               </folding>
@@ -219,9 +204,9 @@
         <option value="$PROJECT_DIR$/lib/Main.py" />
         <option value="$PROJECT_DIR$/run.py" />
         <option value="$PROJECT_DIR$/lib/Request.py" />
-        <option value="$PROJECT_DIR$/lib/Route.py" />
         <option value="$PROJECT_DIR$/lib/Vehicle.py" />
         <option value="$PROJECT_DIR$/lib/Configure.py" />
+        <option value="$PROJECT_DIR$/lib/Route.py" />
       </list>
     </option>
   </component>
@@ -377,18 +362,18 @@
       <workItem from="1552573472295" duration="2341000" />
       <workItem from="1554207411493" duration="91000" />
       <workItem from="1554231050455" duration="8724000" />
-      <workItem from="1554737559053" duration="774000" />
+      <workItem from="1554737559053" duration="875000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="206842000" />
+    <option name="totallyTimeSpent" value="206943000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18820679" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18820679" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -402,7 +387,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.269863" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.269863" />
       <window_info anchor="bottom" id="Python Console" order="12" show_stripe_button="false" weight="0.32970297" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -589,22 +574,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Route.py">
+    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-173">
-          <caret line="46" column="46" lean-forward="true" selection-start-line="46" selection-start-column="46" selection-end-line="46" selection-end-column="46" />
+        <state relative-caret-position="236">
+          <caret line="50" column="26" lean-forward="true" selection-start-line="50" selection-start-column="26" selection-end-line="50" selection-end-column="26" />
           <folding>
-            <element signature="e#50#61#0" expanded="true" />
+            <element signature="e#33#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+    <entry file="file://$PROJECT_DIR$/lib/Route.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="18" column="17" lean-forward="true" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
+        <state relative-caret-position="188">
+          <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
           <folding>
-            <element signature="e#33#52#0" expanded="true" />
+            <element signature="e#50#61#0" expanded="true" />
           </folding>
         </state>
       </provider>

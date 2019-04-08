@@ -51,7 +51,7 @@ IS_ANALYSIS = True
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation
 COEF_WAIT = 1.0
 COEF_INVEH = 1.0
-CORF_TRAVEL = 1.5
+COEF_TRAVEL = 1.5
 
 
 # # parameters for Manhattan map
