@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH
+from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, COEF_TRAVEL
 from lib.Route import Step, Leg, get_routing, find_nearest_node
 
 
@@ -222,7 +222,9 @@ class Veh(object):
                     self.tlat = tlat_backup
                     self.d = d_backup
                     self.t = t_backup
-                    rid_in_route = [rid for (rid, pod, tlng, tlat, tnid, ddl) in self.route]
+                    rid_in_route = []
+                    if len(self.route) > 0:
+                        rid_in_route = [rid for (rid, pod, tlng, tlat, tnid, ddl) in self.route]
                     rid_in_schedule = [rid for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
                     rid_new = set(rid_in_schedule) - set(rid_in_route)
                     return rid_new
@@ -251,10 +253,10 @@ class Veh(object):
     # add a leg based on (rid, pod, tlng, tlat, ddl)
     def add_leg(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
         l = get_routing(self.tlng, self.tlat, tlng, tlat)
-        leg = Leg(rid, pod, tlng, tlat, tnid, ddl, l['duration'], l['distance'], steps=[])
+        leg = Leg(rid, pod, tlng, tlat, tnid, ddl, l['duration']*COEF_TRAVEL, l['distance'], steps=[])
         t_leg = 0.0
         for s in l['steps']:
-            step = Step(s['distance'], s['duration'], s['geometry']['coordinates'])
+            step = Step(s['distance'], s['duration']*COEF_TRAVEL, s['geometry']['coordinates'])
             t_leg += s['duration']
             leg.steps.append(step)
         assert np.isclose(t_leg, leg.t)

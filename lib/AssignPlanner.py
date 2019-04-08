@@ -31,7 +31,7 @@ def greedy_assign(veh_trip_edges):
         T_id_assigned.append(trip_id)
         V_id_assigned.append(veh_id)
         schedule_assigned.append(schedule)
-        # print('     *trip %s is assigned to veh %d' % ([req.id for req in trip], veh_id))
+        # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
 
         # debug
         cost_a += cost
@@ -147,7 +147,7 @@ def ILP_assign(veh_trip_edges, reqs_pool):
                     R_id_assigned.append(req.id)
                 V_id_assigned.append(veh.id)
                 schedule_assigned.append(schedule)
-                # print('     *trip %s is assigned to veh %d' % ([req.id for req in trip], veh.id))
+                # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh.id, cost))
 
                 # debug
                 cost_a += cost

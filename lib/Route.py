@@ -7,7 +7,7 @@ import math
 import requests
 import numpy as np
 from collections import deque
-from lib.Configure import NOD_LOC, NOD_TTT
+from lib.Configure import NOD_LOC, NOD_TTT, CORF_TRAVEL
 
 
 class Step(object):
@@ -104,7 +104,7 @@ def get_duration_from_osrm(olng, olat, dlng, dlat):
     url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
     response, code = call_url(url)
     if code:
-        return response['routes'][0]['duration']
+        return response['routes'][0]['duration'] * CORF_TRAVEL
     else:
         return None
 
@@ -113,7 +113,7 @@ def get_duration_from_osrm(olng, olat, dlng, dlat):
 def get_duration_from_table(onid, dnid):
     duration = NOD_TTT[onid - 1, dnid - 1]
     if duration != -1:
-        return duration
+        return duration * CORF_TRAVEL
     else:
         None
 
