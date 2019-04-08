@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, DMD_SST, FLEET_SIZE, \
+from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, \
     MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT
 
 
@@ -18,8 +18,8 @@ def print_results(model, runtime):
     count_reqs = 0
     count_served = 0
     wait_time = 0.0
-    travel_delay = 0.0
     in_veh_time = 0.0
+    in_veh_delay = 0.0
     detour_factor = 0.0
 
     # analyze requests whose earliest pickup time is within the period of study
@@ -29,15 +29,15 @@ def print_results(model, runtime):
             # count as 'served' only when the request is complete, i.e. the dropoff time is not -1
             if not np.isclose(req.Td, -1.0):
                 count_served += 1
-                wait_time += (req.Tp - req.Cep)
-                travel_delay += (req.Td - req.Ts)
-                in_veh_time += (req.Td - req.Tp)
+                wait_time += req.Tp - req.Cep
+                in_veh_time += req.Td - req.Tp
+                in_veh_delay += req.Td - req.Tp - req.Ts
                 detour_factor += req.D
     if not count_served == 0:
-        in_veh_time /= count_served
-        detour_factor /= count_served
         wait_time /= count_served
-        travel_delay /= count_served
+        in_veh_time /= count_served
+        in_veh_delay /= count_served
+        detour_factor /= count_served
 
     # service rate
     served_rate = 0.0
@@ -72,15 +72,15 @@ def print_results(model, runtime):
     print('scenario: %s' % (DMD_STR))
     print('simulation starts at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
     print('system settings:')
-    print('  - fleet size: %d; capacity: %d' % (model.V, model.K))
+    print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
+    print('  - fleet size: %d; capacity: %d; waiting time: %d' % (model.V, model.K, MAX_WAIT))
     print('  - demand rate: %.2f%% of total requests ' % (model.D*100))
     print('  - assignment method: %s, interval: %.1f s' % (MET_ASSIGN, INT_ASSIGN))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
-    print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
     print('simulation results:')
     print('  - requests:')
     print('    + served rate: %.2f%% (%d/%d), wait time: %.1f s' % (served_rate, count_served, count_reqs, wait_time))
-    print('    + in-vehicle travel time: %.1f s' % in_veh_time)
+    print('    + in-vehicle travel time: %.2f s, in-vehicle travel delay: %.2f s' % (in_veh_time, in_veh_delay))
     print('    + detour factor: %.2f' % detour_factor)
     print('    + total service rate: %.2f%%' % (served_rate+(len(model.reqs_serving)+len(model.reqs_picking))/model.N*100))
     print('  - vehicles:')

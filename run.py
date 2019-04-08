@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in tqdm(range(INT_ASSIGN, T_TOTAL, INT_ASSIGN), desc='AMoD'):
+    for T in tqdm(range(INT_ASSIGN, T_TOTAL, INT_ASSIGN), desc='AMoD simulation'):
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         print('...Outputing simulation video...')
         anime = anim(frames)
         anime.save('output/anim.mp4', dpi=130, fps=None, extra_args=['-vcodec', 'libx264'])
-        plt.show()
+        # plt.show()
 
     # output the simulation results and save data
     if IS_ANALYSIS:

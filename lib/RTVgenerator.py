@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 
 from lib.Configure import RIDESHARING_SIZE, CUTOFF_RTV
 from lib.ScheduleFinder import compute_schedule
-from lib.Route import get_duration, get_euclidean_distance
+from lib.Route import get_duration
 
 
 # build RTV graph for each veh, respectively
@@ -74,9 +74,6 @@ def feasible_trips_search(veh, reqs, T):
     # trips of size 1
     for req in reqs:
         # filter the req which can not be served even when the veh is idle
-        # dt_rough = get_euclidean_distance(veh.lng, veh.lat, req.olng, req.olat)
-        # if dt_rough + T > req.Clp:
-        #     continue
         dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
         if dt is None:  # no available route is found
             continue

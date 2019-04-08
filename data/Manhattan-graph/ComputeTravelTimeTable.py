@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 sys.path.append('../..')
 
-from lib.Route import get_duration_from_osrm
+# from lib.Route import get_duration_from_osrm
 
 
 def load_Manhattan_graph():
@@ -75,24 +75,28 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
 
 
 if __name__ == '__main__':
-    nodes = pd.read_csv('nodes.csv')
-    nodes_id = list(range(1, nodes.shape[0] + 1))
-    # travel_time_table = pd.DataFrame(-np.ones((num_nodes, num_nodes)), index=nodes_id, columns=nodes_id)
-    # travel_time_table.to_csv('travel-time-table.csv')
+    # nodes = pd.read_csv('nodes.csv')
+    # nodes_id = list(range(1, nodes.shape[0] + 1))
+    # # travel_time_table = pd.DataFrame(-np.ones((num_nodes, num_nodes)), index=nodes_id, columns=nodes_id)
+    # # travel_time_table.to_csv('travel-time-table.csv')
+    #
+    # travel_time_table = pd.read_csv('time-table-empty.csv', index_col=0)
+    # # print(travel_time_table.head(2))
+    # # print(travel_time_table.shape[0])
+    # # print(travel_time_table.shape[1])
+    #
+    # compute_table_OSRM(nodes, nodes_id, travel_time_table)
+    #
+    # # compute_table_nx(nodes_id, travel_time_table)
+    #
+    # travel_time_table.to_csv('time-table-osrm.csv')
 
-    travel_time_table = pd.read_csv('time-table-empty.csv', index_col=0)
-    # print(travel_time_table.head(2))
-    # print(travel_time_table.shape[0])
-    # print(travel_time_table.shape[1])
-
-    compute_table_OSRM(nodes, nodes_id, travel_time_table)
-
-    # compute_table_nx(nodes_id, travel_time_table)
-
-    travel_time_table.to_csv('time-table-osrm.csv')
-
-    # travel_time_table = pd.read_csv('time-table-osrm.csv', index_col=0)
+    travel_time_table = pd.read_csv('time-table-osrm.csv', index_col=0)
     # print(travel_time_table.iloc[3826, 3833])
     # print(travel_time_table.iloc[3910, 3920])
+    print(travel_time_table.iloc[5:10, 1800:2000])
+    travel_time_table = pd.read_csv('time-table-sat.csv', index_col=0)
+    print(travel_time_table.iloc[5:10, 1800:2000])
+
 
 

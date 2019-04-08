@@ -87,8 +87,12 @@ class Model(object):
             veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
             if self.assign == 'ILP':
                 print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
-                R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)
+                R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
                 R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue)
+                if len(R_id_assigned1) > len(R_id_assigned):
+                    R_id_assigned = R_id_assigned1
+                    V_id_assigned = V_id_assigned1
+                    schedule_assigned = schedule_assigned1
             elif self.assign == 'greedy':
                 print('    -start greedy assign with %d edges...' % len(veh_trip_edges))
                 R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)

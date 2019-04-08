@@ -46,43 +46,73 @@ def IsPtInPoly(lng, lat):
         return False
 
 
+def LongerThan2Min(olng, olat, dlng, dlat):
+    d = get_duration_from_osrm(olng, olat, dlng, dlat)
+    if d and d > 120:
+        return True
+    else:
+        return False
+
+
+
 if __name__ == '__main__':
     stime = time.time()
 
-    # labels' names
-    # # # for green taxi
-    # pickup_time = 'lpep_pickup_datetime'
-    # dropoff_time = 'Lpep_dropoff_datetime'
-    # olng = 'Pickup_longitude'
-    # olat = 'Pickup_latitude'
-    # dlng = 'Dropoff_longitude'
-    # dlat = 'Dropoff_latitude'
-    # passenger_count = 'Passenger_count'
-    # trip_dist = 'Trip_distance'
+    # # labels' names
+    # for green taxi
+    pickup_time = 'lpep_pickup_datetime'
+    dropoff_time = 'Lpep_dropoff_datetime'
+    olng = 'Pickup_longitude'
+    olat = 'Pickup_latitude'
+    dlng = 'Dropoff_longitude'
+    dlat = 'Dropoff_latitude'
+    passenger_count = 'Passenger_count'
+    trip_dist = 'Trip_distance'
 
-    # for yellow taxi
-    pickup_time = 'tpep_pickup_datetime'
-    dropoff_time = 'tpep_dropoff_datetime'
-    olng = 'pickup_longitude'
-    olat = 'pickup_latitude'
-    dlng = 'dropoff_longitude'
-    dlat = 'dropoff_latitude'
-    passenger_count = 'passenger_count'
-    trip_dist = 'trip_distance'
+    # # for yellow taxi
+    # pickup_time = 'tpep_pickup_datetime'
+    # dropoff_time = 'tpep_dropoff_datetime'
+    # olng = 'pickup_longitude'
+    # olat = 'pickup_latitude'
+    # dlng = 'dropoff_longitude'
+    # dlat = 'dropoff_latitude'
+    # passenger_count = 'passenger_count'
+    # trip_dist = 'trip_distance'
 
     # # read all trips
-    # CSV_FILE_PATH = '/Users/leot/Downloads/green_tripdata_2016-05.csv'
-    # df = pd.read_csv(CSV_FILE_PATH)
+    # CSV_FILE_PATH = '/Users/leot/Downloads/green_tripdata_2015-05.csv'
+    # df = pd.read_csv(CSV_FILE_PATH, usecols=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], index_col=False)
     # print('number of all trips:', df.shape[0])
     # print(df.head(2))  # get the label for pickup time in csv file
+    # print(df.columns.values)
+
+    # # find out the number of trips in a week
+    # df1 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-01')]
+    # print('number of trips in selected day:', df1.shape[0])
+    # df2 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-02')]
+    # print('number of trips in selected day:', df2.shape[0])
+    # df3 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-03')]
+    # print('number of trips in selected day:', df3.shape[0])
+    # df4 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-04')]
+    # print('number of trips in selected day:', df4.shape[0])
+    # df5 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-05')]
+    # print('number of trips in selected day:', df5.shape[0])
+    # df6 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-06')]
+    # print('number of trips in selected day:', df6.shape[0])
+    # df7 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-07')]
+    # print('number of trips in selected day:', df7.shape[0])
+    # df8 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-08')]
+    # print('number of trips in selected day:', df8.shape[0])
+    # df9 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-09')]
+    # print('number of trips in selected day:', df9.shape[0])
+
     # # filter out trips in one day
-    # df1 = df.loc[lambda x: x[pickup_time].str.startswith('2016-05-07')]
+    # df1 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-02')]
     # df1[pickup_time] = pd.to_datetime(df1[pickup_time])
     # df1.sort_values(pickup_time, inplace=True)
-    # df1.to_csv('yellow-taxi-20160502.csv', index=False)
-    # df1.head(2).to_csv('temp.csv', index=False)  # a sample file to read the labels' names
-    #
-    # df1 = pd.read_csv('yellow-taxi-20160502.csv')
+    # df1.to_csv('green-taxi-20150502.csv', index=False)
+
+    # df1 = pd.read_csv('green-taxi-20150502.csv')
     # print('number of trips in selected day:', df1.shape[0])
     # # filter out useful parameters: time, lng & lat, passenger number...
     # df2 = df1.loc[:, [pickup_time, passenger_count, olng, olat, dlng, dlat, trip_dist, dropoff_time]]
@@ -98,32 +128,35 @@ if __name__ == '__main__':
     # # filter out the trips ending in Manhattan
     # df5 = df4[df4.apply(lambda x: IsPtInPoly(x[dlng], x[dlat]), axis=1)]
     # print('number of trips in Manhattan:', df5.shape[0])
+    # df5.to_csv('Manhattan-green-taxi-20150502.csv', index=False)
+
     # # filter out the trips longer than 2 min
-    # df6 = df5[df5.apply(lambda x: get_duration_from_osrm(x[olng], x[olat], x[dlng], x[dlat]) > 120, axis=1)]
+    # df6 = pd.read_csv('Manhattan-yellow-taxi-20150502.csv')
+    # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
     # print('number of trips longer than 2 min :', df6.shape[0])
-    # df6.to_csv('Manhattan-green-taxi-20160507.csv', index=False)
+    # df6.to_csv('Manhattan-yellow-taxi-20160502-1.csv', index=False)
 
     # # rename the column index
-    # df7 = pd.read_csv('Manhattan-yellow-taxi-20160507.csv')
+    # df7 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
     # df7 = df7.loc[:, [pickup_time, passenger_count, olng, olat, dlng, dlat, trip_dist, dropoff_time]]
     # df7.columns = ['ptime', 'npass', 'olng', 'olat', 'dlng', 'dlat', 'dist', 'dtime']
-    # df7.to_csv('Manhattan-yellow-taxi-20160507-1.csv', index=False)
+    # df7.to_csv('Manhattan-green-taxi-20150502-1.csv', index=False)
 
-    # # merge green taxi and yellow taxi together
-    # df8 = pd.read_csv('Manhattan-green-taxi-20160507.csv')
-    # df8['taxi'] = 'green'
-    # print('number of green taxi trips:', df8.shape[0])
-    # df9 = pd.read_csv('Manhattan-yellow-taxi-20160507.csv')
-    # df9['taxi'] = 'yellow'
-    # print('number of green taxi trips:', df9.shape[0])
-    # frames = [df8, df9]
-    # df10 = pd.concat(frames, ignore_index=True)
-    # df10.sort_values('ptime', inplace=True)
-    # print('number of all taxi trips:', df10.shape[0])
-    # df10.to_csv('Manhattan-taxi-20160507.csv', index=False)
+    # merge green taxi and yellow taxi together
+    df8 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
+    df8['taxi'] = 'green'
+    print('number of green taxi trips:', df8.shape[0])
+    df9 = pd.read_csv('Manhattan-yellow-taxi-20150502.csv')
+    df9['taxi'] = 'yellow'
+    print('number of green taxi trips:', df9.shape[0])
+    frames = [df8, df9]
+    df10 = pd.concat(frames, ignore_index=True)
+    df10.sort_values('ptime', inplace=True)
+    print('number of all taxi trips:', df10.shape[0])
+    df10.to_csv('Manhattan-taxi-20150502.csv', index=False)
 
-    df11 = pd.read_csv('Manhattan-taxi-20160507.csv')
-    print('number of all taxi trips in 20160507:', df11.shape[0])
+    # df11 = pd.read_csv('Manhattan-taxi-20160507.csv')
+    # print('number of all taxi trips in 20160507:', df11.shape[0])
 
     runtime = time.time() - stime
     print('...running time : %.05f seconds' % runtime)
