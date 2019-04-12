@@ -1,5 +1,5 @@
 """
-compute all feasible schedules of given vehicle v and trip T.
+compute all feasible schedules for given vehicle v and trip T.
 """
 
 import copy
@@ -27,20 +27,20 @@ def compute_schedule(veh, trip, _trip, _schedules):
         # # check if the req has same origin-destination as any other req in the schedule
         # p = set()
         # d = set()
-        # for (rid, pod, tlng, tlat, ddl) in schedule:
-        #     if pod == 1 and req.olng == tlng and req.olat == tlat:
+        # for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        #     if pod == 1 and req.onid == tnid:
         #         p.add(rid)
-        #         print(' # check if the req has same origin as any other req in the schedule')
-        #     if pod == -1 and req.dlng == tlng and req.dlat == tlat:
+        #         # print(' # check if the req has same origin as any other req in the schedule')
+        #     if pod == -1 and req.dnid == tnid:
         #         d.add(rid)
-        #         print(' # check if the req has same destination as any other req in the schedule')
+        #         # print(' # check if the req has same destination as any other req in the schedule')
         # same_req = p & d
         # if len(same_req) > 0:
         #     print(' # check if the req has same origin-destination as any other req in the schedule')
         #     i = 0
         #     i_p = 0
         #     i_d = 0
-        #     for (rid, pod, tlng, tlat, ddl) in schedule:
+        #     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
         #         i += 1
         #         if pod == 1 and rid in same_req:
         #             if req.Clp <= ddl:
@@ -52,8 +52,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #                 i_d = i
         #             else:
         #                 i_d = i+1
-        #     schedule.insert(i_p, (req.id, 1, req.olng, req.olat, req.Clp))
-        #     schedule.insert(i_d, (req.id, -1, req.dlng, req.dlat, req.Cld))
+        #     schedule.insert(i_p, (req.id, 1, req.olng, req.olat, req.onid, req.Clp))
+        #     schedule.insert(i_d, (req.id, -1, req.dlng, req.dlat, req.dnid, req.Cld))
         #     flag, c, viol = test_constraints_get_cost(schedule, veh, req, i_d)
         #     if flag:
         #         feasible_schedules.append(copy.deepcopy(schedule))
@@ -155,7 +155,7 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
     return True, c, -1
 
 
-# compute the schedule cost using osrm
+# compute the schedule cost using osrm (not used, because it is very slow)
 def compute_schedule_cost(schedule, veh):
     c = 0.0
     t = 0.0

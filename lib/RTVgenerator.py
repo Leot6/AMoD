@@ -14,6 +14,7 @@ from lib.Route import get_duration
 
 # build RTV graph for each veh, respectively
 def build_rtv_graph(vehs, reqs_pool, T):
+    print('    -building RTV-graph...')
     veh_trip_edges = []
 
     # # parallel

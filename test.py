@@ -4,6 +4,8 @@ import requests
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from collections import deque
+
 
 # nodes = pd.read_csv('data/nodes.csv').values.tolist()
 
@@ -129,129 +131,19 @@ def test(a):
 
 if __name__ == "__main__":
 
-    a = 1
-    b = test(a)
-    print(b)
-    if b:
-        print('not None')
+    l = 200
+    aa = time.time()
+    a = deque([])
+    for i in range(l):
+        a.append(i)
+    a.popleft()
+    print('deque running time:', (time.time() - aa))
 
-
-    # travel_time_table = pd.read_csv('data/travel-time-table.csv', index_col=0).values
-
-    # print(travel_time_table[0, 0])
-    # print(travel_time_table[0, 1])
-
-
-    # onid = 3827
-    # dnid = 3834
-    # onlng = nodes[onid-1][1]
-    # onlat = nodes[onid-1][2]
-    # dnlng = nodes[dnid-1][1]
-    # dnlat = nodes[dnid-1][2]
-    #
-    # print([onlng, onlat])
-    # print([dnlng, dnlat])
-    # print(get_duration(onlng, onlat, dnlng, dnlat))
-    # print(get_duration_from_table1(onlng, onlat, dnlng, dnlat))
-
-
-
-
-    # # 0.9 km
-    # olng = -73.9983139038086
-    # olat = 40.745506286621094
-    # dlng = -73.98994445800781
-    # dlat = 40.75670623779297
-    # #
-    # onid = find_nearest_node(olng, olat)
-    # dnid = find_nearest_node(dlng, dlat)
-    # onlng = nodes[onid-1][1]
-    # onlat = nodes[onid-1][2]
-    # dnlng = nodes[dnid-1][1]
-    # dnlat = nodes[dnid-1][2]
-    # print(onid, [onlng, onlat], dnid, [dnlng, dnlat])
-    #
-    # d = get_euclidean_distance(olng, olat, dlng, dlat)
-    # print('distance form eu', d)
-    # r = get_routing(olng, olat, dlng, dlat)
-    # print('distance form osrm', r['distance'])
-    # print('duration from osrm', r['duration'])
-    # du = get_duration_from_table(onid, dnid)
-    # print('duration from table', du)
-    #
-    # e1 = get_euclidean_distance(olng, olat, onlng, onlat)
-    # e2 = get_euclidean_distance(dnlng, dnlat, dlng, dlat)
-    # print('e1', e1, ', e2', e2)
-    #
-    # w1 = get_routing(olng, olat, onlng, onlat)
-    # w2 = get_routing(dnlng, dnlat, dlng, dlat)
-    # print('w1d', w1['distance'], ', w2d', w2['distance'])
-    # print('w1d', w1['duration'], ', w2d', w2['duration'])
-
-
-
-
-    # REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160501.csv')
-    # for i in tqdm(range(1, 200000)):
-    #     # print('req', i)
-    #     olng = REQ_DATA.iloc[i]['olng']
-    #     olat = REQ_DATA.iloc[i]['olat']
-    #     dlng = REQ_DATA.iloc[i]['dlng']
-    #     dlat = REQ_DATA.iloc[i]['dlat']
-    #
-    #     onid = find_nearest_node(olng, olat)
-    #     dnid = find_nearest_node(dlng, dlat)
-    #     # onlng = nodes[onid-1][1]
-    #     # onlat = nodes[onid-1][2]
-    #     # dnlng = nodes[dnid-1][1]
-    #     # dnlat = nodes[dnid-1][2]
-    #
-    #     d_o = get_duration(olng, olat, dlng, dlat)
-    #     d_t = get_duration_from_table(onid, dnid)
-    #     # print(d_o, d_t)
-    #
-    #     # if abs(d_t-d_o) > 100:
-    #     #     print(i, d_o, d_t, olng, olat)
-    #     if onid == 3827 or onid == 3834 or onid == 3911 or onid == 3921:
-    #         print([olng, olat], onid)
-    #     elif dnid == 3827 or dnid == 3834 or dnid == 3911 or dnid == 3921:
-    #         print([dlng, dlat], dnid)
-
-
-
-
-    #
-    # eee = time.time()
-    # ed = get_euclidean_distance(olng, olat, dlng, dlat)
-    # print('euclidean running time:', (time.time() - eee))
-    # print(ed)
-    #
-    # ooo = time.time()
-    # d = get_duration(olng, olat, dlng, dlat)
-    # print('osrm running time:', (time.time() - ooo))
-    # print(d)
-    # #
-    # nnn = time.time()
-    # nid = find_nearest_node(olng, olat)
-    # print(nid)
-    # print('nearest running time:', (time.time() - nnn))
-    #
-    # ttt = time.time()
-    # t = get_duration_from_table(onid, dnid)
-    # print('table running time:', (time.time() - ttt))
-    #
-    # ttt1 = time.time()
-    # t1 = get_duration_from_table1(olng, olat, dlng, dlat)
-    # print('table1 running time:', (time.time() - ttt1))
-
-
-
-
-
-
-
-
-
-
+    bb = time.time()
+    b = []
+    for i in range(l):
+        b.append(i)
+    del b[0:3]
+    print('list running time:', (time.time() - bb))
 
 

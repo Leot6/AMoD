@@ -8,6 +8,7 @@ from lib.Configure import CUTOFF_ILP
 
 
 def greedy_assign(veh_trip_edges):
+    print('    -start greedy assign with %d edges...' % len(veh_trip_edges))
     R_id_assigned = []
     T_id_assigned = []
     V_id_assigned = []
@@ -40,7 +41,9 @@ def greedy_assign(veh_trip_edges):
     return R_id_assigned, V_id_assigned, schedule_assigned
 
 
-def ILP_assign(veh_trip_edges, reqs_pool):
+def ILP_assign(veh_trip_edges, reqs_new, reqs_old):
+    print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
+    reqs_pool = list(set(reqs_new).union(reqs_old))
     R_id_assigned = []
     V_id_assigned = []
     schedule_assigned = []

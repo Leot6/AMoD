@@ -8,7 +8,7 @@ istime = time.time()
 print('initializing the model...')
 from tqdm import tqdm
 from lib.Main import Model
-from lib.Configure import T_TOTAL, INT_ASSIGN, IS_ANIMATION, DMD_SST, IS_ANALYSIS
+from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
