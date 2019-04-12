@@ -7,11 +7,13 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
-from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, \
-    STN_LOC, REQ_DATA, DMD_SST, INT_ASSIGN, INT_REBL
+
+from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, DMD_SST, \
+    INT_ASSIGN, INT_REBL
 from lib.Vehicle import Veh
 from lib.Request import Req
 from lib.RTVgenerator import build_rtv_graph
+from lib.VTtableGenerator import build_vt_table
 from lib.AssignPlanner import greedy_assign, ILP_assign
 from lib.Rebalancer import rebalance
 
@@ -67,11 +69,8 @@ class Model(object):
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
         self.T = T
-        print('    -updating vehicle status...')
         self.upd_vehs_stat_to_time()
-        print('    -updating served reqs status...')
         self.upd_reqs_stat_to_time()
-        print('    -loading new reqs ...')
         self.gen_reqs_to_time()
 
         # debug code starts
@@ -83,24 +82,23 @@ class Model(object):
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
-            print('    -building RTV-graph...')
-            veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
+            # veh_trip_edges = build_rtv_graph(self.vehs, self.queue, T)
+            reqs_old = self.reqs_picking.union(self.reqs_unassigned)
+            veh_trip_edges = build_vt_table(self.vehs, self.queue, reqs_old, T)
+
             if self.assign == 'ILP':
-                print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
                 R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
-                R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue)
+                R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue, reqs_old)
                 if len(R_id_assigned1) > len(R_id_assigned):
                     R_id_assigned = R_id_assigned1
                     V_id_assigned = V_id_assigned1
                     schedule_assigned = schedule_assigned1
             elif self.assign == 'greedy':
-                print('    -start greedy assign with %d edges...' % len(veh_trip_edges))
                 R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)
-            print('    -execute the assignments...')
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
+
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'simple':
-                print('    -start rebalancing...')
                 rebalance(self, T)
             else:
                 self.rejs.extend(list(self.reqs_unassigned))
@@ -108,17 +106,23 @@ class Model(object):
 
     # update vehs status to their current positions at time T
     def upd_vehs_stat_to_time(self):
+        print('    -updating vehicle status...')
         for veh in self.vehs:
             done = veh.move_to_time(self.T)
             for (rid, pod, t) in done:
                 if pod == 1:
                     self.reqs[rid].Tp = t
+                    veh.new_pick_rid.append(rid)
+                    veh.rid_onboard.append(rid)
                 elif pod == -1:
                     self.reqs[rid].Td = t
                     self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
+                    veh.new_drop_rid.append(rid)
+                    veh.rid_onboard.remove(rid)
 
     # update reqs statues to time T
     def upd_reqs_stat_to_time(self):
+        print('    -updating served reqs status...')
         picked = set()
         dropped = set()
         for req in self.reqs_picking:
@@ -134,6 +138,7 @@ class Model(object):
 
     # generate requests up to time T, loading from reqs data file
     def gen_reqs_to_time(self):
+        print('    -loading new reqs ...')
         req_idx = self.req_init_idx + int(self.N / self.D)
         while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds <= self.T:
             req = Req(self.N,  (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds,
@@ -153,20 +158,19 @@ class Model(object):
 
     # execute the assignment from AssignPlanner
     def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
-        R_assigned_failed = set()
-        for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-            rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
-            if rid_fail:
-                for req_id in rid_fail:
-                    R_assigned_failed.add(self.reqs[req_id])
-        R_assigned = set()
-        for req_id in R_id_assigned:
-            R_assigned.add(self.reqs[req_id])
-        R_assigned = R_assigned - R_assigned_failed
-        self.reqs_picking.update(R_assigned)
-        R_unassigned = set(self.queue) - R_assigned
-        self.reqs_unassigned.update(R_unassigned)
+        print('    -execute the assignments...')
+        reqs_pool = list(self.reqs_picking) + self.queue
+        assert len(reqs_pool) == len(set(reqs_pool))
         self.queue.clear()
+        self.reqs_picking.clear()
+        R_assigned_failed = set()
+        for vid, schedule in zip(V_id_assigned, schedule_assigned):
+            rid_fail = self.vehs[vid].build_route(schedule, self.reqs, self.T)
+            if rid_fail:
+                R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
+        R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
+        self.reqs_picking.update(R_assigned)
+        self.reqs_unassigned = set(reqs_pool) - R_assigned
 
     # visualize
     def draw(self):

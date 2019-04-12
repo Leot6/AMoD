@@ -12,7 +12,7 @@ NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1
-DMD_SST = parse('2016-05-07 12:00:00')
+DMD_SST = parse('2016-05-07 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
@@ -23,7 +23,7 @@ RIDESHARING_SIZE = 4
 # maximum wait time window and maximum total delay
 MAX_WAIT = 60 * 5
 MAX_DELAY = MAX_WAIT * 2
-MAX_DETOUR = 1.33
+MAX_DETOUR = 2
 
 # intervals for vehicle-request assignment and rebalancing
 INT_ASSIGN = 30
@@ -31,13 +31,13 @@ INT_REBL = INT_ASSIGN * 2
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = INT_ASSIGN * 0
-T_STUDY = INT_ASSIGN + INT_ASSIGN * 30
+T_STUDY = INT_ASSIGN + INT_ASSIGN * 60
 T_COOL_DOWN = INT_ASSIGN * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
-# MET_ASSIGN = 'greedy'
-MET_ASSIGN = 'ILP'
+MET_ASSIGN = 'greedy'
+# MET_ASSIGN = 'ILP'
 MET_REBL = 'simple'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
@@ -45,7 +45,7 @@ CUTOFF_RTV = 1000
 CUTOFF_ILP = 1000
 
 # if true, activate the animation / analysis
-IS_ANIMATION = True
+IS_ANIMATION = False
 IS_ANALYSIS = True
 
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation

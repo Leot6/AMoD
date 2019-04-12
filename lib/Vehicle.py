@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, COEF_TRAVEL
+from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, COEF_TRAVEL, RIDESHARING_SIZE
 from lib.Route import Step, Leg, get_routing, find_nearest_node
 
 
@@ -25,7 +25,6 @@ class Veh(object):
         tlat: target (end of route) lngitude
         tlng: target (end of route) longtitude
         K: capacity
-        S: speed (m/s)
         n: number of passengers on board
         route: a list of legs
         t: total duration of the route
@@ -39,7 +38,7 @@ class Veh(object):
         Ld: accumulated load, weighed by service distance
     """
 
-    def __init__(self, id, lng, lat, K=4, S=6, T=0.0):
+    def __init__(self, id, lng, lat, K=4, T=0.0):
         self.id = id
         self.idle = True
         self.rebl = False
@@ -50,10 +49,8 @@ class Veh(object):
         self.tlng = self.lng
         self.tlat = self.lat
         self.K = K
-        self.S = S
         self.n = 0
         self.route = deque([])
-        self.route_backup = deque([])
         self.t = 0.0
         self.d = 0.0
         self.c = 0.0
@@ -63,9 +60,16 @@ class Veh(object):
         self.Tr = 0.0
         self.Lt = 0.0
         self.Ld = 0.0
+        self.VTtable = [[] for i in range(RIDESHARING_SIZE*2)]
+        self.rid_onboard = []
+        self.new_pick_rid = []
+        self.new_drop_rid = []
+        self.route_record = []
 
     # update the vehicle location as well as the route after moving to time T
     def move_to_time(self, T):
+        self.new_pick_rid.clear()
+        self.new_drop_rid.clear()
         dT = T - self.T
         if dT <= 0:
             return []
@@ -87,6 +91,10 @@ class Veh(object):
                 self.jump_to_location(leg.tlng, leg.tlat)
                 self.n += leg.pod
                 done.append((leg.rid, leg.pod, self.T))
+
+                # debug code
+                self.route_record.append((leg.rid, leg.pod))
+
                 self.pop_leg()
             else:
                 while dT > 0 and len(leg.steps) > 0:
@@ -110,6 +118,10 @@ class Veh(object):
                             self.jump_to_location(leg.tlng, leg.tlat)
                             self.n += leg.pod
                             done.append((leg.rid, leg.pod, self.T))
+
+                            # debug code
+                            self.route_record.append((leg.rid, leg.pod))
+
                             self.pop_leg()
                             break
                     # the vehicle has to stop somewhere within the step
@@ -136,9 +148,7 @@ class Veh(object):
         self.T = T
         self.d = 0.0
         self.t = 0.0
-        if len(self.route) == 0:
-            self.idle = True
-            # print('change to ilde')
+        self.idle = True
         return done
 
     # pop the first leg from the route list
@@ -196,12 +206,6 @@ class Veh(object):
     # update t, d, c, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
     def build_route(self, schedule, reqs=None, T=None):
-        route_backup = copy.deepcopy(self.route)
-        tlng_backup = copy.deepcopy(self.tlng)
-        tlat_backup = copy.deepcopy(self.tlat)
-        d_backup = copy.deepcopy(self.d)
-        t_backup = copy.deepcopy(self.t)
-
         self.clear_route()
         # if the route is null, vehicle is idle
         if len(schedule) == 0:
@@ -210,33 +214,69 @@ class Veh(object):
             self.t = 0.0
             self.d = 0.0
             self.c = 0.0
-            return
         else:
             for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+                # self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
                 try:
                     self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
                 # when osrm cannot find a route for the new schedule, we give up on this new schedule
                 except:
-                    self.route = route_backup
-                    self.tlng = tlng_backup
-                    self.tlat = tlat_backup
-                    self.d = d_backup
-                    self.t = t_backup
-                    rid_in_route = []
-                    if len(self.route) > 0:
-                        rid_in_route = [rid for (rid, pod, tlng, tlat, tnid, ddl) in self.route]
-                    rid_in_schedule = [rid for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
-                    rid_new = set(rid_in_schedule) - set(rid_in_route)
-                    return rid_new
+                    new_schedule = []
+                    rid_new = []
+                    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+                        if rid in self.rid_onboard:
+                            new_schedule.append((rid, pod, tlng, tlat, tnid, ddl))
+                        else:
+                            rid_new.append(rid)
+                    self.build_route_debug(new_schedule, rid_new, reqs, T)
 
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True
             self.rebl = True
             self.c = 0.0
-            return
         # else, the vehicle is in service to pick-up or drop-off
         else:
+            # verify the route with capacity constraint and get the cost of the route
+            c = 0.0
+            self.idle = False
+            self.rebl = False
+            t = 0.0
+            n = self.n
+            for leg in self.route:
+                t += leg.t
+                c += n * leg.t * COEF_INVEH
+                n += leg.pod
+                c += t * COEF_WAIT if leg.pod == 1 else 0
+
+            # debug code starts
+            if n != 0:
+                schedule = [(leg.rid, leg.pod) for leg in self.route]
+                print('')
+                print('error, veh', self.id, ', passengers', self.n)
+                print('route', self.route_record)
+                print('schedule', schedule)
+                print('rid on board', self.rid_onboard, ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
+                print('')
+            # debug code ends
+
+            assert n == 0
+            self.c = c
+        return
+
+    def build_route_debug(self, schedule, rid_fail, reqs=None, T=None):
+        self.clear_route()
+        for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+            self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
+
+        # if rid is -1, vehicle is rebalancing
+        if self.route[0].rid == -1:
+            self.idle = True
+            self.rebl = True
+            self.c = 0.0
+        # else, the vehicle is in service to pick-up or drop-off
+        else:
+            # verify the route with capacity constraint and get the cost of the route
             c = 0.0
             self.idle = False
             self.rebl = False
@@ -249,6 +289,7 @@ class Veh(object):
                 c += t * COEF_WAIT if leg.pod == 1 else 0
             assert n == 0
             self.c = c
+        return rid_fail
 
     # add a leg based on (rid, pod, tlng, tlat, ddl)
     def add_leg(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
@@ -257,7 +298,7 @@ class Veh(object):
         t_leg = 0.0
         for s in l['steps']:
             step = Step(s['distance'], s['duration']*COEF_TRAVEL, s['geometry']['coordinates'])
-            t_leg += s['duration']
+            t_leg += s['duration']*COEF_TRAVEL
             leg.steps.append(step)
         assert np.isclose(t_leg, leg.t)
         # the last step of a leg is always of length 2,
