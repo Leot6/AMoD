@@ -10,7 +10,7 @@ import matplotlib.image as mpimg
 from matplotlib import animation
 
 from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, \
-    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT
+    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE
 
 
 # print and save results
@@ -68,21 +68,23 @@ def print_results(model, runtime):
     veh_load_by_dist /= model.V
     veh_load_by_time /= model.V
 
+
+
     print('*' * 80)
     print('scenario: %s' % (DMD_STR))
-    print('simulation starts at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
+    print('simulation ends at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
     print('system settings:')
     print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; demand rate: %.2f%%' % (model.V, model.K, model.D*100))
     print('  - waiting time: %d; max detour: %.1f' % (MAX_WAIT, MAX_DETOUR))
-    print('  - assignment method: %s, interval: %.1f s' % (MET_ASSIGN, INT_ASSIGN))
+    print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
     print('simulation results:')
     print('  - requests:')
     print('    + served rate: %.2f%% (%d/%d), wait time: %.1f s' % (served_rate, count_served, count_reqs, wait_time))
     print('    + in-vehicle travel time: %.2f s, in-vehicle travel delay: %.2f s' % (in_veh_time, in_veh_delay))
     print('    + detour factor: %.2f' % detour_factor)
-    print('    + total service rate: %.2f%%' % (served_rate+(len(model.reqs_serving)+len(model.reqs_picking))/model.N*100))
+    print('    + total service rate: %.2f%%' % (100-(len(model.reqs_unassigned)+len(model.rejs))/model.N*100))
     print('  - vehicles:')
     print('    + vehicle service distance travelled: %.1f m' % veh_service_dist)
     print('    + vehicle service time travelled: %.1f s' % veh_service_time)

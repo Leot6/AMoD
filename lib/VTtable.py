@@ -1,5 +1,5 @@
 """
-dispatch algorithms for the AMoD system
+compute all feasible veh-trip combinations for the vehicle fleet and requests in queue
 """
 
 import copy
@@ -12,9 +12,8 @@ from lib.ScheduleFinder import compute_schedule
 from lib.Route import get_duration
 
 
-# build RTV graph for each veh, respectively
-def build_rtv_graph(vehs, reqs_pool, T):
-    print('    -building RTV-graph...')
+# build VT table for each veh, respectively
+def build_vt_table(vehs, reqs_pool, T):
     veh_trip_edges = []
 
     # # parallel
@@ -27,11 +26,11 @@ def build_rtv_graph(vehs, reqs_pool, T):
     #             veh_trip_edges.append([veh, trip, schedule, cost])
 
     # non-parallel
-    for veh in tqdm(vehs, desc='RTV'):
+    for veh in tqdm(vehs, desc='VT Table'):
         trip_list, schedule_list, cost_list = feasible_trips_search(veh, reqs_pool, T)
         for trips, schedules, costs in zip(trip_list, schedule_list, cost_list):
             for trip, schedule, cost in zip(trips, schedules, costs):
-                veh_trip_edges.append([veh, trip, schedule, cost])
+                veh_trip_edges.append((veh, trip, schedule, cost))
         # print('veh %d is finished' % veh.id)
 
     # # debug code starts
@@ -73,6 +72,10 @@ def feasible_trips_search(veh, reqs, T):
     time1 = time.time()
 
     # trips of size 1
+    _schedule = []
+    if not veh.idle:
+        for leg in veh.route:
+            _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
     for req in reqs:
         # filter the req which can not be served even when the veh is idle
         dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
@@ -80,17 +83,16 @@ def feasible_trips_search(veh, reqs, T):
             continue
         if dt + T <= req.Clp:
             trip = tuple([req])  # trip is defined as tuple
-            _schedule = []
-            if not veh.idle:
-                for leg in veh.route:
-                    _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
             best_schedule, min_cost, schedules = compute_schedule(veh, trip, [], [_schedule])
             if best_schedule:
                 trip_list[0].append(trip)
                 schedule_list[0].append(best_schedule)
                 cost_list[0].append(min_cost)
                 schedules_k.append(schedules)
-                # print('size 1 add', req.id, 'schedules_num', len(schedules))
+
+                # if veh.id == 3 or veh.id == 4:
+                #     print('veh', veh.id, ': size 1 add', req.id, 'schedules_num', len(schedules))
+
     # print('veh', veh.id, ', trip size:', 1, ', num of trips:', len(trip_list[0]),
     #       ', running time:', round((time.time() - time1), 2))
 
@@ -139,13 +141,6 @@ def feasible_trips_search(veh, reqs, T):
                 # debug code
                 n1 += 1
 
-                # # debug code starts
-                # reqid=[]
-                # for req in trip_k:
-                #     reqid.append(req.id)
-                # print('veh', veh.id, 'test trip', reqid)
-                # # debug code ends
-
                 if k > 2:
                     # check trip size is k
                     if len(trip_k) != k:
@@ -168,6 +163,10 @@ def feasible_trips_search(veh, reqs, T):
                     _trip = trip2
                     _schedules = schedules_k_1[j]
 
+                # # debug code starts
+                # print('veh', veh.id, ': size', k, 'test', [req.id for req in trip_k])
+                # # debug code ends
+
                 # debug code
                 n2 += 1
 
@@ -178,15 +177,13 @@ def feasible_trips_search(veh, reqs, T):
                     cost_list[k-1].append(min_cost)
                     schedules_k.append(schedules)
 
+                    # # debug code starts
+                    # print('veh', veh.id, ': size', k, 'add', [req.id for req in trip_k],
+                    #       'schedules_num', len(schedules))
+                    # # debug code ends
+
                     # debug code
                     n3 += 1
-
-                    # # debug code starts
-                    # reqid=[]
-                    # for req in trip_k:
-                    #     reqid.append(req.id)
-                    # print('size', k, 'add', reqid, 'schedules_num', len(schedules))
-                    # # debug code ends
 
                 if time.time() - start_time > CUTOFF_RTV:
                     # # debug code starts
@@ -195,7 +192,7 @@ def feasible_trips_search(veh, reqs, T):
                     # print('   number of trip size', k, 'in test2 is', n2)
                     # print('   number of trip size', k, 'pass test is', n3)
                     # # debug code ends
-                    print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k - 1]), '(time out)')
+                    # print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k - 1]), '(time out)')
                     return trip_list, schedule_list, cost_list
         # # debug code starts
         # print('   number of trip size', k-1, 'is', l)
@@ -205,6 +202,7 @@ def feasible_trips_search(veh, reqs, T):
         # # debug code ends
         # print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k-1]),
         #       ', running time:', round((time.time() - time2), 2))
+
         if len(trip_list[k-1]) == 0:
             trip_list.pop()
             schedule_list.pop()

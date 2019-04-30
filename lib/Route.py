@@ -142,6 +142,13 @@ def find_nearest_node(lng, lat):
         if d_ < d:
             d = d_
             nearest_node_id = nid
+
+    if nearest_node_id is None:
+        print()
+        print('nearest_node_id not found')
+        print('coordination', lng, lat)
+        print('d', d)
+        print()
     return int(nearest_node_id)
 
 
