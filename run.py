@@ -5,10 +5,10 @@ import copy
 import matplotlib.pyplot as plt
 # start time of initialization
 istime = time.time()
-print('initializing the model...')
+print('initializing the model ...')
 from tqdm import tqdm
 from lib.Main import Model
-from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS
+from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     frames = []
     # initialize the AMoD model
     model = Model()
-    print('...running time of initialization: %.05f seconds' % (time.time() - istime))
+    print('...running time of initialization (%s): %.05f seconds' % (MODEE, time.time() - istime))
     print('')
 
     # start time of simulation
@@ -28,17 +28,18 @@ if __name__ == '__main__':
         model.dispatch_at_time(T)
         if IS_ANIMATION:
             frames.append(copy.deepcopy(model.vehs))
-        print('System situation at %s : %d reqs have been received, %d have been served (%.02f%%), %d are on board '
-              '(%.02f%%), %d are being picked-up (%.02f%%), %d are unassigned (%.02f%%), %d are rejected (%.02f%%).'
-              % (DMD_SST + datetime.timedelta(seconds=T),
-                 model.N, len(model.reqs_served), (len(model.reqs_served) / model.N * 100),
-                 len(model.reqs_serving), (len(model.reqs_serving) / model.N * 100),
-                 len(model.reqs_picking), (len(model.reqs_picking) / model.N * 100),
-                 len(model.reqs_unassigned), (len(model.reqs_unassigned) / model.N * 100),
-                 len(model.rejs), (len(model.rejs) / model.N * 100)))
-        print('...running time of simulation: %.02f seconds (last interval:%.02f)'
-              % ((time.time() - stime), (time.time() - estime)))
-        print('')
+        if IS_DEBUG:
+            print('System situation at %s : %d reqs have been received, %d have been served (%.02f%%), %d are on board '
+                  '(%.02f%%), %d are being picked-up (%.02f%%), %d are unassigned (%.02f%%), %d are rejected (%.02f%%).'
+                  % (DMD_SST + datetime.timedelta(seconds=T),
+                     model.N, len(model.reqs_served), (len(model.reqs_served) / model.N * 100),
+                     len(model.reqs_serving), (len(model.reqs_serving) / model.N * 100),
+                     len(model.reqs_picking), (len(model.reqs_picking) / model.N * 100),
+                     len(model.reqs_unassigned), (len(model.reqs_unassigned) / model.N * 100),
+                     len(model.rejs), (len(model.rejs) / model.N * 100)))
+            print('...running time of simulation: %.02f seconds (last interval:%.02f)'
+                  % ((time.time() - stime), (time.time() - estime)))
+            print()
 
     print('End of this simulation.')
     # end time

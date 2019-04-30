@@ -61,15 +61,15 @@ class Veh(object):
         self.Lt = 0.0
         self.Ld = 0.0
         self.VTtable = [[] for i in range(RIDESHARING_SIZE*2)]
-        self.rid_onboard = []
+        self.onboard_rid = []
         self.new_pick_rid = []
         self.new_drop_rid = []
+        # debug code starts
         self.route_record = []
+        # debug code ends
 
     # update the vehicle location as well as the route after moving to time T
     def move_to_time(self, T):
-        self.new_pick_rid.clear()
-        self.new_drop_rid.clear()
         dT = T - self.T
         if dT <= 0:
             return []
@@ -92,8 +92,9 @@ class Veh(object):
                 self.n += leg.pod
                 done.append((leg.rid, leg.pod, self.T))
 
-                # debug code
+                # debug code starts
                 self.route_record.append((leg.rid, leg.pod))
+                # debug code ends
 
                 self.pop_leg()
             else:
@@ -119,8 +120,9 @@ class Veh(object):
                             self.n += leg.pod
                             done.append((leg.rid, leg.pod, self.T))
 
-                            # debug code
+                            # debug code starts
                             self.route_record.append((leg.rid, leg.pod))
+                            # debug code ends
 
                             self.pop_leg()
                             break
@@ -214,21 +216,22 @@ class Veh(object):
             self.t = 0.0
             self.d = 0.0
             self.c = 0.0
+            return
         else:
             for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
                 # self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
-                try:
-                    self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
-                # when osrm cannot find a route for the new schedule, we give up on this new schedule
-                except:
-                    new_schedule = []
+                flag = self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
+                if not flag:
+                    print('          build route error!!!!!')
+                    schedule_old = []
                     rid_new = []
-                    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
-                        if rid in self.rid_onboard:
-                            new_schedule.append((rid, pod, tlng, tlat, tnid, ddl))
+                    for (rid1, pod1, tlng1, tlat1, tnid1, ddl1) in schedule:
+                        if rid1 in self.onboard_rid:
+                            schedule_old.append((rid1, pod1, tlng1, tlat1, tnid1, ddl1))
                         else:
-                            rid_new.append(rid)
-                    self.build_route_debug(new_schedule, rid_new, reqs, T)
+                            rid_new.append(rid1)
+                    self.build_route_debug(schedule_old, reqs, T)
+                    return rid_new
 
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
@@ -253,10 +256,10 @@ class Veh(object):
             if n != 0:
                 schedule = [(leg.rid, leg.pod) for leg in self.route]
                 print('')
-                print('error, veh', self.id, ', passengers', self.n)
+                print('error n!=0, veh', self.id, ', passengers', self.n)
                 print('route', self.route_record)
                 print('schedule', schedule)
-                print('rid on board', self.rid_onboard, ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
+                print('rid on board', self.onboard_rid, ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
                 print('')
             # debug code ends
 
@@ -264,8 +267,16 @@ class Veh(object):
             self.c = c
         return
 
-    def build_route_debug(self, schedule, rid_fail, reqs=None, T=None):
+    def build_route_debug(self, schedule, reqs=None, T=None):
         self.clear_route()
+        # if the route is null, vehicle is idle
+        if len(schedule) == 0:
+            self.idle = True
+            self.rebl = False
+            self.t = 0.0
+            self.d = 0.0
+            self.c = 0.0
+            return
         for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
             self.add_leg(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
 
@@ -289,11 +300,12 @@ class Veh(object):
                 c += t * COEF_WAIT if leg.pod == 1 else 0
             assert n == 0
             self.c = c
-        return rid_fail
 
     # add a leg based on (rid, pod, tlng, tlat, ddl)
     def add_leg(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
         l = get_routing(self.tlng, self.tlat, tlng, tlat)
+        if l is None:
+            return False
         leg = Leg(rid, pod, tlng, tlat, tnid, ddl, l['duration']*COEF_TRAVEL, l['distance'], steps=[])
         t_leg = 0.0
         for s in l['steps']:
@@ -316,6 +328,7 @@ class Veh(object):
         self.tlat = leg.steps[-1].geo[1][1]
         self.d += leg.d
         self.t += leg.t
+        return True
 
     # remove the current route
     def clear_route(self):

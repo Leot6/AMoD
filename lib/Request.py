@@ -4,7 +4,7 @@ defination of requests for the AMoD system
 
 import matplotlib.pyplot as plt
 from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
-from lib.Route import find_nearest_node, get_duration_from_osrm
+from lib.Route import find_nearest_node, get_duration_from_osrm, get_duration
 
 
 class Req(object):
@@ -38,14 +38,25 @@ class Req(object):
         self.onid = find_nearest_node(olng, olat)
         self.dnid = find_nearest_node(dlng, dlat)
         self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
+        self.Ts_VT = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
         self.Cep = Tr
-        self.Clp = Tr + MAX_WAIT if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * (MAX_DETOUR -1)
+        self.Clp = Tr + MAX_WAIT if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * (MAX_DETOUR -1) / 2
         # self.Cld = None
         self.Cld = Tr + self.Ts + MAX_DELAY if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * MAX_DETOUR
         self.Tp = -1.0
         self.Td = -1.0
         self.D = 0.0
-        self.served = False
+
+        # debug code starts
+        # if id == 130:
+        #     print()
+        #     print('req', id)
+        #     print('Tr', Tr)
+        #     print('Ts', self.Ts)
+        #     print('Clp', self.Clp)
+        #     print('Cld', self.Cld)
+        #     print()
+        # debug code ends
 
     # return origin
     def get_origin(self):

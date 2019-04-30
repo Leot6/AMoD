@@ -7,7 +7,7 @@ from tqdm import tqdm
 from collections import deque
 
 
-# nodes = pd.read_csv('data/nodes.csv').values.tolist()
+nodes = pd.read_csv('data/nodes.csv').values.tolist()
 
 
 # generate the request in url format
@@ -60,16 +60,6 @@ def get_duration(olng, olat, dlng, dlat):
         return None
 
 
-def get_duration_from_table(onid, dnid):
-    return travel_time_table[onid-1, dnid-1]
-
-
-def get_duration_from_table1(olng, olat, dlng, dlat):
-    onid = find_nearest_node(olng, olat)
-    dnid = find_nearest_node(dlng, dlat)
-    return travel_time_table[onid-1, dnid-1]
-
-
 def get_euclidean_distance(olng, olat, dlng, dlat):
     dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
                                                    * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
@@ -119,31 +109,26 @@ def find_nearest_node(lng, lat):
     #     print('distance of', [lng, lat], 'to node', nearest_node_id, 'is larger than 100m!!!!!!!!')
     return int(nearest_node_id)
 
-def test(a):
-    if a > 3:
-        return
-    if a == 3:
-        return {1,2}
-    else:
-        a = 3
-        print('no returen')
-
 
 if __name__ == "__main__":
 
-    l = 200
-    aa = time.time()
-    a = deque([])
-    for i in range(l):
-        a.append(i)
-    a.popleft()
-    print('deque running time:', (time.time() - aa))
+    # l = 200
+    # aa = time.time()
+    # a = deque([])
+    # for i in range(l):
+    #     a.append(i)
+    # a.popleft()
+    # print('deque running time:', (time.time() - aa))
+    #
+    # bb = time.time()
+    # b = []
+    # for i in range(l):
+    #     b.append(i)
+    # del b[0:3]
+    # print('list running time:', (time.time() - bb))
 
-    bb = time.time()
-    b = []
-    for i in range(l):
-        b.append(i)
-    del b[0:3]
-    print('list running time:', (time.time() - bb))
+    node_id = find_nearest_node(-73.99002075195312, 40.73868179321289)
+    print(node_id)
+
 
 

@@ -10,6 +10,11 @@ STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
 NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
 
+MODEE = 'VT'
+# MODEE = 'VT_replan'
+# MODEE = 'VT_replan_all'
+
+
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1
 DMD_SST = parse('2016-05-07 00:00:00')
@@ -27,26 +32,27 @@ MAX_DETOUR = 2
 
 # intervals for vehicle-request assignment and rebalancing
 INT_ASSIGN = 30
-INT_REBL = INT_ASSIGN * 2
+INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = INT_ASSIGN * 0
+T_WARM_UP = INT_ASSIGN * 40
 T_STUDY = INT_ASSIGN + INT_ASSIGN * 60
 T_COOL_DOWN = INT_ASSIGN * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
-MET_ASSIGN = 'greedy'
-# MET_ASSIGN = 'ILP'
-MET_REBL = 'simple'
+# MET_ASSIGN = 'greedy'
+MET_ASSIGN = 'ILP'
+MET_REBL = 'naive'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 1000
-CUTOFF_ILP = 1000
+CUTOFF_ILP = 5
 
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
+IS_DEBUG = False
 
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation
 COEF_WAIT = 1.0

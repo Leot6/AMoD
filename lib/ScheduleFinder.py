@@ -18,10 +18,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
     ealist_drop_off_point = 0
     viol = None
 
-    if len(trip) == 1:
-        req = trip[0]
-    else:
-        req = tuple(set(trip) - set(_trip))[0]
+    req = tuple(set(trip) - set(_trip))[0]
 
     for schedule in _schedules:
         # # check if the req has same origin-destination as any other req in the schedule
@@ -89,7 +86,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
                     continue
                 schedule.insert(i, (req.id, 1, req.olng, req.olat, req.onid, req.Clp))
                 schedule.insert(j, (req.id, -1, req.dlng, req.dlat, req.dnid, req.Cld))
-                flag, c, viol = test_constraints_get_cost(schedule, veh, req, j)
+                flag, c, viol = test_constraints_get_cost(veh, trip, schedule, req, j)  # j: req's drop-off point index
                 if flag:
                     feasible_schedules.append(copy.deepcopy(schedule))
                     if c < min_cost:
@@ -109,8 +106,10 @@ def compute_schedule(veh, trip, _trip, _schedules):
 
 
 # test if a schedule can satisfy all constraints, return the cost (if yes) or the type of violation (if no)
-def test_constraints_get_cost(schedule, veh, req, drop_point):
-    c = 0.0
+def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
+    c_delay = 0.0
+    c_wait = 0.0
+    c_inveh = 0.0
     t = 0.0
     n = veh.n
     T = veh.T
@@ -118,6 +117,7 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
     lng = veh.lng
     lat = veh.lat
     nid = veh.nid
+    req_id = req.id
 
     # test the capacity constraint during the whole schedule
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
@@ -135,7 +135,7 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
             return False, None, 1  # no route found between points
         t += dt
         if T + t > ddl:
-            if rid == req.id:
+            if rid == req_id:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
                 return False, None, 2 if pod == -1 else 3
@@ -144,30 +144,49 @@ def test_constraints_get_cost(schedule, veh, req, drop_point):
                 # since the violation happens before the drop-off of req
                 return False, None, 4
             return False, None, 0
-        c += n * dt * COEF_INVEH
+        c_inveh += n * dt * COEF_INVEH
         n += pod
         assert n <= veh.K
-        c += t * COEF_WAIT if pod == 1 else 0
+        c_wait += t * COEF_WAIT if pod == 1 else 0
+        if pod == -1:
+            for req in trip:
+                if rid == req.id:
+                    c_delay += round(T + t - (req.Tr + req.Tp + req.Ts_VT))
+                    if round(T + t - (req.Tr + req.Tp + req.Ts_VT)) < 0:
+                        c_delay += -round(T + t - (req.Tr + req.Tp + req.Ts_VT))
         lng = tlng
         lat = tlat
         nid = tnid
 
-    return True, c, -1
+    return True, c_wait+c_delay, -1
+    # return True, round(t*8/c_inveh), -1
+    # return True, c_wait+c_inveh, -1
+    # return True, c_wait, -1
 
 
-# compute the schedule cost using osrm (not used, because it is very slow)
-def compute_schedule_cost(schedule, veh):
-    c = 0.0
+# compute the schedule cost using osrm
+def compute_schedule_cost(veh, trip, schedule):
+    c_delay = 0.0
+    c_wait = 0.0
+    c_inveh = 0.0
     t = 0.0
     n = veh.n
+    T = veh.T
     lng = veh.lng
     lat = veh.lat
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
         dt = get_duration_from_osrm(lng, lat, tlng, tlat)
         t += dt
-        c += n * dt * COEF_INVEH
+        c_inveh += n * dt * COEF_INVEH
         n += pod
-        c += t * COEF_WAIT if pod == 1 else 0
+        c_wait += t * COEF_WAIT if pod == 1 else 0
+        if pod == -1:
+            for req in trip:
+                if rid == req.id:
+                    c_delay += round(T + t - (req.Tr + req.Tp + req.Ts_VT))
+                    if round(T + t - (req.Tr + req.Tp + req.Ts_VT)) < 0:
+                        c_delay += -round(T + t - (req.Tr + req.Tp + req.Ts_VT))
+        c_wait += t * COEF_WAIT if pod == 1 else 0
         lng = tlng
         lat = tlat
-    return c
+    return c_wait+c_delay
