@@ -10,8 +10,8 @@ STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
 NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
 
-MODEE = 'VT'
-# MODEE = 'VT_replan'
+# MODEE = 'VT'
+MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
 
 
@@ -21,7 +21,7 @@ DMD_SST = parse('2016-05-07 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
+FLEET_SIZE = 5
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
@@ -35,19 +35,20 @@ INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = INT_ASSIGN * 40
-T_STUDY = INT_ASSIGN + INT_ASSIGN * 60
+T_WARM_UP = INT_ASSIGN * 0
+T_STUDY = INT_ASSIGN + INT_ASSIGN * 3
 T_COOL_DOWN = INT_ASSIGN * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
 # MET_ASSIGN = 'greedy'
 MET_ASSIGN = 'ILP'
-MET_REBL = 'naive'
+# MET_REBL = 'naive'
+MET_REBL = 'None'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 1000
-CUTOFF_ILP = 5
+CUTOFF_ILP = 15
 
 # if true, activate the animation / analysis
 IS_ANIMATION = False

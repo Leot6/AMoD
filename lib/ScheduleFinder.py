@@ -60,6 +60,12 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #     schedule.pop(i_p)
         #     return best_schedule, min_cost, feasible_schedules
 
+        # # debug
+        # if {r.id for r in trip} == {56, 505}:
+        #     print()
+        #     print('veh', veh.id)
+        #     print('_sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
+
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constrain of a req already in the schedule,
         # it cannot be picked-up before that req.
@@ -117,7 +123,15 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     lng = veh.lng
     lat = veh.lat
     nid = veh.nid
-    req_id = req.id
+    insert_req_id = req.id
+    reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
+
+    # # debug code starts
+    # if {r.id for r in trip} < {1, 113, 338}:
+    #     print('veh:', veh.id, ', trip:', )
+    #     print('   sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
+    #     print('   rout', [(leg.rid, leg.pod) for leg in veh.route])
+    # # debug code ends
 
     # test the capacity constraint during the whole schedule
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
@@ -131,11 +145,32 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
         idx += 1
         dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
+
+        # codes to fix bugs that caused by using travel time table (starts)
+        # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
+        #     if travel times are computed from travel time table (which is not accurate))
+        if rid in {leg.rid for leg in veh.route}:
+            dt = get_duration_from_osrm(lng, lat, tlng, tlat)
+        # codes to fix bugs that caused by using travel time table (ends)
+
         if dt is None:
             return False, None, 1  # no route found between points
         t += dt
+
+        # # debug code starts
+        # if {r.id for r in trip} < {1, 113, 338}:
+        #     print('go test', (rid, pod, ddl), T, t, dt, get_duration_from_osrm(lng, lat, tlng, tlat))
+        #     print('   ', lng, lat, tlng, tlat)
+        # # debug code ends
+
         if T + t > ddl:
-            if rid == req_id:
+
+            # # debug code starts
+            # if {r.id for r in trip} < {1, 113, 338}:
+            #     print('ddl failed', (rid, pod), ddl, T, t, dt, get_duration_from_osrm(lng, lat, tlng, tlat))
+            # # debug code ends
+
+            if rid == insert_req_id:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
                 return False, None, 2 if pod == -1 else 3
@@ -149,16 +184,16 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
         assert n <= veh.K
         c_wait += t * COEF_WAIT if pod == 1 else 0
         if pod == -1:
-            for req in trip:
+            for req in reqs_in_schedule:
                 if rid == req.id:
-                    c_delay += round(T + t - (req.Tr + req.Tp + req.Ts_VT))
-                    if round(T + t - (req.Tr + req.Tp + req.Ts_VT)) < 0:
-                        c_delay += -round(T + t - (req.Tr + req.Tp + req.Ts_VT))
+                    c_delay += round(T + t - (req.Tr + req.Ts))
+                    assert round(T + t - (req.Tr + req.Ts)) >= 0
+                    break
         lng = tlng
         lat = tlat
         nid = tnid
 
-    return True, c_wait+c_delay, -1
+    return True, c_wait + c_delay, -1
     # return True, round(t*8/c_inveh), -1
     # return True, c_wait+c_inveh, -1
     # return True, c_wait, -1
@@ -174,19 +209,24 @@ def compute_schedule_cost(veh, trip, schedule):
     T = veh.T
     lng = veh.lng
     lat = veh.lat
+    nid = veh.nid
+    reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        # dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
+
         dt = get_duration_from_osrm(lng, lat, tlng, tlat)
+        if not dt:
+            dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
         t += dt
         c_inveh += n * dt * COEF_INVEH
         n += pod
         c_wait += t * COEF_WAIT if pod == 1 else 0
         if pod == -1:
-            for req in trip:
+            for req in reqs_in_schedule:
                 if rid == req.id:
-                    c_delay += round(T + t - (req.Tr + req.Tp + req.Ts_VT))
-                    if round(T + t - (req.Tr + req.Tp + req.Ts_VT)) < 0:
-                        c_delay += -round(T + t - (req.Tr + req.Tp + req.Ts_VT))
-        c_wait += t * COEF_WAIT if pod == 1 else 0
+                    c_delay += round(T + t - (req.Tr + req.Ts))
+                    assert round(T + t - (req.Tr + req.Ts)) >= 0
         lng = tlng
         lat = tlat
-    return c_wait+c_delay
+        nid = tnid
+    return c_delay

@@ -16,13 +16,14 @@ def naive_rebalance(vehs, reqs_unassigned):
     # debug code
     ss = time.time()
 
-    # # debug code starts
-    # noi = 0  # number of idle vehicles
-    # for veh in vehs:
-    #     if veh.idle:
-    #         noi += 1
-    # print('        idle vehs:', noi)
-    # # debug code ends
+    # debug code starts
+    if IS_DEBUG:
+        noi = 0  # number of idle vehicles
+        for veh in vehs:
+            if veh.idle:
+                noi += 1
+        print('        idle vehs:', noi)
+    # debug code ends
 
     # reqs_unassigned = sorted(reqs_unassigned, key=lambda r: r.id)
     rebl_veh_req = []

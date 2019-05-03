@@ -14,8 +14,9 @@ from lib.Vehicle import Veh
 from lib.Request import Req
 from lib.VTtable import build_vt_table
 from lib.VTtableReplan import build_vt_table_replan
-from lib.AssignPlanner import greedy_assign, ILP_assign
+from lib.AssignPlanner import ILP_assign
 from lib.Rebalancer import naive_rebalance
+from lib.ScheduleFinder import compute_schedule_cost
 
 
 class Model(object):
@@ -65,7 +66,11 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = []
-        self.rid_assigned_last = []
+        self.rid_assigned_last = set()
+
+        # debug
+        self.rid_assigned = set()
+        self.rid_unassigned = set()
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
@@ -100,7 +105,7 @@ class Model(object):
             if self.assign == 'ILP':
                 if IS_DEBUG:
                     print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
-                R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
+                # R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
                 if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
                     R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + self.queue,
                                                                                  self.rid_assigned_last)
@@ -108,17 +113,37 @@ class Model(object):
                     R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue,
                                                                                  self.rid_assigned_last)
                 # assert len(R_id_assigned1) <= len(R_id_assigned)
-                if len(R_id_assigned1) > len(R_id_assigned):
-                    R_id_assigned = R_id_assigned1
-                    V_id_assigned = V_id_assigned1
-                    schedule_assigned = schedule_assigned1
-            # elif self.assign == 'greedy':
-            #     if IS_DEBUG:
-            #         print('    -start greedy assign with %d edges...' % len(veh_trip_edges))
-            #     R_id_assigned, V_id_assigned, schedule_assigned = greedy_assign(veh_trip_edges)
+                # if len(R_id_assigned1) > len(R_id_assigned):
+                #     R_id_assigned = R_id_assigned1
+                #     V_id_assigned = V_id_assigned1
+                #     schedule_assigned = schedule_assigned1
+
             if IS_DEBUG:
                 print('    -execute the assignments...')
+
+            # # debug
+            # print()
+            # noi = 0  # number of idle vehicles
+            # for veh in self.vehs:
+            #     if veh.idle:
+            #         noi += 1
+            # print(' - T = %.0f, reqs in queue: %d, reqs in pool: %d, idle vehs: %d / %d'
+            #       % (self.T, len(self.queue), len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned), noi,
+            #          self.V))
+
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
+
+            # # debug code starts
+            # print('   Veh route after assign:')
+            # for veh in self.vehs:
+            #     print('          veh:', veh.id, (veh.nid, round(veh.lng, 4),round(veh.lat, 4)),
+            #           ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ds:', round(veh.Ds, 2))
+            #     sche = [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]
+            #     trip = tuple({self.reqs[leg.rid] for leg in veh.route})
+            #     c = compute_schedule_cost(veh, trip, sche)
+            #     print('              *route:', [(leg.rid, leg.pod) for leg in veh.route],
+            #           't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', c)
+            # # debug code ends
 
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'naive':
@@ -140,12 +165,14 @@ class Model(object):
                 if pod == 1:
                     veh.new_pick_rid.append(rid)
                     veh.onboard_rid.append(rid)
+                    veh.onboard_reqs.add(self.reqs[rid])
                     self.reqs[rid].Tp = t
                     self.reqs_picking.remove(self.reqs[rid])
                     self.reqs_serving.add(self.reqs[rid])
                 elif pod == -1:
                     veh.new_drop_rid.append(rid)
                     veh.onboard_rid.remove(rid)
+                    veh.onboard_reqs.remove(self.reqs[rid])
                     self.reqs[rid].Td = t
                     self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
                     self.reqs_serving.remove(self.reqs[rid])
@@ -193,7 +220,7 @@ class Model(object):
             R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
             self.reqs_picking.update(R_assigned)
             self.reqs_unassigned = set(reqs_pool) - R_assigned
-            self.rid_assigned_last = R_id_assigned
+            self.rid_assigned_last = set(R_id_assigned) - {req.id for req in R_assigned_failed}
 
         if MODEE == 'VT':
             R_assigned_failed = set()
@@ -217,9 +244,11 @@ class Model(object):
 
     # execute the assignment from Rebalancer and build route for ilde vehicles
     def exec_rebl(self, R_id_rebl, V_id_rebl, schedule_rebl):
-        for veh_id, schedule in zip(V_id_rebl, schedule_rebl):
-            rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
+        for rid, vid, schedule in zip(R_id_rebl, V_id_rebl, schedule_rebl):
+            rid_fail = self.vehs[vid].build_route(schedule, self.reqs, self.T)
             assert rid_fail is None
+            self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), [schedule])]
+        self.rid_assigned_last.update(R_id_rebl)
         R_rebl = {self.reqs[rid] for rid in R_id_rebl}
         self.reqs_picking.update(R_rebl)
         self.reqs_unassigned.difference_update(R_rebl)
