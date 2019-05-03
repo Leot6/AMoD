@@ -61,6 +61,7 @@ class Veh(object):
         self.Lt = 0.0
         self.Ld = 0.0
         self.VTtable = [[] for i in range(RIDESHARING_SIZE*2)]
+        self.onboard_reqs = set()
         self.onboard_rid = []
         self.new_pick_rid = []
         self.new_drop_rid = []

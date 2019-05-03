@@ -113,7 +113,6 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
             for j in range(i+1, l+1):
                 trip2 = trip_list[k-2][-j]  # another trip of size k-1
                 trip_k = tuple(sorted(set(trip1).union(set(trip2)), key=lambda r: r.id))
-
                 if k > 2:
                     # check trip size is k
                     if len(trip_k) != k:
@@ -137,7 +136,8 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
                     _schedules = schedules_k_1[-j]
 
                 # # debug code starts
-                # print('veh', veh.id, ': size', k, 'test', [req.id for req in trip_k])
+                # if veh.id == 3:
+                #     print('veh', veh.id, ': size', k, 'test', [req.id for req in trip_k])
                 # # debug code ends
 
                 best_schedule, min_cost, schedules = compute_schedule(veh, trip_k, _trip, _schedules)
@@ -155,9 +155,9 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
                     #       'schedules_num', len(schedules))
                     # # debug code ends
 
-                if time.time() - start_time > CUTOFF_RTV:
-                    # print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k - 1]), '(time out)')
-                    return trip_list, schedule_list, cost_list
+                # if time.time() - start_time > CUTOFF_RTV:
+                #     # print('veh', veh.id, ', trip size:', k, ', num of trips:', len(trip_list[k - 1]), '(time out)')
+                #     return trip_list, schedule_list, cost_list
 
         veh.VTtable[k-1] = [(trip, schedules) for trip, schedules in zip(trip_list[k-1], schedules_k)]
 
@@ -177,11 +177,16 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
 
 def get_old_trips(veh, rid_old, k):
 
-    # debug code starts
-    trip_size = k
-    sche = []
-    sche_ = []
-    # debug code ends
+    # debug
+    veh_id = 3
+    # if veh.id == veh_id and len(veh.route) != 0:
+    #     print('new start           veh', veh.id, ' has route, new pick:', veh.new_pick_rid, ', new drop:', veh.new_drop_rid)
+    #     print([(leg.rid, leg.pod) for leg in veh.route], veh.onboard_rid)
+    #     print('trip size', k)
+    #     print('veh.VTtable[0]', len(veh.VTtable[0]))
+    #     print('veh.VTtable[1]', len(veh.VTtable[1]))
+    #     print('veh.VTtable[2]', len(veh.VTtable[2]))
+    #     print('veh.VTtable[3]', len(veh.VTtable[3]))
 
     old_trip_list = []
     old_schedule_list = []
@@ -205,8 +210,15 @@ def get_old_trips(veh, rid_old, k):
         trip_id_sup = rid_old.union(new_pick_rid)
         assert len(trip_id_sup) - len(rid_old) == l_new_pick
 
+    veh_route = [(leg.rid, leg.pod) for leg in veh.route]
+    veh_rid_enroute = {leg.rid for leg in veh.route}
     for trip, schedules in veh.VTtable[k - 1]:
         trip_id = {req.id for req in trip}
+
+        # # debug
+        # if veh.id == veh_id and len(veh.route) != 0:
+        #     print('trip size', k, ', trip_id', trip_id, ', schedules', len(schedules))
+
         if trip_id_sub < trip_id < trip_id_sup:
             best_schedule = None
             min_cost = np.inf
@@ -221,8 +233,10 @@ def get_old_trips(veh, rid_old, k):
             else:
                 trip_ = trip
             for schedule in schedules:
-                sche_record = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
-                route_record = [(leg.rid, leg.pod) for leg in veh.route]
+
+                # # debug
+                # if veh.id == veh_id and len(veh.route) != 0:
+                #     print('sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
 
                 if l_new_both != 0:
                     if {schedule[i][0] for i in range(l_new_both)} != new_both_rid:
@@ -231,15 +245,54 @@ def get_old_trips(veh, rid_old, k):
                         assert sum([schedule[i][1] for i in range(l_new_both)]) == l_new_pick - 1 * l_new_drop
                         del schedule[0:l_new_both]
 
-                        # debug code
-                        sche = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
-
-                if sche_record == route_record:
+                # codes to fix bugs that caused by using travel time table (starts)
+                # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
+                #     if travel times are computed from travel time table (which is not accurate))
+                trip_id_ = {req.id for req in trip_}
+                trip_sche_ = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
+                if trip_sche_ == veh_route:
                     flag = True
                     c = compute_schedule_cost(veh, trip_, schedule)
+
+                    # # debug
+                    # if veh.id == veh_id:
+                    #     print('veh', veh.id, ' add route (same as route)')
+
+                elif trip_id_ < veh_rid_enroute:
+                    veh_partial_route = []
+                    for (rid, pod) in veh_route:
+                        if rid in trip_id_.union(set(veh.onboard_rid)):
+                            veh_partial_route.append((rid, pod))
+
+                    # # debug
+                    # if veh.id == veh_id:
+                    #     print('trip_sche_', trip_sche_)
+                    #     print('veh_partial_route', veh_partial_route)
+
+                    if trip_sche_ == veh_partial_route:
+                        flag = True
+                        c = compute_schedule_cost(veh, trip_, schedule)
+
+                        # # debug
+                        # if veh.id == veh_id:
+                        #     print('veh', veh.id, ' add route (partial route)')
+
+                    else:
+                        flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
+
+                        # # debug
+                        # if veh.id == veh_id:
+                        #     print('veh', veh.id, ' go to test (partial route)')
+
+                # codes to fix bugs that caused by using travel time table (ends)
                 else:
                     flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
                 if flag:
+
+                    # # debug
+                    # if veh.id == veh_id:
+                    #     print('veh', veh.id, ' add route, cost:', c)
+
                     feasible_schedules.append(copy.deepcopy(schedule))
                     if c < min_cost:
                         best_schedule = copy.deepcopy(schedule)
@@ -249,19 +302,12 @@ def get_old_trips(veh, rid_old, k):
                 old_schedule_list.append(best_schedule)
                 old_cost_list.append(min_cost)
                 old_schedules_k.append(feasible_schedules)
-
-                # debug code
-                try:
-                    assert {req.id for req in trip_} < rid_old
-                except AssertionError:
-                    print()
-                    print('AssertionError!!!!!!!!!!')
-                    print('trip size', trip_size, ', num of new pick', l_new_pick)
-                    print('pick', new_pick_rid, ', drop', new_drop_rid)
-                    print('trip before', {req.id for req in trip}, ', sche', sche_record)
-                    print('trip after', {req.id for req in trip_}, ', sche', sche)
-                    print()
+                assert {req.id for req in trip_} < rid_old
 
     assert len(old_trip_list) == len(set(old_trip_list))
+
+    # # debug
+    # if veh.id == veh_id:
+    #     print('old_trip_list', len(old_trip_list))
 
     return old_trip_list, old_schedule_list, old_cost_list, old_schedules_k
