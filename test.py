@@ -1,8 +1,11 @@
 import time
 import math
 import requests
+import pickle
 import pandas as pd
 import numpy as np
+import networkx as nx
+
 from tqdm import tqdm
 from collections import deque
 
@@ -66,36 +69,6 @@ def get_euclidean_distance(olng, olat, dlng, dlat):
     return dist
 
 
-# def find_nearest_node(lng, lat):
-#     nearest_node_id = 1
-#     d = np.inf
-#     nearest_node_id1 = 1
-#     d1 = np.inf
-#
-#     for nid, nlng, nlat in nodes:
-#         d_ = get_euclidean_distance(lng, lat, nlng, nlat)
-#         if d_ < d:
-#             d = d_
-#             nearest_node_id = nid
-#
-#         # d1_ = abs(lng-nlng) + abs(lat-nlat)
-#         # if d1_ < d1:
-#         #     d1 = d1_
-#         #     nearest_node_id1 = nid
-#
-#     nearest_node_id = int(nearest_node_id)
-#     nearest_node_id1 = int(nearest_node_id1)
-#
-#     # if d > 150:
-#     #     print('distance to node is larger than 150m!!!!!!!!')
-#     #     print([round(lng, 6), round(lat, 6)], int(nearest_node_id), round(d, 2))
-#     #
-#     # if nearest_node_id != nearest_node_id1:
-#     #     d1 = get_euclidean_distance(lng, lat, nodes[nearest_node_id1-1][1], nodes[nearest_node_id1-1][2])
-#     #     print('   !!!!!!!!!not the same:', nearest_node_id, d, nearest_node_id1, d1)
-#
-#     return int(nearest_node_id)
-
 def find_nearest_node(lng, lat):
     nearest_node_id = None
     d = np.inf
@@ -108,6 +81,21 @@ def find_nearest_node(lng, lat):
     # if d > 150:
     #     print('distance of', [lng, lat], 'to node', nearest_node_id, 'is larger than 100m!!!!!!!!')
     return int(nearest_node_id)
+
+
+def test():
+    row = np.array([0, 0, 0, 1, 2, 3, 6])
+    col = np.array([1, 2, 3, 4, 5, 6, 7])
+    value = np.array([1, 2, 1, 8, 1, 3, 5])
+
+    print('生成一个空的有向图')
+    G = nx.DiGraph()
+    print('为这个网络添加节点...')
+    for i in range(0, np.size(col) + 1):
+        G.add_node(i)
+    print('在网络中添加带权中的边...')
+    for i in range(np.size(row)):
+        G.add_weighted_edges_from([(row[i], col[i], value[i])])
 
 
 if __name__ == "__main__":
@@ -127,8 +115,41 @@ if __name__ == "__main__":
     # del b[0:3]
     # print('list running time:', (time.time() - bb))
 
-    node_id = find_nearest_node(-73.99002075195312, 40.73868179321289)
-    print(node_id)
+    aa = time.time()
+    # REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160507.csv')
+    # STN_LOC = pd.read_csv('./data/stations-630.csv')
+    # NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
+    NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
+    print('deque running time:', (time.time() - aa))
+
+    # with open('./data/REQ_DATA.pickle', 'wb') as f:
+    #     pickle.dump(REQ_DATA, f)
+    # with open('./data/STN_LOC.pickle', 'wb') as f:
+    #     pickle.dump(STN_LOC, f)
+    # with open('./data/NOD_LOC.pickle', 'wb') as f:
+    #     pickle.dump(NOD_LOC, f)
+    with open('./data/NOD_TTT.pickle', 'wb') as f:
+        pickle.dump(NOD_TTT, f)
+
+    bb = time.time()
+    # with open('./data/REQ_DATA.pickle', 'rb') as f:
+    #     REQ_DATA = pickle.load(f)
+    # with open('./data/STN_LOC.pickle', 'rb') as f:
+    #     STN_LOC = pickle.load(f)
+    # with open('./data/NOD_LOC.pickle', 'rb') as f:
+    #     NOD_LOC = pickle.load(f)
+    with open('./data/NOD_TTT.pickle', 'rb') as f:
+        NOD_TTT = pickle.load(f)
+
+    print('deque running time:', (time.time() - bb))
+
+
+
+
+
+
+
+
 
 
 

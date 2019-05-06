@@ -37,3 +37,4 @@ data/travel-time-table.csv
 data/Manhattan-graph/.time-table-sat.csv.icloud
 data/Manhattan-graph/.time-table-osrm.csv.icloud
 data/.travel-time-table.csv.icloud
+*.pickle

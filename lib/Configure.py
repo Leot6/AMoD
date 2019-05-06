@@ -1,14 +1,19 @@
 """
 constants are found here
 """
+import pickle
 import pandas as pd
 from dateutil.parser import parse
 
 # taxi requests data, station loctions, graph nodes and travel time table
-REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160507.csv')
 STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
-NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
+# REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160507.csv')
+with open('./data/REQ_DATA.pickle', 'rb') as f:
+        REQ_DATA = pickle.load(f)
+# NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
+with open('./data/NOD_TTT.pickle', 'rb') as f:
+    NOD_TTT = pickle.load(f)
 
 # MODEE = 'VT'
 MODEE = 'VT_replan'
@@ -53,7 +58,7 @@ CUTOFF_ILP = 15
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
-IS_DEBUG = False
+IS_DEBUG = True
 
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation
 COEF_WAIT = 1.0
