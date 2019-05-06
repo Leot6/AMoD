@@ -75,6 +75,7 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
 
 
 if __name__ == '__main__':
+    # # for travel time table
     # nodes = pd.read_csv('nodes.csv')
     # nodes_id = list(range(1, nodes.shape[0] + 1))
     # # travel_time_table = pd.DataFrame(-np.ones((num_nodes, num_nodes)), index=nodes_id, columns=nodes_id)
@@ -91,12 +92,32 @@ if __name__ == '__main__':
     #
     # travel_time_table.to_csv('time-table-osrm.csv')
 
-    travel_time_table = pd.read_csv('time-table-osrm.csv', index_col=0)
-    # print(travel_time_table.iloc[3826, 3833])
-    # print(travel_time_table.iloc[3910, 3920])
-    print(travel_time_table.iloc[5:10, 1800:2000])
-    travel_time_table = pd.read_csv('time-table-sat.csv', index_col=0)
-    print(travel_time_table.iloc[5:10, 1800:2000])
+    # travel_time_table = pd.read_csv('time-table-osrm.csv', index_col=0)
+    # # print(travel_time_table.iloc[3826, 3833])
+    # # print(travel_time_table.iloc[3910, 3920])
+    # print(travel_time_table.iloc[5:10, 1800:2000])
+    # travel_time_table = pd.read_csv('time-table-sat.csv', index_col=0)
+    # print(travel_time_table.iloc[5:10, 1800:2000])
+
+    # # for routing machine
+    # G = load_Manhattan_graph()
+    # with open('map.pickle', 'wb') as f:
+    #     pickle.dump(G, f)
+
+    with open('map.pickle', 'rb') as f:
+        G = pickle.load(f)
+
+    aa = time.time()
+    path = nx.dijkstra_path(G, 1, 10)
+    print(path)
+    print('aa running time:', (time.time() - aa))
+
+    bb = time.time()
+    path = nx.bidirectional_dijkstra(G, 1, 4000)
+    print(path)
+    print('bb running time:', (time.time() - bb))
+
+
 
 
 
