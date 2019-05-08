@@ -11,6 +11,8 @@ from collections import deque
 
 
 nodes = pd.read_csv('data/nodes.csv').values.tolist()
+with open('./data/NOD_TTT.pickle', 'rb') as f:
+    NOD_TTT = pickle.load(f)
 
 
 # generate the request in url format
@@ -83,21 +85,6 @@ def find_nearest_node(lng, lat):
     return int(nearest_node_id)
 
 
-def test():
-    row = np.array([0, 0, 0, 1, 2, 3, 6])
-    col = np.array([1, 2, 3, 4, 5, 6, 7])
-    value = np.array([1, 2, 1, 8, 1, 3, 5])
-
-    print('生成一个空的有向图')
-    G = nx.DiGraph()
-    print('为这个网络添加节点...')
-    for i in range(0, np.size(col) + 1):
-        G.add_node(i)
-    print('在网络中添加带权中的边...')
-    for i in range(np.size(row)):
-        G.add_weighted_edges_from([(row[i], col[i], value[i])])
-
-
 if __name__ == "__main__":
 
     # l = 200
@@ -115,34 +102,56 @@ if __name__ == "__main__":
     # del b[0:3]
     # print('list running time:', (time.time() - bb))
 
-    aa = time.time()
-    # REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160507.csv')
-    # STN_LOC = pd.read_csv('./data/stations-630.csv')
-    # NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
-    NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
-    print('deque running time:', (time.time() - aa))
+    # olng = -74.017946
+    # olat = 40.706991
+    # dlng = -74.016979
+    # dlat = 40.709037
+    #
+    olng = -74.016765
+    olat = 40.709333
+    # dlng = -74.016375
+    # dlat = 40.710085
 
-    # with open('./data/REQ_DATA.pickle', 'wb') as f:
-    #     pickle.dump(REQ_DATA, f)
-    # with open('./data/STN_LOC.pickle', 'wb') as f:
-    #     pickle.dump(STN_LOC, f)
-    # with open('./data/NOD_LOC.pickle', 'wb') as f:
-    #     pickle.dump(NOD_LOC, f)
-    with open('./data/NOD_TTT.pickle', 'wb') as f:
-        pickle.dump(NOD_TTT, f)
+    # dlng = -73.931773
+    # dlat = 40.800979
+
+    dlng = -74.016765
+    dlat = 40.709333
+
+    onid = find_nearest_node(olng, olat)
+    dnid = find_nearest_node(dlng, dlat)
+
+    with open('./data/NET_NYC.pickle', 'rb') as f:
+        NET_NYC = pickle.load(f)
+
+    aa = time.time()
+    leg = get_routing(olng, olat, dlng, dlat)
+    steps = [(s['duration'], s['distance'], s['geometry']['coordinates']) for s in leg['steps']]
+    print(leg['duration'], leg['distance'])
+    for step in steps:
+        print('  ', step)
+    print('aa running time:', (time.time() - aa))
+    print()
 
     bb = time.time()
-    # with open('./data/REQ_DATA.pickle', 'rb') as f:
-    #     REQ_DATA = pickle.load(f)
-    # with open('./data/STN_LOC.pickle', 'rb') as f:
-    #     STN_LOC = pickle.load(f)
-    # with open('./data/NOD_LOC.pickle', 'rb') as f:
-    #     NOD_LOC = pickle.load(f)
-    with open('./data/NOD_TTT.pickle', 'rb') as f:
-        NOD_TTT = pickle.load(f)
+    duration, path = nx.bidirectional_dijkstra(NET_NYC, onid, dnid)
+    path.append(path[-1])
+    steps = []
+    for i in range(len(path)-1):
+        src = path[i]
+        sink = path[i+1]
+        src_geo = [nodes[src - 1][1], nodes[src - 1][2]]
+        sink_geo = [nodes[sink - 1][1], nodes[sink - 1][2]]
+        t = NOD_TTT[src - 1, sink - 1]
+        d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
+        steps.append((t, d, [src_geo, sink_geo], [src, sink]))
 
-    print('deque running time:', (time.time() - bb))
-
+    print(duration, path)
+    print(sum([s[0] for s in steps]), sum([s[1] for s in steps]))
+    assert np.isclose(duration, sum([s[0] for s in steps]))
+    for step in steps:
+        print('  ', step)
+    print('bb running time:', (time.time() - bb))
 
 
 

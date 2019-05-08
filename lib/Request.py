@@ -37,8 +37,8 @@ class Req(object):
         self.dlat = dlat
         self.onid = find_nearest_node(olng, olat)
         self.dnid = find_nearest_node(dlng, dlat)
-        self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
-        self.Ts_VT = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
+        # self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
+        self.Ts = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
         self.Cep = Tr
         self.Clp = Tr + MAX_WAIT if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * (MAX_DETOUR -1) / 2
         # self.Cld = None

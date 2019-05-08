@@ -118,7 +118,7 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     c_inveh = 0.0
     t = 0.0
     n = veh.n
-    T = veh.T
+    T = veh.T + veh.t_to_nid
     K = veh.K
     lng = veh.lng
     lat = veh.lat
@@ -127,7 +127,7 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
 
     # # debug code starts
-    # if {r.id for r in trip} < {1, 113, 338}:
+    # if veh.id == 2 and 95 in veh.onboard_rid:
     #     print('veh:', veh.id, ', trip:', )
     #     print('   sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
     #     print('   rout', [(leg.rid, leg.pod) for leg in veh.route])
@@ -146,28 +146,28 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
         idx += 1
         dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
 
-        # codes to fix bugs that caused by using travel time table (starts)
-        # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
-        #     if travel times are computed from travel time table (which is not accurate))
-        if rid in {leg.rid for leg in veh.route}:
-            dt = get_duration_from_osrm(lng, lat, tlng, tlat)
-        # codes to fix bugs that caused by using travel time table (ends)
+        # # codes to fix bugs that caused by using travel time table (starts)
+        # # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
+        # #     if travel times are computed from travel time table (which is not accurate))
+        # if rid in {leg.rid for leg in veh.route}:
+        #     dt = get_duration_from_osrm(lng, lat, tlng, tlat)
+        # # codes to fix bugs that caused by using travel time table (ends)
 
         if dt is None:
             return False, None, 1  # no route found between points
         t += dt
 
         # # debug code starts
-        # if {r.id for r in trip} < {1, 113, 338}:
-        #     print('go test', (rid, pod, ddl), T, t, dt, get_duration_from_osrm(lng, lat, tlng, tlat))
-        #     print('   ', lng, lat, tlng, tlat)
+        # if veh.id == 2 and {95, 243, 250} < set(veh.onboard_rid):
+        #     print('go test', (rid, pod, ddl), veh.T, T, t, dt,)
+        #     print('   ', nid, tnid, T+dt)
         # # debug code ends
 
         if T + t > ddl:
 
             # # debug code starts
-            # if {r.id for r in trip} < {1, 113, 338}:
-            #     print('ddl failed', (rid, pod), ddl, T, t, dt, get_duration_from_osrm(lng, lat, tlng, tlat))
+            # if veh.id in {1, 2}:
+            #     print('ddl failed', (rid, pod), ddl, veh.T, T, t, dt)
             # # debug code ends
 
             if rid == insert_req_id:
@@ -187,6 +187,12 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
             for req in reqs_in_schedule:
                 if rid == req.id:
                     c_delay += round(T + t - (req.Tr + req.Ts))
+
+                    # # debug
+                    # if rid == 95 and round(T + t - (req.Tr + req.Ts)) < 0:
+                    #     print(req.id, round(T + t - (req.Tr + req.Ts)))
+                    #     print(veh.id)
+
                     assert round(T + t - (req.Tr + req.Ts)) >= 0
                     break
         lng = tlng
@@ -206,17 +212,18 @@ def compute_schedule_cost(veh, trip, schedule):
     c_inveh = 0.0
     t = 0.0
     n = veh.n
-    T = veh.T
+    T = veh.T + veh.t_to_nid
     lng = veh.lng
     lat = veh.lat
     nid = veh.nid
     reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
-        # dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
+        dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
 
-        dt = get_duration_from_osrm(lng, lat, tlng, tlat)
-        if not dt:
-            dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
+        # dt = get_duration_from_osrm(lng, lat, tlng, tlat)
+        # if not dt:
+        #     dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
+
         t += dt
         c_inveh += n * dt * COEF_INVEH
         n += pod

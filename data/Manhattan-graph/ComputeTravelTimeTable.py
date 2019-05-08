@@ -79,7 +79,7 @@ if __name__ == '__main__':
     # nodes = pd.read_csv('nodes.csv')
     # nodes_id = list(range(1, nodes.shape[0] + 1))
     # # travel_time_table = pd.DataFrame(-np.ones((num_nodes, num_nodes)), index=nodes_id, columns=nodes_id)
-    # # travel_time_table.to_csv('travel-time-table.csv')
+    # # travel_time_table.to_csv('time-table-empty.csv')
     #
     # travel_time_table = pd.read_csv('time-table-empty.csv', index_col=0)
     # # print(travel_time_table.head(2))
