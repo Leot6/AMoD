@@ -209,25 +209,25 @@ def anim(frames):
         color = '0.50'
         size = 7
         if v.id == 1:
-            color = '#FF5733'
+            color = '#6DDCFD'
         elif v.id == int(FLEET_SIZE*2/10):
-            color = '#FAD91E'
+            color = '#A89BFA'
         elif v.id == int(FLEET_SIZE*3/10):
             color = '#1EFA35'
-        elif v.id == int(FLEET_SIZE*4/10):
-            color = '#6DDCFD'
-        elif v.id == int(FLEET_SIZE*5/10):
-            color = '#A89BFA'
-        elif v.id == int(FLEET_SIZE*6/10):
-            color = '#EE9BFA'
-        elif v.id == int(FLEET_SIZE*7/10):
-            color = '#F3FFCA'
-        elif v.id == int(FLEET_SIZE*8/10):
-            color = '#9BFAC6'
-        elif v.id == int(FLEET_SIZE*9/10):
-            color = '#FACC9B'
-        elif v.id == FLEET_SIZE - 1:
-            color = '#9BFAF3'
+        # elif v.id == int(FLEET_SIZE*4/10):
+        #     color = '#FF5733'
+        # elif v.id == int(FLEET_SIZE*5/10):
+        #     color = '#FAD91E'
+        # elif v.id == int(FLEET_SIZE*6/10):
+        #     color = '#EE9BFA'
+        # elif v.id == int(FLEET_SIZE*7/10):
+        #     color = '#F3FFCA'
+        # elif v.id == int(FLEET_SIZE*8/10):
+        #     color = '#9BFAC6'
+        # elif v.id == int(FLEET_SIZE*9/10):
+        #     color = '#FACC9B'
+        # elif v.id == FLEET_SIZE - 1:
+        #     color = '#9BFAF3'
         else:
             size = 3
         vehs.append(plt.plot([], [], color=color, marker='o', markersize=size, alpha=1)[0])

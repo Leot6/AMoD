@@ -3,14 +3,13 @@ serialize data to pickle file to save time on initialization
 """
 
 import pickle
+import time
 import pandas as pd
-import numpy as np
-
 
 if __name__ == '__main__':
     aa = time.time()
     REQ_DATA = pd.read_csv('Manhattan-taxi-20160507.csv')
-    NOD_TTT = pd.read_csv('data/travel-time-table.csv', index_col=0).values
+    NOD_TTT = pd.read_csv('travel-time-table.csv', index_col=0).values
     print('load from csv file running time:', (time.time() - aa))
 
     # with open('REQ_DATA.pickle', 'wb') as f:

@@ -6,23 +6,25 @@ import time
 import math
 import requests
 import numpy as np
+import networkx as nx
 from collections import deque
-from lib.Configure import NOD_LOC, NOD_TTT, COEF_TRAVEL
+from lib.Configure import NOD_LOC, NOD_TTT, NET_NYC, COEF_TRAVEL
 
 
 class Step(object):
     """
     Step is a class for steps in a leg
     Attributes:
-        d: distance
         t: duration
+        d: distance
         geo: geometry, a list of coordinates
     """
 
-    def __init__(self, d=0.0, t=0.0, geo=[]):
-        self.d = d
+    def __init__(self, t=0.0, d=0.0, geo=[], nid=[]):
         self.t = t
+        self.d = d
         self.geo = geo
+        self.nid = nid
 
     def __str__(self):
         return 'step: distance = %.1f, duration = %.1f' % (self.d, self.t)
@@ -59,6 +61,20 @@ class Leg(object):
         return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
 
 
+# get the duration of the best route from origin to destination
+def get_duration(olng, olat, dlng, dlat, onid, dnid):
+    # duration = get_duration_from_osrm(olng, olat, dlng, dlat)
+    duration = get_duration_from_table(onid, dnid)
+    return duration
+
+
+# get the duration of the best route from origin to destination
+def get_routing(olng, olat, dlng, dlat, onid, dnid):
+    route = get_routing_from_osrm(olng, olat, dlng, dlat)
+    # route = get_routing_from_networkx(onid, dnid)
+    return route
+
+
 # generate the request in url format
 def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
     ghost = '0.0.0.0'
@@ -90,7 +106,7 @@ def call_url(url):
 
 
 # get the best route from origin to destination
-def get_routing(olng, olat, dlng, dlat):
+def get_routing_from_osrm(olng, olat, dlng, dlat):
     url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
     response, code = call_url(url)
     if code:
@@ -118,11 +134,30 @@ def get_duration_from_table(onid, dnid):
         None
 
 
-# get the duration of the best route from origin to destination
-def get_duration(olng, olat, dlng, dlat, onid, dnid):
-    # duration = get_duration_from_osrm(olng, olat, dlng, dlat)
-    duration = get_duration_from_table(onid, dnid)
-    return duration
+# get the best route from origin to destination
+def get_routing_from_networkx(onid, dnid):
+    duration, path = nx.bidirectional_dijkstra(NET_NYC, onid, dnid)
+    distance = 0.0
+    path.append(path[-1])
+    steps = []
+    for i in range(len(path) - 1):
+        src = path[i]
+        sink = path[i + 1]
+        src_geo = [NOD_LOC[src - 1][1], NOD_LOC[src - 1][2]]
+        sink_geo = [NOD_LOC[sink - 1][1], NOD_LOC[sink - 1][2]]
+        d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
+        t = NOD_TTT[src - 1, sink - 1]
+        steps.append((t, d, [src_geo, sink_geo], [src, sink]))
+        distance += d
+    assert np.isclose(duration, sum([s[0] for s in steps]))
+
+    # debug
+    # if True:
+    #     print(duration, len(path), (onid, dnid))
+        # for step in steps:
+        #     print('  ', step)
+
+    return duration, distance, steps
 
 
 # get the duration based on Euclidean distance
