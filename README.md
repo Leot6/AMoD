@@ -6,9 +6,10 @@ Based on [amod-abm](https://github.com/wenjian0202/amod-abm).
 <img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
 
 
-## Installation 
+## Installation of OSRM
 
 > This installation guideline targets MacOS.
+> OSRM, written in C++14, should be built from source beforehand. For more information please go to OSRM [Wiki](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine).
 
 Install HomeBrew if not available:
 ```
@@ -22,19 +23,7 @@ Similarly, install all other necessary dependencies:
 ```
 brew install boost git cmake libzip libstxxl libxml2 lua tbb ccache
 brew install GDAL
-```
-Navigate to a good directory, and clone the project from GitHub using git:
-```
-git clone https://github.com/Leot6/AMoD-Simulation.git
-```
-
-Get into the project folder, and remove the compiled OSRM files:
-```
-cd amod-abm
-rm -R osrm-backend-5.21.0
-```
-
-> OSRM, written in C++14, should be built from source beforehand. For more information please go to OSRM [Wiki](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine). 
+``` 
 
 Get new OSRM source files and extract:
 ```
@@ -55,7 +44,7 @@ cmake ../
 make -j
 cd ..
 ```
-The `osrm-routed` executable should be working now. The next step is to grab a `.osm.pbf` OpenStreetMap extract from [Geofabrik](http://download.geofabrik.de/index.html) or [BBBike](https://extract.bbbike.org/). Here, we use areas of London as a toy case:
+The `osrm-routed` executable should be working now. The next step is to grab a `.osm.pbf` OpenStreetMap extract from [Geofabrik](http://download.geofabrik.de/index.html) or [BBBike](https://extract.bbbike.org/) (recommended). Here, we use areas of London as a toy case:
 ```
 wget http://download.geofabrik.de/europe/great-britain/england/greater-london-latest.osm.pbf
 ```
@@ -88,5 +77,6 @@ A demo of the simulation platform has been prepared. Keep the routing server run
 ## References
 
 1. Jian Wen. amod-abm. https://github.com/wenjian0202/amod-abm, 2017
+2. Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E. and Rus, D., 2017. [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://www.pnas.org/content/114/3/462.short). Proceedings of the National Academy of Sciences, 114(3), pp.462-467
 
 
