@@ -6,9 +6,10 @@ Based on [amod-abm](https://github.com/wenjian0202/amod-abm).
 <img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
 
 
-## Installation of OSRM
+## Installation of OSRM (not accurate and not used at now)
 
 > This installation guideline targets MacOS.
+
 > OSRM, written in C++14, should be built from source beforehand. For more information please go to OSRM [Wiki](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine).
 
 Install HomeBrew if not available:
@@ -63,15 +64,6 @@ The installation is done. Run the OSRM engine and establish an routing server:
 ./build/osrm-routed greater-london-latest.osrm
 ```
 [General Options](https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md) gives syntax for all possible services that OSRM is providing. 
-
-A demo of the simulation platform has been prepared. Keep the routing server running, then run `python run.py` and see what's happening. 
-
-## Requirements
-
-- OS X >= 10.10
-- XCode
-- Python >= 3.6
-
 
 
 ## References
