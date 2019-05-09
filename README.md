@@ -6,11 +6,13 @@ Based on [amod-abm](https://github.com/wenjian0202/amod-abm).
 <img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
 
 
-## Installation of OSRM (not accurate and not used at now)
+## Installation of OSRM (not used at now)
 
 > This installation guideline targets MacOS.
 
 > OSRM, written in C++14, should be built from source beforehand. For more information please go to OSRM [Wiki](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine).
+
+> The route returned by OSRM is not consistant in some situation when using the built-in vehicle status updating code. (e.g. After a vehicle movies along a route (A->B), which duration is 90s, for 20s and stops at a midpoint between A and B, the route returned by OSRM from the midpoint to B might be 75s instead of 70s as expected.)
 
 Install HomeBrew if not available:
 ```
