@@ -1,9 +1,27 @@
-# An AMoD Simulator
-Based on [amod-abm](https://github.com/wenjian0202/amod-abm).
-
-## `Illustration`
-
+# `An AMoD Simulator`
 <img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
+
+Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper [[2]](https://github.com/Leot6/AMoD#references).
+
+## Main Parts
+
+- class `Main` for free-floating AMoD systems, with a fleet of vehicles
+  - all other class are connected by it
+- class `Vehicle` for (shared) autonomous vehicles
+  - vehicle capacity can be set to 1 (no sharing), 2 (at most 2 travelers sharing at a time) or more
+- class `Request` for requests
+  - requests are loaded from NYC trip data
+  - requests are on-demand
+- class `Route` for routing server
+  - the complete road network of Manhattan (4,092 nodes and 9,453 edges) are considered, with the travel time on each edge (road segment) of the network given by the daily mean travel time estimate
+  - the map data should be preprocessed beforehand using `ComputeTravelTimeTable`
+- class `VTtable`, `ScheduleFinder`, `AssignPlaner` for a central dispatcher
+  - assigns requests to vehicles, based on the idea of [[2]](https://github.com/Leot6/AMoD#references)
+- class `Rebalancer` for a naive rebalancer  
+  - assigns idle vehicles to requests that can not be served by the central dispatcher, based on the idea of [[2]](https://github.com/Leot6/AMoD#references)
+
+The main function in `run.py` will simulate the system given input parameters from `Configures.py`. An example of the results of a typical simulation run could be found in folder `output`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
+
 
 
 ## Installation of OSRM (not used at now)
