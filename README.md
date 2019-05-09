@@ -23,6 +23,7 @@ Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper
 The main function in `run.py` will simulate the system given input parameters from `Configures.py`. An example of the results of a typical simulation run could be found in folder `output`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
 
 
+<!--
 
 ## Installation of OSRM (not used at now)
 
@@ -84,6 +85,8 @@ The installation is done. Run the OSRM engine and establish an routing server:
 ./build/osrm-routed greater-london-latest.osrm
 ```
 [General Options](https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md) gives syntax for all possible services that OSRM is providing. 
+
+-->
 
 
 ## References
