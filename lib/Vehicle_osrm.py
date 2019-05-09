@@ -1,5 +1,5 @@
 """
-defination of vehicles for the AMoD system
+defination of vehicles for the AMoD system (building route with OSRM, not used at now)
 """
 
 import copy

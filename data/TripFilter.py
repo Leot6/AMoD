@@ -3,10 +3,15 @@ filter out the trips starts/ends within Manhattan area
 """
 
 import time
+import pickle
 import pandas as pd
+import numpy as np
 import sys
-sys.path.append('..')
-from lib.Route import get_duration_from_osrm
+# from lib.Route import get_duration_from_osrm
+
+NOD_LOC = pd.read_csv('nodes.csv').values.tolist()
+with open('NOD_TTT.pickle', 'rb') as f:
+    NOD_TTT = pickle.load(f)
 
 
 def IsPtInPoly(lng, lat):
@@ -47,12 +52,26 @@ def IsPtInPoly(lng, lat):
 
 
 def LongerThan2Min(olng, olat, dlng, dlat):
-    d = get_duration_from_osrm(olng, olat, dlng, dlat)
+    onid = find_nearest_node(olng, olat)
+    dnid = find_nearest_node(dlng, dlat)
+    # d = get_duration_from_osrm(olng, olat, dlng, dlat)
+    d = NOD_TTT[onid - 1, dnid - 1]
     if d and d > 120:
         return True
     else:
         return False
 
+
+def find_nearest_node(lng, lat):
+    nearest_node_id = None
+    d = np.inf
+    for nid, nlng, nlat in NOD_LOC:
+        # d_ = get_euclidean_distance(lng, lat, nlng, nlat)
+        d_ = abs(lng-nlng) + abs(lat-nlat)
+        if d_ < d:
+            d = d_
+            nearest_node_id = nid
+    return int(nearest_node_id)
 
 
 if __name__ == '__main__':
@@ -130,11 +149,14 @@ if __name__ == '__main__':
     # print('number of trips in Manhattan:', df5.shape[0])
     # df5.to_csv('Manhattan-green-taxi-20150502.csv', index=False)
 
-    # # filter out the trips longer than 2 min
-    # df6 = pd.read_csv('Manhattan-yellow-taxi-20150502.csv')
+    # filter out the trips longer than 2 min
+    df6 = pd.read_csv('Manhattan-taxi-20160507.csv')
+    print('number of trips in that day:', df6.shape[0])
     # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
-    # print('number of trips longer than 2 min :', df6.shape[0])
-    # df6.to_csv('Manhattan-yellow-taxi-20160502-1.csv', index=False)
+    df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
+
+    print('number of trips longer than 2 min :', df6.shape[0])
+    df6.to_csv('Manhattan-taxi-20160507-1.csv', index=False)
 
     # # rename the column index
     # df7 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
@@ -143,17 +165,17 @@ if __name__ == '__main__':
     # df7.to_csv('Manhattan-green-taxi-20150502-1.csv', index=False)
 
     # merge green taxi and yellow taxi together
-    df8 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
-    df8['taxi'] = 'green'
-    print('number of green taxi trips:', df8.shape[0])
-    df9 = pd.read_csv('Manhattan-yellow-taxi-20150502.csv')
-    df9['taxi'] = 'yellow'
-    print('number of green taxi trips:', df9.shape[0])
-    frames = [df8, df9]
-    df10 = pd.concat(frames, ignore_index=True)
-    df10.sort_values('ptime', inplace=True)
-    print('number of all taxi trips:', df10.shape[0])
-    df10.to_csv('Manhattan-taxi-20150502.csv', index=False)
+    # df8 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
+    # df8['taxi'] = 'green'
+    # print('number of green taxi trips:', df8.shape[0])
+    # df9 = pd.read_csv('Manhattan-yellow-taxi-20150502.csv')
+    # df9['taxi'] = 'yellow'
+    # print('number of green taxi trips:', df9.shape[0])
+    # frames = [df8, df9]
+    # df10 = pd.concat(frames, ignore_index=True)
+    # df10.sort_values('ptime', inplace=True)
+    # print('number of all taxi trips:', df10.shape[0])
+    # df10.to_csv('Manhattan-taxi-20150502.csv', index=False)
 
     # df11 = pd.read_csv('Manhattan-taxi-20160507.csv')
     # print('number of all taxi trips in 20160507:', df11.shape[0])

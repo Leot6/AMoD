@@ -78,78 +78,36 @@ class Veh(object):
         dT = T - self.T
         if dT <= 0:
             return []
+        self.step_to_nid = None
+        self.t_to_nid = 0
 
         # # debug
         # print('total  time', round(self.Ts + self.t, 2))
         # print('remain time', round(self.t, 2))
         # print('t2nid before move', round(self.t_to_nid, 2))
 
-        if self.step_to_nid:
-            assert np.isclose(self.step_to_nid.t, self.t_to_nid)
-            flag = True
-            step0 = self.step_to_nid
-            step1 = self.route[0].steps[0]
-            if np.isclose(step0.t, step1.t) and np.isclose(step0.d, step1.d) and step0.nid == step1.nid:
-                assert np.isclose(step0.geo[0][0], step1.geo[0][0])
-                assert np.isclose(step0.geo[0][1], step1.geo[0][1])
-                assert np.isclose(step0.geo[1][0], step1.geo[1][0])
-                assert np.isclose(step0.geo[1][1], step1.geo[1][1])
-                self.step_to_nid = None
-                self.t_to_nid = 0
-                flag = False
-            if flag:
-
-                # if self.step_to_nid.t == dT:
-                #     print('over!!!!!!!!!!!!!!')
-
-                if self.step_to_nid.t < dT:
-                    step = self.step_to_nid
-                    dT -= step.t
-                    self.T += step.t
-                    if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
-                        self.Ts += step.t
-                        self.Ds += step.d
-                        self.Lt += step.t * self.n
-                        self.Ld += step.d * self.n
-                    self.jump_to_location(step.geo[1][0], step.geo[1][1], step.nid[1])
-                    self.t -= self.step_to_nid.t
-                    self.d -= self.step_to_nid.d
-                    self.step_to_nid = None
-                    self.t_to_nid = 0
-
-                    # # debug
-                    # print('total  time', round(self.Ts + self.t, 2))
-                    # print('remain time', round(self.t, 2))
-                    # print('t2nid', round(self.t_to_nid, 2))
-
-                else:
-                    step = self.step_to_nid
-                    pct = dT / step.t
-                    if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
-                        self.Ts += dT
-                        self.Ds += step.d * pct
-                        self.Lt += dT * self.n
-                        self.Ld += step.d * pct * self.n
-                    # find the exact location the vehicle stops and update the step
-                    step.geo[0][0] += pct * (step.geo[1][0] - step.geo[0][0])
-                    step.geo[0][1] += pct * (step.geo[1][1] - step.geo[0][1])
-                    assert step.nid[0] == step.nid[1]
-                    step.nid[0] = step.nid[1]
-                    self.t -= step.t * pct
-                    self.d -= step.d * pct
-                    self.t_to_nid = step.t * (1 - pct)
-                    self.step_to_nid.t -= step.t * pct
-                    self.step_to_nid.d -= step.d * pct
-                    self.jump_to_location(step.geo[0][0], step.geo[0][1], step.nid[0])
-                    self.T = T
-                    return []
+        # # debug
+        # if self.id == 91:
+        #     move_d = 0
+        #     print(' move 111', move_d)
 
         # done is a list of finished legs
         done = []
         while dT > 0 and len(self.route) > 0:
+
+            # # debug
+            # if self.id == 91:
+            #     print(' move 222')
+
             leg = self.route[0]
             # if the first leg could be finished by then
             if leg.t < dT:
+
+                # # debug
+                # if self.id == 91:
+                #     move_d -= leg.d
+                #     print(' move 333', move_d)
+
                 dT -= leg.t
                 self.T += leg.t
                 if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
@@ -161,18 +119,29 @@ class Veh(object):
                     self.Ld += leg.d * self.n if leg.rid != -1 else 0
                 self.jump_to_location(leg.tlng, leg.tlat, leg.tnid)
                 self.n += leg.pod
-                done.append((leg.rid, leg.pod, self.T))
-
-                # debug code starts
-                self.route_record.append((leg.rid, leg.pod))
-                # debug code ends
+                if leg.rid != -2:
+                    done.append((leg.rid, leg.pod, self.T))
+                    # debug code starts
+                    self.route_record.append((leg.rid, leg.pod))
+                    # debug code ends
 
                 self.pop_leg()
             else:
+
+                # # debug
+                # if self.id == 91:
+                #     print(' move 444')
+
                 while dT > 0 and len(leg.steps) > 0:
                     step = leg.steps[0]
                     # if the first leg could not be finished, but the first step of the leg could be finished by then
                     if step.t < dT:
+
+                        # # debug
+                        # if self.id == 91:
+                        #     move_d -= step.d
+                        #     print(' move 555', move_d, step.d)
+
                         dT -= step.t
                         self.T += step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
@@ -186,20 +155,32 @@ class Veh(object):
                         self.pop_step()
 
                         if len(leg.steps) == 0:
+
+                            # # debug
+                            # if self.id == 91:
+                            #     moove_d -= leg.d
+                            #     print(' move 666', move_d, step.d)
+
                             # corner case: leg.t extremely small, but still larger than dT
                             # this is due to the limited precision of the floating point numbers
-                            self.jump_to_location(leg.tlng, leg.tlat, leg.nid)
+                            self.jump_to_location(leg.tlng, leg.tlat, leg.tnid)
                             self.n += leg.pod
-                            done.append((leg.rid, leg.pod, self.T))
-
-                            # debug code starts
-                            self.route_record.append((leg.rid, leg.pod))
-                            # debug code ends
+                            if leg.rid != -2:
+                                done.append((leg.rid, leg.pod, self.T))
+                                # debug code starts
+                                self.route_record.append((leg.rid, leg.pod))
+                                # debug code ends
 
                             self.pop_leg()
                             break
                     # the vehicle has to stop somewhere within the step
                     else:
+
+                        # # debug
+                        # if self.id == 91:
+                        #     move_d -= dT / step.t * step.d
+                        #     print(' move 777', move_d, step.d)
+
                         pct = dT / step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
                             self.Ts += dT if leg.rid != -1 else 0
@@ -221,41 +202,8 @@ class Veh(object):
                         return done
         assert dT > 0 or np.isclose(dT, 0.0)
         assert self.T < T or np.isclose(self.T, T)
-
-        if len(self.route) != 0:
-            schedule = [(leg.rid, leg.pod) for leg in self.route]
-            print('')
-            print('error n!=0, veh', self.id, ', passengers', self.n)
-            print('route record', self.route_record)
-            print('schedule', schedule)
-            print('rid on board', self.onboard_rid, ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
-            print('')
-
         assert len(self.route) == 0
         assert self.n == 0
-
-        # debug code starts
-        if not np.isclose(self.d, 0.0):
-            schedule = [(leg.rid, leg.pod) for leg in self.route]
-            print('')
-            print('error self.d, veh', self.id, ', passengers', self.n, ', self.d', self.d)
-            print('route_record', self.route_record)
-            print('schedule', schedule)
-            print('rid on board', self.onboard_rid, self.onboard_reqs, ', new pick', self.new_pick_rid, ', new drop',
-                  self.new_drop_rid)
-            print('')
-        if not np.isclose(self.t, 0.0):
-            schedule = [(leg.rid, leg.pod) for leg in self.route]
-            print('')
-            print('error self.t, veh', self.id, ', passengers', self.n, ', self.t', self.t)
-            print('route_record', self.route_record)
-            print('schedule', schedule)
-            req = list(self.onboard_reqs)[0]
-            print('rid on board', self.onboard_rid, ', reqs id', req.id, ', reqs Ts', req.Ts,
-                  ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
-            print('')
-        # debug code ends
-
         assert np.isclose(self.d, 0.0)
         assert np.isclose(self.t, 0.0)
         self.T = T
@@ -311,13 +259,36 @@ class Veh(object):
             self.t = 0.0
             self.d = 0.0
             self.c = 0.0
+            self.step_to_nid = None
+            self.t_to_nid = 0
             return
         else:
+            if self.step_to_nid:
+                rid = -2
+                pod = 0
+                tlng = self.step_to_nid.geo[1][0]
+                tlat = self.step_to_nid.geo[1][1]
+                tnid = self.step_to_nid.nid[1]
+                ddl = self.T + self.step_to_nid.t
+                duration = self.step_to_nid.t
+                distance = self.step_to_nid.d
+                steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [[tlng, tlat], [tlng, tlat]], [tnid, tnid])]
+                leg = Leg(rid, pod, tlng, tlat, tnid, ddl, duration, distance, steps)
+                # the last step of a leg is always of length 2,
+                # consisting of 2 identical points as a flag of the end of the leg
+                assert len(leg.steps[-1].geo) == 2
+                assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
+                self.route.append(leg)
+                self.tlng = leg.steps[-1].geo[1][0]
+                self.tlat = leg.steps[-1].geo[1][1]
+                self.tnid = leg.steps[-1].nid[1]
+                self.d += leg.d
+                self.t += leg.t
             for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
                 self.add_leg_from_networkx(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
-            if self.step_to_nid:
-                self.d += self.step_to_nid.d
-                self.t += self.step_to_nid.t
+            # if self.step_to_nid:
+            #     self.d += self.step_to_nid.d
+            #     self.t += self.step_to_nid.t
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True

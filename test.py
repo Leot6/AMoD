@@ -124,17 +124,12 @@ if __name__ == "__main__":
     with open('./data/NET_NYC.pickle', 'rb') as f:
         NET_NYC = pickle.load(f)
 
-    aa = time.time()
-    leg = get_routing(olng, olat, dlng, dlat)
-    steps = [(s['duration'], s['distance'], s['geometry']['coordinates']) for s in leg['steps']]
-    print(leg['duration'], leg['distance'])
-    for step in steps:
-        print('  ', step)
-    print('aa running time:', (time.time() - aa))
-    print()
+    onid = 3525
+    dnid = 3683
 
     bb = time.time()
     duration, path = nx.bidirectional_dijkstra(NET_NYC, onid, dnid)
+    distance = 0.0
     path.append(path[-1])
     steps = []
     for i in range(len(path)-1):
@@ -145,16 +140,13 @@ if __name__ == "__main__":
         t = NOD_TTT[src - 1, sink - 1]
         d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
         steps.append((t, d, [src_geo, sink_geo], [src, sink]))
-
+        distance += d
     print(duration, path)
     print(sum([s[0] for s in steps]), sum([s[1] for s in steps]))
     assert np.isclose(duration, sum([s[0] for s in steps]))
-    for step in steps:
-        print('  ', step)
+    # for step in steps:
+    #     print('  ', step)
     print('bb running time:', (time.time() - bb))
-
-
-
 
 
 

@@ -16,7 +16,6 @@ from lib.VTtable import build_vt_table
 from lib.VTtableReplan import build_vt_table_replan
 from lib.AssignPlanner import ILP_assign
 from lib.Rebalancer import naive_rebalance
-from lib.ScheduleFinder import compute_schedule_cost
 from lib.Route import get_duration_from_table, get_routing_from_networkx
 
 
@@ -80,34 +79,64 @@ class Model(object):
             print('    -updating status of vehicles and requests...')
         self.upd_vehs_and_reqs_stat_to_time()
 
-        # debug code starts
-        print('   Veh route after move:')
-        for veh in self.vehs:
-            d_to_nid = 0
-            if veh.step_to_nid:
-                d_to_nid = veh.step_to_nid.d
-            # print('          veh:', veh.id, (veh.nid, round(veh.lng, 4), round(veh.lat, 4)),
-            #       ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ts+V.t:', round(veh.Ts + veh.t, 2),
-            #       ', Ds+V.d', round(veh.Ds + veh.d, 2), ', t2nid', round(veh.t_to_nid, 2), ', d2nid', round(d_to_nid, 2))
-            sche = [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]
-            trip = tuple({self.reqs[leg.rid] for leg in veh.route})
-            c = compute_schedule_cost(veh, trip, sche)
-            # print('              *route:', [(leg.rid, leg.pod) for leg in veh.route],
-            #       't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', c)
-            nids = [veh.nid] + [leg.tnid for leg in veh.route]
-            t = 0
-            d = 0
-            for i in range(len(nids) - 1):
-                duration1 = get_duration_from_table(nids[i], nids[i + 1])
-                duration, distance, steps = get_routing_from_networkx(nids[i], nids[i + 1])
-                assert np.isclose(duration1, duration)
-                t += duration
-                d += distance
-            # print('               travel time total', round(t, 2), round(t + veh.t_to_nid, 2))
-            # print('               travel dist total', round(d, 2), round(d + d_to_nid, 2))
-            assert np.isclose(t + veh.t_to_nid, veh.t)
-            assert np.isclose(d + d_to_nid, veh.d)
-        # debug code ends
+        # # debug code starts
+        # # print('   Veh route after move:')
+        # for veh in self.vehs:
+        # # if True:
+        # #     veh = self.vehs[91]
+        #     d_to_nid = 0
+        #     if veh.step_to_nid:
+        #         d_to_nid = veh.step_to_nid.d
+        #     # print('          veh:', veh.id, (veh.nid, round(veh.lng, 4), round(veh.lat, 4)),
+        #     #       ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ts+V.t:', round(veh.Ts + veh.t, 2),
+        #     #       ', Ds:', round(veh.Ds, 2), ', Ds+V.d', round(veh.Ds + veh.d, 2),
+        #     #       ', t2nid', round(veh.t_to_nid, 2), ', d2nid',round(d_to_nid, 2))
+        #     sche = [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]
+        #     trip = tuple({self.reqs[leg.rid] for leg in veh.route})
+        #     # print('              *route:', [(leg.rid, leg.pod, leg.tnid) for leg in veh.route],
+        #     #       't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', compute_schedule_cost(veh, trip, sche))
+        #     nids = [veh.nid] + [leg.tnid for leg in veh.route]
+        #     t = 0
+        #     d = 0
+        #     for i in range(len(nids) - 1):
+        #         duration1 = get_duration_from_table(nids[i], nids[i + 1])
+        #         duration, distance, steps = get_routing_from_networkx(nids[i], nids[i + 1])
+        #         assert np.isclose(duration1, duration)
+        #         t += duration
+        #         d += distance
+        #     # print('               travel time total', round(t, 2), round(t + veh.t_to_nid, 2))
+        #     # print('               travel dist total', round(d, 2), round(d + d_to_nid, 2))
+        #
+        #     # if not np.isclose(t + veh.t_to_nid, veh.t):
+        #     #     schedule = []
+        #     #     if len(veh.route) != 0:
+        #     #         schedule = [(leg.rid, leg.pod) for leg in veh.route]
+        #     #     print('')
+        #     #     print('error veh.t, veh', veh.id, ', passengers', veh.n)
+        #     #     print('route record', veh.route_record)
+        #     #     print('schedule', schedule)
+        #     #     print('rid on board', veh.onboard_rid, ', new pick', veh.new_pick_rid, ', new drop', veh.new_drop_rid)
+        #     #     print('  veh.t - t + t_to_nid', veh.t - (t + veh.t_to_nid))
+        #     #     if self.reqs[17142] in self.reqs_unassigned:
+        #     #         print('self.reqs[17142] becomes unassigned')
+        #     #     if self.reqs[17142] in self.reqs_picking:
+        #     #         print('self.reqs[17142] becomes picking')
+        #     #     if self.reqs[17142] in self.reqs_serving:
+        #     #         print('self.reqs[17142] becomes serving')
+        #     #     print('')
+        #     # if not np.isclose(d + d_to_nid, veh.d):
+        #     #     schedule = []
+        #     #     if len(veh.route) != 0:
+        #     #         schedule = [(leg.rid, leg.pod) for leg in veh.route]
+        #     #     print('error veh.d, veh', veh.id, ', passengers', veh.n)
+        #     #     print('route record', veh.route_record)
+        #     #     print('schedule', schedule)
+        #     #     print('rid on board', veh.onboard_rid, ', new pick', veh.new_pick_rid, ', new drop', veh.new_drop_rid)
+        #     #     print('  veh.d - d + d_to_nid', veh.d - (d + d_to_nid))
+        #     #     print()
+        #     assert np.isclose(t + veh.t_to_nid, veh.t)
+        #     # assert d + d_to_nid <= veh.d <= d + d_to_nid + 5
+        # # debug code ends
 
         if IS_DEBUG:
             print('    -loading new reqs ...')
@@ -165,22 +194,21 @@ class Model(object):
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
 
             # # debug code starts
-            # print('   Veh route after assign:')
+            # # print('   Veh route after assign:')
             # for veh in self.vehs:
             # # if True:
-            # #     veh = self.vehs[1071]
+            # #     veh = self.vehs[91]
             #     d_to_nid = 0
             #     if veh.step_to_nid:
             #         d_to_nid = veh.step_to_nid.d
-            #     print('          veh:', veh.id, (veh.nid, round(veh.lng, 4), round(veh.lat, 4)),
-            #           ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ts+V.t:', round(veh.Ts + veh.t, 2),
-            #           ', Ds+V.d', round(veh.Ds + veh.d, 2), ', t2nid', round(veh.t_to_nid, 2), ', d2nid',
-            #           round(d_to_nid, 2))
+            #     # print('          veh:', veh.id, (veh.nid, round(veh.lng, 4), round(veh.lat, 4)),
+            #     #       ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ts+V.t:', round(veh.Ts + veh.t, 2),
+            #     #       ', Ds:', round(veh.Ds, 2), ', Ds+V.d', round(veh.Ds + veh.d, 2),
+            #     #       ', t2nid', round(veh.t_to_nid, 2), ', d2nid', round(d_to_nid, 2))
             #     sche = [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]
             #     trip = tuple({self.reqs[leg.rid] for leg in veh.route})
-            #     c = compute_schedule_cost(veh, trip, sche)
-            #     print('              *route:', [(leg.rid, leg.pod) for leg in veh.route],
-            #           't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', c)
+            #     # print('              *route:', [(leg.rid, leg.pod, leg.tnid) for leg in veh.route],
+            #     #       't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', compute_schedule_cost(veh, trip, sche))
             #     nids = [veh.nid] + [leg.tnid for leg in veh.route]
             #     t = 0
             #     d = 0
@@ -190,10 +218,39 @@ class Model(object):
             #         assert np.isclose(duration1, duration)
             #         t += duration
             #         d += distance
-            #     print('               travel time total', round(t, 2), round(t + veh.t_to_nid, 2))
-            #     print('               travel dist total', round(d, 2), round(d + d_to_nid, 2))
+            #     # print('               travel time total', round(t, 2), round(t + veh.t_to_nid, 2))
+            #     # print('               travel dist total', round(d, 2), round(d + d_to_nid, 2))
+            #     if not np.isclose(t + veh.t_to_nid, veh.t):
+            #         schedule = []
+            #         if len(veh.route) != 0:
+            #             schedule = [(leg.rid, leg.pod) for leg in veh.route]
+            #         print('')
+            #         print('error veh.t, veh', veh.id, ', passengers', veh.n)
+            #         print('route record', veh.route_record)
+            #         print('schedule', schedule)
+            #         print('rid on board', veh.onboard_rid, ', new pick',
+            #               veh.new_pick_rid, ', new drop', veh.new_drop_rid)
+            #         print('  veh.t - t + t_to_nid', veh.t - (t+veh.t_to_nid))
+            #         if self.reqs[17142] in self.reqs_unassigned:
+            #             print('self.reqs[17142] becomes unassigned')
+            #         if self.reqs[17142] in self.reqs_picking:
+            #             print('self.reqs[17142] becomes picking')
+            #         if self.reqs[17142] in self.reqs_serving:
+            #             print('self.reqs[17142] becomes serving')
+            #         print('')
+            #     if not np.isclose(d + d_to_nid, veh.d):
+            #         schedule = []
+            #         if len(veh.route) != 0:
+            #             schedule = [(leg.rid, leg.pod) for leg in veh.route]
+            #         print('error veh.d, veh', veh.id, ', passengers', veh.n)
+            #         print('route record', veh.route_record)
+            #         print('schedule', schedule)
+            #         print('rid on board', veh.onboard_rid, ', new pick',
+            #               veh.new_pick_rid, ', new drop', veh.new_drop_rid)
+            #         print('  veh.d - d + d_to_nid', veh.d - (d + d_to_nid))
+            #         print()
             #     assert np.isclose(t+veh.t_to_nid, veh.t)
-            #     assert np.isclose(d+d_to_nid, veh.d)
+            #     # assert d + d_to_nid <= veh.d <= d + d_to_nid + 5
             # # debug code ends
 
         if np.isclose(T % INT_REBL, 0):
@@ -289,6 +346,8 @@ class Model(object):
         reqs_on_vehs = []
         for veh in self.vehs:
             trip = {leg.rid for leg in veh.route}
+            if -2 in trip:
+                trip.remove(-2)
             reqs_on_vehs.extend(list(trip))
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
@@ -315,6 +374,8 @@ class Model(object):
         reqs_on_vehs = []
         for veh in self.vehs:
             trip = {leg.rid for leg in veh.route}
+            if -2 in trip:
+                trip.remove(-2)
             reqs_on_vehs.extend(list(trip))
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
