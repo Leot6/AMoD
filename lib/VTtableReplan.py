@@ -245,49 +245,58 @@ def get_old_trips(veh, rid_old, k):
                         assert sum([schedule[i][1] for i in range(l_new_both)]) == l_new_pick - 1 * l_new_drop
                         del schedule[0:l_new_both]
 
-                # # codes to fix bugs that caused by using travel time table (starts)
-                # # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
-                # #     if travel times are computed from travel time table (which is not accurate))
-                # trip_id_ = {req.id for req in trip_}
-                # trip_sche_ = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
-                # if trip_sche_ == veh_route:
-                #     flag = True
-                #     c = compute_schedule_cost(veh, trip_, schedule)
-                #
-                #     # # debug
-                #     # if veh.id == veh_id:
-                #     #     print('veh', veh.id, ' add route (same as route)')
-                #
-                # elif trip_id_ < veh_rid_enroute:
-                #     veh_partial_route = []
-                #     for (rid, pod) in veh_route:
-                #         if rid in trip_id_.union(set(veh.onboard_rid)):
-                #             veh_partial_route.append((rid, pod))
-                #
-                #     # # debug
-                #     # if veh.id == veh_id:
-                #     #     print('trip_sche_', trip_sche_)
-                #     #     print('veh_partial_route', veh_partial_route)
-                #
-                #     if trip_sche_ == veh_partial_route:
-                #         flag = True
-                #         c = compute_schedule_cost(veh, trip_, schedule)
-                #
-                #         # # debug
-                #         # if veh.id == veh_id:
-                #         #     print('veh', veh.id, ' add route (partial route)')
-                #
-                #     else:
-                #         flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
-                #
-                #         # # debug
-                #         # if veh.id == veh_id:
-                #         #     print('veh', veh.id, ' go to test (partial route)')
-                # else:
-                #     flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
-                # # codes to fix bugs that caused by using travel time table (ends)
+                # codes to fix bugs that caused by using travel time table (starts)
+                # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
+                #     if travel times are computed from travel time table (which is not accurate))
+                trip_id_ = {req.id for req in trip_}
+                trip_sche_ = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
+                if trip_sche_ == veh_route:
+                    flag = True
+                    c = compute_schedule_cost(veh, trip_, schedule)
 
-                flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
+                    # # debug
+                    # if veh.id == veh_id:
+                    #     print('veh', veh.id, ' add route (same as route)')
+
+                elif trip_id_ < veh_rid_enroute:
+                    veh_partial_route = []
+                    for (rid, pod) in veh_route:
+                        if rid in trip_id_.union(set(veh.onboard_rid)):
+                            veh_partial_route.append((rid, pod))
+
+                    # # debug
+                    # if veh.id == veh_id:
+                    #     print('trip_sche_', trip_sche_)
+                    #     print('veh_partial_route', veh_partial_route)
+
+                    if trip_sche_ == veh_partial_route:
+                        flag = True
+                        c = compute_schedule_cost(veh, trip_, schedule)
+
+                        # # debug
+                        # if veh.id == veh_id:
+                        #     print('veh', veh.id, ' add route (partial route)')
+
+                    else:
+                        flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
+
+                        # # debug
+                        # if veh.id == veh_id:
+                        #     print('veh', veh.id, ' go to test (partial route)')
+                else:
+                    flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
+                # codes to fix bugs that caused by using travel time table (ends)
+
+                # flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
+
+                # debug:
+                if veh.id == 91:
+                    if trip_id == {17142}:
+                        if flag:
+                            print('veh 91 and reqs 17142 added')
+                        else:
+                            print('veh 91 and reqs 17142 failed')
+
                 if flag:
 
                     # # debug

@@ -84,7 +84,8 @@ def print_results(model, runtime):
     print('    + served rate: %.2f%% (%d/%d), wait time: %.1f s' % (served_rate, count_served, count_reqs, wait_time))
     print('    + in-vehicle travel time: %.2f s, in-vehicle travel delay: %.2f s' % (in_veh_time, in_veh_delay))
     print('    + detour factor: %.2f' % detour_factor)
-    print('    + total service rate: %.2f%%' % (100-(len(model.reqs_unassigned)+len(model.rejs))/model.N*100))
+    print('    + total service rate: %.2f%%' % ((count_served+len(model.reqs_serving)+len(model.reqs_picking))/count_reqs*100))
+    # print('    + total service rate: %.2f%%' % (100-(len(model.reqs_unassigned)+len(model.rejs))/model.N*100))
     print('  - vehicles:')
     print('    + vehicle service distance travelled: %.1f m' % veh_service_dist)
     print('    + vehicle service time travelled: %.1f s' % veh_service_time)
@@ -148,7 +149,7 @@ def anim(frames):
                         r2x.extend(geo[0])
                         r2y.extend(geo[1])
                 count += leg.pod
-            if i == int(FLEET_SIZE * 4 / 10) or i == int(FLEET_SIZE * 3 / 10) or i == int(FLEET_SIZE * 5 / 10):
+            if i == 1 or i == int(FLEET_SIZE * 2 / 10) or i == int(FLEET_SIZE * 3 / 10):
                 routes1[i].set_data(r1x, r1y)
                 routes2[i].set_data(r2x, r2y)
                 routes3[i].set_data(r3x, r3y)
@@ -173,7 +174,10 @@ def anim(frames):
                         geo = np.transpose(step.geo)
                         r3x.extend(geo[0])
                         r3y.extend(geo[1])
-                    assert len(frames[n][i].route) == 1
+                    # if len(frames[n][i].route) != 1:
+                    #     print(len(frames[n][i].route))
+                    #     print((leg.rid, leg.pod, leg.tnid) for leg in frames[n][i].route)
+                    # assert len(frames[n][i].route) == 1
                     continue
                 if count == 0:
                     for step in leg.steps:
@@ -188,10 +192,13 @@ def anim(frames):
                 # count += leg.pod
                 count += 1
 
-            if i == int(FLEET_SIZE * 4 / 10) or i == int(FLEET_SIZE * 3 / 10) or i == int(FLEET_SIZE * 5 / 10):
+            if i == 1 or i == int(FLEET_SIZE * 2 / 10) or i == int(FLEET_SIZE * 3 / 10):
                 routes1[i].set_data(r1x, r1y)
                 routes2[i].set_data(r2x, r2y)
                 routes3[i].set_data(r3x, r3y)
+            # routes1[i].set_data(r1x, r1y)
+            # routes2[i].set_data(r2x, r2y)
+            # routes3[i].set_data(r3x, r3y)
 
         return vehs, routes1, routes2, routes3
 
