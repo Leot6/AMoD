@@ -137,6 +137,7 @@ def get_duration_from_table(onid, dnid):
 # get the best route from origin to destination
 def get_routing_from_networkx(onid, dnid):
     duration, path = nx.bidirectional_dijkstra(NET_NYC, onid, dnid)
+    duration = duration * COEF_TRAVEL
     distance = 0.0
     path.append(path[-1])
     steps = []
@@ -146,17 +147,10 @@ def get_routing_from_networkx(onid, dnid):
         src_geo = [NOD_LOC[src - 1][1], NOD_LOC[src - 1][2]]
         sink_geo = [NOD_LOC[sink - 1][1], NOD_LOC[sink - 1][2]]
         d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
-        t = NOD_TTT[src - 1, sink - 1]
+        t = NOD_TTT[src - 1, sink - 1] * COEF_TRAVEL
         steps.append((t, d, [src_geo, sink_geo], [src, sink]))
         distance += d
     assert np.isclose(duration, sum([s[0] for s in steps]))
-
-    # debug
-    # if True:
-    #     print(duration, len(path), (onid, dnid))
-        # for step in steps:
-        #     print('  ', step)
-
     return duration, distance, steps
 
 

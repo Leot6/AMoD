@@ -5,29 +5,37 @@ import pickle
 import pandas as pd
 from dateutil.parser import parse
 
-MODEE = 'VT'
-# MODEE = 'VT_replan'
+# ride-sharing logic mode
+# MODEE = 'VT'
+MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
+
+TRAVEL_ENGINE = 'networkx'
+# TRAVEL_ENGINE = 'OSRM'
 
 # taxi requests data, station loctions, graph nodes and travel time table
 STN_LOC = pd.read_csv('./data/stations-630.csv')
 NOD_LOC = pd.read_csv('./data/nodes.csv').values.tolist()
 # REQ_DATA = pd.read_csv('./data/Manhattan-taxi-20160507.csv')
 with open('./data/REQ_DATA.pickle', 'rb') as f:
-        REQ_DATA = pickle.load(f)
-# NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
-with open('./data/NOD_TTT.pickle', 'rb') as f:
-    NOD_TTT = pickle.load(f)
+    REQ_DATA = pickle.load(f)
+if TRAVEL_ENGINE == 'OSRM':
+    with open('./data/NOD_TTT_OSRM.pickle', 'rb') as f:
+        NOD_TTT = pickle.load(f)
+else:
+    # NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
+    with open('./data/NOD_TTT.pickle', 'rb') as f:
+        NOD_TTT = pickle.load(f)
 with open('./data/NET_NYC.pickle', 'rb') as f:
     NET_NYC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1
+DMD_VOL = 0.05
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 3000
+FLEET_SIZE = 150
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
@@ -41,25 +49,25 @@ INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = INT_ASSIGN * 40
-T_STUDY = INT_ASSIGN + INT_ASSIGN * 200
-T_COOL_DOWN = INT_ASSIGN * 0
+T_WARM_UP = 60 * 0
+T_STUDY = 60 * 100
+T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
 # MET_ASSIGN = 'greedy'
 MET_ASSIGN = 'ILP'
-MET_REBL = 'naive'
-# MET_REBL = 'None'
+# MET_REBL = 'naive'
+MET_REBL = 'None'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
-CUTOFF_RTV = 1000
+CUTOFF_RTV = 3000
 CUTOFF_ILP = 15
 
 # if true, activate the animation / analysis
-IS_ANIMATION = True
+IS_ANIMATION = False
 IS_ANALYSIS = True
-IS_DEBUG = False
+IS_DEBUG = True
 
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation
 COEF_WAIT = 1.0

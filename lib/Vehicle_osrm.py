@@ -46,6 +46,8 @@ class Veh(object):
         self.lng = lng
         self.lat = lat
         self.nid = find_nearest_node(lng, lat)
+        self.step_to_nid = None
+        self.t_to_nid = 0
         self.tlng = self.lng
         self.tlat = self.lat
         self.tnid = self.nid

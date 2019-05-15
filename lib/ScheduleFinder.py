@@ -5,7 +5,7 @@ compute all feasible schedules for given vehicle v and trip T.
 import copy
 import time
 import numpy as np
-from lib.Configure import COEF_WAIT, COEF_INVEH
+from lib.Configure import COEF_WAIT, COEF_INVEH, TRAVEL_ENGINE
 from lib.Route import get_duration, get_duration_from_osrm
 
 
@@ -19,6 +19,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
     viol = None
 
     req = tuple(set(trip) - set(_trip))[0]
+    assert len(trip) - len(_trip) == 1
 
     for schedule in _schedules:
         # # check if the req has same origin-destination as any other req in the schedule
@@ -188,12 +189,11 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
                 if rid == req.id:
                     c_delay += round(T + t - (req.Tr + req.Ts))
 
-                    # # debug
-                    # if rid == 95 and round(T + t - (req.Tr + req.Ts)) < 0:
-                    #     print(req.id, round(T + t - (req.Tr + req.Ts)))
-                    #     print(veh.id)
-
-                    assert round(T + t - (req.Tr + req.Ts)) >= 0
+                    if TRAVEL_ENGINE == 'OSRM':
+                        if round(T + t - (req.Tr + req.Ts)) < 0:
+                            c_delay -= round(T + t - (req.Tr + req.Ts))
+                    else:
+                        assert round(T + t - (req.Tr + req.Ts)) >= 0
                     break
         lng = tlng
         lat = tlat
@@ -203,6 +203,7 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     # return True, round(t*8/c_inveh), -1
     # return True, c_wait+c_inveh, -1
     # return True, c_wait, -1
+    # return True, c_delay, -1
 
 
 # compute the schedule cost using osrm
@@ -219,11 +220,6 @@ def compute_schedule_cost(veh, trip, schedule):
     reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
         dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
-
-        # dt = get_duration_from_osrm(lng, lat, tlng, tlat)
-        # if not dt:
-        #     dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
-
         t += dt
         c_inveh += n * dt * COEF_INVEH
         n += pod
@@ -232,7 +228,11 @@ def compute_schedule_cost(veh, trip, schedule):
             for req in reqs_in_schedule:
                 if rid == req.id:
                     c_delay += round(T + t - (req.Tr + req.Ts))
-                    assert round(T + t - (req.Tr + req.Ts)) >= 0
+                    if TRAVEL_ENGINE == 'OSRM':
+                        if round(T + t - (req.Tr + req.Ts)) < 0:
+                            c_delay -= round(T + t - (req.Tr + req.Ts))
+                    else:
+                        assert round(T + t - (req.Tr + req.Ts)) >= 0
         lng = tlng
         lat = tlat
         nid = tnid

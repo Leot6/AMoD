@@ -9,13 +9,17 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
 from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, DMD_SST, \
-    INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG
-from lib.Vehicle import Veh
+    INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, TRAVEL_ENGINE
 from lib.Request import Req
 from lib.VTtable import build_vt_table
 from lib.VTtableReplan import build_vt_table_replan
 from lib.AssignPlanner import ILP_assign
 from lib.Rebalancer import naive_rebalance
+if TRAVEL_ENGINE == 'OSRM':
+    from lib.Vehicle_osrm import Veh
+else:
+    from lib.Vehicle import Veh
+
 from lib.Route import get_duration_from_table, get_routing_from_networkx
 
 
@@ -65,12 +69,8 @@ class Model(object):
         self.reqs_serving = set()
         self.reqs_picking = set()
         self.reqs_unassigned = set()
-        self.rejs = []
+        self.rejs = set()
         self.rid_assigned_last = set()
-
-        # debug
-        self.rid_assigned = set()
-        self.rid_unassigned = set()
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
@@ -259,9 +259,9 @@ class Model(object):
                     print('    -start rebalancing...')
                 R_id_rebl, V_id_rebl, schedule_rebl = naive_rebalance(self.vehs, self.reqs_unassigned)
                 self.exec_rebl(R_id_rebl, V_id_rebl, schedule_rebl)
-            # else:
-            #     self.rejs.extend(list(self.reqs_unassigned))
-            #     self.reqs_unassigned.clear()
+            else:
+                self.rejs.update(list(self.reqs_unassigned))
+                self.reqs_unassigned.clear()
 
     # update vehs and reqs status to their current positions at time T
     def upd_vehs_and_reqs_stat_to_time(self):
@@ -366,9 +366,9 @@ class Model(object):
             reqs_rejected = set()
             for req in self.reqs_unassigned:
                 if req.Clp >= self.T:
-                    self.rejs.append(req)
                     reqs_rejected.add(req)
             self.reqs_unassigned.difference_update(reqs_rejected)
+            self.rejs.update(reqs_rejected)
 
         # debug code starts
         reqs_on_vehs = []

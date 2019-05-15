@@ -74,6 +74,12 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
                 travel_time_table.iloc[o - 1, d - 1] = round(duration, 2)
 
 
+def store_map_as_pickle_file():
+    G = load_Manhattan_graph()
+    with open('map.pickle', 'wb') as f:
+        pickle.dump(G, f)
+
+
 if __name__ == '__main__':
     # # for travel time table
     # nodes = pd.read_csv('nodes.csv')
@@ -99,11 +105,8 @@ if __name__ == '__main__':
     # travel_time_table = pd.read_csv('time-table-sat.csv', index_col=0)
     # print(travel_time_table.iloc[5:10, 1800:2000])
 
-    # # for routing machine
-    # G = load_Manhattan_graph()
-    # with open('map.pickle', 'wb') as f:
-    #     pickle.dump(G, f)
-
+    # for routing server
+    store_map_as_pickle_file()
     with open('map.pickle', 'rb') as f:
         G = pickle.load(f)
 

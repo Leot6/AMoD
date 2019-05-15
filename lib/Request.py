@@ -3,7 +3,7 @@ defination of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
+from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR, TRAVEL_ENGINE
 from lib.Route import find_nearest_node, get_duration_from_osrm, get_duration
 
 
@@ -37,8 +37,10 @@ class Req(object):
         self.dlat = dlat
         self.onid = find_nearest_node(olng, olat)
         self.dnid = find_nearest_node(dlng, dlat)
-        # self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
-        self.Ts = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
+        if TRAVEL_ENGINE == 'OSRM':
+            self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
+        else:
+            self.Ts = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
         self.Cep = Tr
         self.Clp = Tr + MAX_WAIT if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * (MAX_DETOUR -1) / 2
         # self.Cld = None
