@@ -30,12 +30,12 @@ with open('./data/NET_NYC.pickle', 'rb') as f:
     NET_NYC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 0.05
+DMD_VOL = 0.1
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 150
+FLEET_SIZE = 300
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
@@ -49,25 +49,24 @@ INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 0
-T_STUDY = 60 * 100
+T_WARM_UP = 60 * 10
+T_STUDY = 60 * 20
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
-# MET_ASSIGN = 'greedy'
 MET_ASSIGN = 'ILP'
-# MET_REBL = 'naive'
-MET_REBL = 'None'
+MET_REBL = 'naive'
+# MET_REBL = 'None'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
-CUTOFF_RTV = 3000
+CUTOFF_RTV = 600
 CUTOFF_ILP = 15
 
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
-IS_DEBUG = True
+IS_DEBUG = False
 
 # coefficients for wait time, in-vehicle travel time in the cost function, and travel time estimation
 COEF_WAIT = 1.0

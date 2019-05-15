@@ -42,9 +42,12 @@ class Req(object):
         else:
             self.Ts = get_duration(olng, olat, dlng, dlat, self.onid, self.dnid)
         self.Cep = Tr
-        self.Clp = Tr + MAX_WAIT if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * (MAX_DETOUR -1) / 2
-        # self.Cld = None
-        self.Cld = Tr + self.Ts + MAX_DELAY if self.Ts * (MAX_DETOUR-1) > MAX_DELAY else Tr + self.Ts * MAX_DETOUR
+        if self.Ts * (MAX_DETOUR - 1) > MAX_DELAY:
+            self.Clp = Tr + MAX_WAIT
+            self.Cld = Tr + self.Ts + MAX_DELAY
+        else:
+            self.Clp = Tr + self.Ts * (MAX_DETOUR - 1) * (MAX_WAIT / MAX_DELAY)
+            self.Cld = Tr + self.Ts * MAX_DETOUR
         self.Tp = -1.0
         self.Td = -1.0
         self.D = 0.0
