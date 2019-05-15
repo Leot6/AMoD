@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, T_COOL_DOWN, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, \
+from lib.Configure import T_WARM_UP, T_STUDY, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, RIDESHARING_SIZE, \
     MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE
 
 
@@ -75,7 +75,7 @@ def print_results(model, runtime):
     print('simulation ends at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
     print('system settings:')
     print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
-    print('  - fleet size: %d; capacity: %d; demand rate: %.2f%%' % (model.V, model.K, model.D*100))
+    print('  - fleet size: %d; capacity: %d; ride-sharing size: %d' % (model.V, model.K, RIDESHARING_SIZE))
     print('  - waiting time: %d; max detour: %.1f' % (MAX_WAIT, MAX_DETOUR))
     print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
