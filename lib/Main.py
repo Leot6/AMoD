@@ -12,7 +12,6 @@ from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REB
     INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, TRAVEL_ENGINE
 from lib.Request import Req
 from lib.VTtable import build_vt_table
-from lib.VTtableReplan import build_vt_table_replan
 from lib.AssignPlanner import ILP_assign
 from lib.Rebalancer import naive_rebalance
 if TRAVEL_ENGINE == 'OSRM':
@@ -154,24 +153,23 @@ class Model(object):
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
+            if MODEE == 'VT':
+                reqs_old = []
+                reqs_new = self.queue
+            else:  # 'VT_replan'
+                reqs_old = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id)
+                reqs_new = self.queue
+
             if IS_DEBUG:
                 print('    -building VT-table ...')
-            if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
-                reqs_old = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id)
-                veh_trip_edges = build_vt_table_replan(self.vehs, self.queue, reqs_old, T)
-            if MODEE == 'VT':
-                veh_trip_edges = build_vt_table(self.vehs, self.queue, T)
+            veh_trip_edges = build_vt_table(self.vehs, reqs_new, reqs_old, T)
 
             if self.assign == 'ILP':
                 if IS_DEBUG:
                     print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
                 # R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
-                if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
-                    R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + self.queue,
-                                                                                 self.rid_assigned_last)
-                if MODEE == 'VT':
-                    R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, self.queue,
-                                                                                 self.rid_assigned_last)
+                R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + reqs_new,
+                                                                             self.rid_assigned_last)
                 # assert len(R_id_assigned1) <= len(R_id_assigned)
                 # if len(R_id_assigned1) > len(R_id_assigned):
                 #     R_id_assigned = R_id_assigned1
@@ -259,9 +257,14 @@ class Model(object):
                     print('    -start rebalancing...')
                 R_id_rebl, V_id_rebl, schedule_rebl = naive_rebalance(self.vehs, self.reqs_unassigned)
                 self.exec_rebl(R_id_rebl, V_id_rebl, schedule_rebl)
-            else:
-                self.rejs.update(list(self.reqs_unassigned))
-                self.reqs_unassigned.clear()
+
+        if len(self.reqs_unassigned) > 0:
+            reqs_rejected = set()
+            for req in self.reqs_unassigned:
+                if req.Clp >= self.T:
+                    reqs_rejected.add(req)
+            self.reqs_unassigned.difference_update(reqs_rejected)
+            self.rejs.update(reqs_rejected)
 
     # update vehs and reqs status to their current positions at time T
     def upd_vehs_and_reqs_stat_to_time(self):
@@ -307,6 +310,18 @@ class Model(object):
 
     # execute the assignment from AssignPlanner and build (update) route for vehicles
     def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
+        if MODEE == 'VT':
+            R_assigned_failed = set()
+            for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
+                rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
+                if rid_fail:
+                    R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
+            R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
+            self.reqs_picking.update(R_assigned)
+            R_unassigned = set(self.queue) - R_assigned
+            self.reqs_unassigned.update(R_unassigned)
+            self.queue.clear()
+
         if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
             reqs_pool = list(self.reqs_picking) + list(self.reqs_unassigned) + self.queue
             assert len(reqs_pool) == len(set(reqs_pool))
@@ -330,18 +345,6 @@ class Model(object):
             self.reqs_unassigned = set(reqs_pool) - R_assigned
             self.rid_assigned_last = set(R_id_assigned) - {req.id for req in R_assigned_failed}
 
-        if MODEE == 'VT':
-            R_assigned_failed = set()
-            for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-                rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
-                if rid_fail:
-                    R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
-            R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
-            self.reqs_picking.update(R_assigned)
-            R_unassigned = set(self.queue) - R_assigned
-            self.reqs_unassigned.update(R_unassigned)
-            self.queue.clear()
-
         # debug code starts
         reqs_on_vehs = []
         for veh in self.vehs:
@@ -362,13 +365,6 @@ class Model(object):
         R_rebl = {self.reqs[rid] for rid in R_id_rebl}
         self.reqs_picking.update(R_rebl)
         self.reqs_unassigned.difference_update(R_rebl)
-        if len(self.reqs_unassigned) > 0:
-            reqs_rejected = set()
-            for req in self.reqs_unassigned:
-                if req.Clp >= self.T:
-                    reqs_rejected.add(req)
-            self.reqs_unassigned.difference_update(reqs_rejected)
-            self.rejs.update(reqs_rejected)
 
         # debug code starts
         reqs_on_vehs = []
