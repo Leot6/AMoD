@@ -77,7 +77,7 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
                 schedules_k.append(schedules)
 
                 # debug code
-                assert {req.id for req in trip} < {req.id for req in reqs_new}
+                assert {req.id for req in trip} <= {req.id for req in reqs_new}
 
                 # if veh.id == 3 or veh.id == 4:
                 #     print('veh', veh.id, ': size 1 add', req.id, 'schedules_num', len(schedules))

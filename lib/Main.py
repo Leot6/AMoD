@@ -76,7 +76,10 @@ class Model(object):
         self.T = T
         if IS_DEBUG:
             print('    -updating status of vehicles and requests...')
+        a1 = time.time()
         self.upd_vehs_and_reqs_stat_to_time()
+        if IS_DEBUG:
+            print('        a1 running time:', round((time.time() - a1), 2))
 
         # # debug code starts
         # # print('   Veh route after move:')
@@ -139,7 +142,10 @@ class Model(object):
 
         if IS_DEBUG:
             print('    -loading new reqs ...')
+        a2 = time.time()
         self.gen_reqs_to_time()
+        if IS_DEBUG:
+            print('        a2 running time:', round((time.time() - a2), 2))
 
         # debug code starts
         if IS_DEBUG:
@@ -162,14 +168,20 @@ class Model(object):
 
             if IS_DEBUG:
                 print('    -building VT-table ...')
+            a3 = time.time()
             veh_trip_edges = build_vt_table(self.vehs, reqs_new, reqs_old, T)
+            if IS_DEBUG:
+                print('        a3 running time:', round((time.time() - a3), 2))
 
             if self.assign == 'ILP':
                 if IS_DEBUG:
                     print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
                 # R_id_assigned1, V_id_assigned1, schedule_assigned1 = greedy_assign(veh_trip_edges)
+                a4 = time.time()
                 R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + reqs_new,
                                                                              self.rid_assigned_last)
+                if IS_DEBUG:
+                    print('        a4 running time:', round((time.time() - a4), 2))
                 # assert len(R_id_assigned1) <= len(R_id_assigned)
                 # if len(R_id_assigned1) > len(R_id_assigned):
                 #     R_id_assigned = R_id_assigned1
@@ -178,18 +190,10 @@ class Model(object):
 
             if IS_DEBUG:
                 print('    -execute the assignments...')
-
-            # # debug
-            # print()
-            # noi = 0  # number of idle vehicles
-            # for veh in self.vehs:
-            #     if veh.idle:
-            #         noi += 1
-            # print(' - T = %.0f, reqs in queue: %d, reqs in pool: %d, idle vehs: %d / %d'
-            #       % (self.T, len(self.queue), len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned), noi,
-            #          self.V))
-
+            a5 = time.time()
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
+            if IS_DEBUG:
+                print('        a5 running time:', round((time.time() - a5), 2))
 
             # # debug code starts
             # # print('   Veh route after assign:')
@@ -255,8 +259,11 @@ class Model(object):
             if self.rebl == 'naive':
                 if IS_DEBUG:
                     print('    -start rebalancing...')
+                a6 = time.time()
                 R_id_rebl, V_id_rebl, schedule_rebl = naive_rebalance(self.vehs, self.reqs_unassigned)
                 self.exec_rebl(R_id_rebl, V_id_rebl, schedule_rebl)
+                if IS_DEBUG:
+                    print('        a6 running time:', round((time.time() - a6), 2))
 
         if len(self.reqs_unassigned) > 0:
             reqs_rejected = set()

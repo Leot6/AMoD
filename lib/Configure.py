@@ -6,8 +6,8 @@ import pandas as pd
 from dateutil.parser import parse
 
 # ride-sharing logic mode
-# MODEE = 'VT'
-MODEE = 'VT_replan'
+MODEE = 'VT'
+# MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
 
 TRAVEL_ENGINE = 'networkx'
@@ -30,27 +30,27 @@ with open('./data/NET_NYC.pickle', 'rb') as f:
     NET_NYC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 0.1
+DMD_VOL = 1
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 300
+FLEET_SIZE = 2000
 VEH_CAPACITY = 4
-RIDESHARING_SIZE = 4
+RIDESHARING_SIZE = 1
 
-# maximum wait time window and maximum total delay
+# maximum wait time window, maximum total delay and maximum in-vehicle detour
 MAX_WAIT = 60 * 5
 MAX_DELAY = MAX_WAIT * 2
-MAX_DETOUR = 2
+MAX_DETOUR = 1.3
 
 # intervals for vehicle-request assignment and rebalancing
 INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 10
-T_STUDY = 60 * 20
+T_WARM_UP = 60 * 30
+T_STUDY = 60 * 1400
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 

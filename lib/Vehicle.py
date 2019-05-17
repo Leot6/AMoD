@@ -22,6 +22,8 @@ class Veh(object):
         lat: current lngitude
         lng: current longtitude
         nid: current nearest node id in network
+        step_to_nid: step from current location to the nearest node in network
+        t_to_nid = 0: travel time from current location to the nearest node in network
         tlat: target (end of route) lngitude
         tlng: target (end of route) longtitude
         K: capacity
@@ -36,6 +38,11 @@ class Veh(object):
         Tr: accumulated rebalancing time traveled
         Lt: accumulated load, weighed by service time
         Ld: accumulated load, weighed by service distance
+        VTtable = stored feasible trips from last interval plan
+        onboard_reqs = requests currently on board
+        onboard_rid = id of requests currently on board
+        new_pick_rid = id of requests picked up in this interval
+        new_drop_rid = id of requests dropped off in this interval
     """
 
     def __init__(self, id, lng, lat, K=4, T=0.0):
