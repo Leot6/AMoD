@@ -37,8 +37,8 @@ def greedy_assign(veh_trip_edges):
         # debug
         cost_a += cost
 
-    if IS_DEBUG:
-        print('        greedy assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+    # if IS_DEBUG:
+    #     print('        greedy assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
     return R_id_assigned, V_id_assigned, schedule_assigned
 
 
@@ -210,10 +210,10 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
         #             print(i, assign_idx[i], round(assign_idx[i]))
         # debug code ends
 
-        if IS_DEBUG:
-            print('        ILP assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
-            # print('number of reqs', len(reqs_pool), ', number of vehs', len(V_id), ', number of edges', len(veh_trip_edges))
-            print('        ILP running time:', (time.time() - ss))
+        # if IS_DEBUG:
+        #     print('        ILP assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
+        #     # print('number of reqs', len(reqs_pool), ', number of vehs', len(V_id), ', number of edges', len(veh_trip_edges))
+        #     print('        ILP running time:', (time.time() - ss))
 
         if MODEE == 'VT_replan':
             rid_assigned_last_not_assigned_this_time = rid_assigned_last-set(R_id_assigned) - (rid_assigned_last-set(R_id))
