@@ -6,8 +6,8 @@ import pandas as pd
 from dateutil.parser import parse
 
 # ride-sharing logic mode
-MODEE = 'VT'
-# MODEE = 'VT_replan'
+# MODEE = 'VT'
+MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
 
 TRAVEL_ENGINE = 'networkx'
@@ -37,7 +37,7 @@ DMD_STR = 'Manhattan'
 # fleet size, vehicle capacity and ridesharing size
 FLEET_SIZE = 2000
 VEH_CAPACITY = 4
-RIDESHARING_SIZE = 1
+RIDESHARING_SIZE = 4
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
 MAX_WAIT = 60 * 5
@@ -50,7 +50,7 @@ INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 30
-T_STUDY = 60 * 1400
+T_STUDY = 60 * 300
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 

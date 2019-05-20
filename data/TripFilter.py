@@ -150,13 +150,13 @@ if __name__ == '__main__':
     # df5.to_csv('Manhattan-green-taxi-20150502.csv', index=False)
 
     # filter out the trips longer than 2 min
-    df6 = pd.read_csv('Manhattan-taxi-20160507.csv')
+    df6 = pd.read_csv('Manhattan-taxi-20150502.csv')
     print('number of trips in that day:', df6.shape[0])
     # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
-    df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
+    # df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
 
-    print('number of trips longer than 2 min :', df6.shape[0])
-    df6.to_csv('Manhattan-taxi-20160507-1.csv', index=False)
+    # print('number of trips longer than 2 min :', df6.shape[0])
+    # df6.to_csv('Manhattan-taxi-20160507-1.csv', index=False)
 
     # # rename the column index
     # df7 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
