@@ -339,8 +339,12 @@ class Model(object):
                 schedule = []
                 if veh.id in V_id_assigned:
                     schedule = schedule_assigned[V_id_assigned.index(veh.id)]
+                    if schedule == [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]:
+                        continue
                 else:
                     if not veh.idle:
+                        if 1 not in {leg.pod for leg in veh.route}:
+                            continue
                         for leg in veh.route:
                             if leg.rid in veh.onboard_rid:
                                 schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
