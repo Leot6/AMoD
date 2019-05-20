@@ -16,7 +16,7 @@ Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper
 - class `Route` for routing server
   - the complete road network of Manhattan (4,092 nodes and 9,453 edges, might not fine enough) are considered, with the travel time on each edge (road segment) of the network given by the daily mean travel time estimate
   - the map data should be preprocessed beforehand using `ComputeTravelTimeTable`
-  - ~~[OSRM](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine) can be used as an alternative routing server with data from [OSM](https://www.openstreetmap.org/#map=12/40.7899/-73.9157) (amounting at 17,446 nodes, but the travel time might not accurate enough) (computational time too long)~~
+  - ~~[OSRM](https://github.com/Project-OSRM/osrm-backend#open-source-routing-machine) can be used as an alternative routing server with data from [OSM](https://www.openstreetmap.org/#map=12/40.7899/-73.9157) (amounting at 17,446 nodes, but the travel time might not accurate enough)~~ (computational time too long)
 - class `VTtable`, `ScheduleFinder`, `AssignPlaner` for a central dispatcher
   - assigns requests to vehicles, based on the idea of [[2]](https://github.com/Leot6/AMoD#references)
 - class `Rebalancer` for a naive rebalancer  
