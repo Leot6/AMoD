@@ -65,7 +65,7 @@ def get_duration(olng, olat, dlng, dlat):
         return None
 
 
-def get_euclidean_distance(olng, olat, dlng, dlat):
+def get_haversine_distance(olng, olat, dlng, dlat):
     dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
                                                    * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
     return dist
@@ -75,7 +75,7 @@ def find_nearest_node(lng, lat):
     nearest_node_id = None
     d = np.inf
     for nid, nlng, nlat in nodes:
-        # d_ = get_euclidean_distance(lng, lat, nlng, nlat)
+        # d_ = get_haversine_distance(lng, lat, nlng, nlat)
         d_ = abs(lng-nlng) + abs(lat-nlat)
         if d_ < d:
             d = d_
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         src_geo = [nodes[src - 1][1], nodes[src - 1][2]]
         sink_geo = [nodes[sink - 1][1], nodes[sink - 1][2]]
         t = NOD_TTT[src - 1, sink - 1]
-        d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
+        d = get_haversine_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
         steps.append((t, d, [src_geo, sink_geo], [src, sink]))
         distance += d
     print(duration, path)
@@ -146,6 +146,7 @@ if __name__ == "__main__":
     assert np.isclose(duration, sum([s[0] for s in steps]))
     # for step in steps:
     #     print('  ', step)
+    
     print('bb running time:', (time.time() - bb))
 
 

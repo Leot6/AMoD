@@ -216,7 +216,8 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
         #     print('        ILP running time:', (time.time() - ss))
 
         if MODEE == 'VT_replan':
-            rid_assigned_last_not_assigned_this_time = rid_assigned_last-set(R_id_assigned) - (rid_assigned_last-set(R_id))
+            rid_assigned_last_not_assigned_this_time = \
+                rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
             # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
             assert len(rid_assigned_last_not_assigned_this_time) == 0
 

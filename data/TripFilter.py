@@ -66,7 +66,7 @@ def find_nearest_node(lng, lat):
     nearest_node_id = None
     d = np.inf
     for nid, nlng, nlat in NOD_LOC:
-        # d_ = get_euclidean_distance(lng, lat, nlng, nlat)
+        # d_ = get_haversine_distance(lng, lat, nlng, nlat)
         d_ = abs(lng-nlng) + abs(lat-nlat)
         if d_ < d:
             d = d_

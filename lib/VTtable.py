@@ -17,6 +17,13 @@ from lib.ScheduleFinder import compute_schedule, test_constraints_get_cost, comp
 def build_vt_table(vehs, reqs_new, reqs_old, T):
     veh_trip_edges = []
 
+    # # parallel (not working properly)
+    # trip_list_all = Parallel(n_jobs=-1)(delayed(feasible_trips_search)(veh, reqs_new, reqs_old, T) for veh in vehs)
+    # for veh, (trip_list, schedule_list, cost_list) in zip(vehs, trip_list_all):
+    #     for trips, schedules, costs in zip(trip_list, schedule_list, cost_list):
+    #         for trip, schedule, cost in zip(trips, schedules, costs):
+    #             veh_trip_edges.append((veh, trip, schedule, cost))
+
     # non-parallel
     for veh in tqdm(vehs, desc='VT Table'):
         trip_list, schedule_list, cost_list = feasible_trips_search(veh, reqs_new, reqs_old, T)

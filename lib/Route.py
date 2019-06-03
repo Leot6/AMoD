@@ -146,7 +146,7 @@ def get_routing_from_networkx(onid, dnid):
         sink = path[i + 1]
         src_geo = [NOD_LOC[src - 1][1], NOD_LOC[src - 1][2]]
         sink_geo = [NOD_LOC[sink - 1][1], NOD_LOC[sink - 1][2]]
-        d = get_euclidean_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
+        d = get_haversine_distance(src_geo[0], src_geo[1], sink_geo[0], sink_geo[1])
         t = NOD_TTT[src - 1, sink - 1] * COEF_TRAVEL
         steps.append((t, d, [src_geo, sink_geo], [src, sink]))
         distance += d
@@ -154,8 +154,8 @@ def get_routing_from_networkx(onid, dnid):
     return duration, distance, steps
 
 
-# get the duration based on Euclidean distance
-def get_euclidean_distance(olng, olat, dlng, dlat):
+# get the duration based on haversine formula
+def get_haversine_distance(olng, olat, dlng, dlat):
     dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
                                                    * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
     return dist
@@ -166,7 +166,7 @@ def find_nearest_node(lng, lat):
     nearest_node_id = None
     d = np.inf
     for nid, nlng, nlat in NOD_LOC:
-        # d_ = get_euclidean_distance(lng, lat, nlng, nlat)
+        # d_ = get_haversine_distance(lng, lat, nlng, nlat)
         d_ = abs(lng-nlng) + abs(lat-nlat)
         if d_ < d:
             d = d_
