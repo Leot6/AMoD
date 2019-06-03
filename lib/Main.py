@@ -268,7 +268,8 @@ class Model(object):
         if len(self.reqs_unassigned) > 0:
             reqs_rejected = set()
             for req in self.reqs_unassigned:
-                if req.Clp >= self.T:
+                if req.Clp <= self.T:
+                # if min(req.Tr + 150, req.Clp) <= self.T:
                     reqs_rejected.add(req)
             self.reqs_unassigned.difference_update(reqs_rejected)
             self.rejs.update(reqs_rejected)

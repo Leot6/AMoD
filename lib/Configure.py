@@ -31,7 +31,7 @@ with open('./data/NET_NYC.pickle', 'rb') as f:
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1
-DMD_SST = parse('2015-05-02 00:00:00')
+DMD_SST = parse('2015-05-02 10:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
