@@ -6,12 +6,15 @@ import pandas as pd
 from dateutil.parser import parse
 
 # ride-sharing logic mode
-# MODEE = 'VT'
-MODEE = 'VT_replan'
+MODEE = 'VT'
+# MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
 
-TRAVEL_ENGINE = 'networkx'
+# travel machine and travel mode
 # TRAVEL_ENGINE = 'OSRM'
+TRAVEL_ENGINE = 'networkx'
+# IS_STOCHASTIC = True
+IS_STOCHASTIC = False
 
 # taxi requests data, station loctions, graph nodes and travel time table
 STN_LOC = pd.read_csv('./data/stations-630.csv')
@@ -31,7 +34,7 @@ with open('./data/NET_NYC.pickle', 'rb') as f:
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1
-DMD_SST = parse('2015-05-02 10:00:00')
+DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
@@ -50,14 +53,14 @@ INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 30
-T_STUDY = 60 * 300
+T_STUDY = 60 * 50
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
 MET_ASSIGN = 'ILP'
-MET_REBL = 'naive'
-# MET_REBL = 'None'
+# MET_REBL = 'naive'
+MET_REBL = 'None'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 600

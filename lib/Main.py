@@ -9,11 +9,12 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
 from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, DMD_SST, \
-    INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, TRAVEL_ENGINE
+    INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, TRAVEL_ENGINE, IS_STOCHASTIC
 from lib.Request import Req
 from lib.VTtable import build_vt_table
 from lib.AssignPlanner import ILP_assign
 from lib.Rebalancer import naive_rebalance
+from lib.Route import upd_traffic_on_network
 if TRAVEL_ENGINE == 'OSRM':
     from lib.Vehicle_osrm import Veh
 else:
@@ -80,6 +81,14 @@ class Model(object):
         self.upd_vehs_and_reqs_stat_to_time()
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
+
+        if IS_DEBUG:
+            print('    -updating traffics...')
+        a11 = time.time()
+        if IS_STOCHASTIC:
+            upd_traffic_on_network()
+        if IS_DEBUG:
+            print('        a11 running time:', round((time.time() - a11), 2))
 
         # # debug code starts
         # # print('   Veh route after move:')
@@ -268,8 +277,8 @@ class Model(object):
         if len(self.reqs_unassigned) > 0:
             reqs_rejected = set()
             for req in self.reqs_unassigned:
-                if req.Clp <= self.T:
-                # if min(req.Tr + 150, req.Clp) <= self.T:
+                # if req.Clp <= self.T:
+                if min(req.Tr + 150, req.Clp) <= self.T:
                     reqs_rejected.add(req)
             self.reqs_unassigned.difference_update(reqs_rejected)
             self.rejs.update(reqs_rejected)

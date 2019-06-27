@@ -40,8 +40,7 @@ def IsPtInPoly(lng, lat):
 
         if ((lat >= vlat1) and (lat < vlat2)) or ((lat >= vlat2) and (lat < vlat1)):
             if abs(vlat1 - vlat2) > 0:
-                pLon = vlng1 - ((vlng1 - vlng2) * (vlat1 - lat)) / (vlat1 - vlat2);
-
+                pLon = vlng1 - ((vlng1 - vlng2) * (vlat1 - lat)) / (vlat1 - vlat2)
                 if pLon < lng:
                     iSum += 1
 

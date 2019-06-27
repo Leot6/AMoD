@@ -10,39 +10,66 @@ import matplotlib.image as mpimg
 from matplotlib import animation
 
 from lib.Configure import T_WARM_UP, T_STUDY, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, RIDESHARING_SIZE, \
-    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE
+    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, IS_STOCHASTIC
 
 
 # print and save results
 def print_results(model, runtime):
     count_reqs = 0
     count_served = 0
+    count_serving = 0
+    count_wait_viol = 0
+    count_arri_viol = 0
     wait_time = 0.0
     in_veh_time = 0.0
     in_veh_delay = 0.0
     detour_factor = 0.0
+    wait_viol_time = 0.0
+    arri_viol_time = 0.0
 
     # analyze requests whose earliest pickup time is within the period of study
     for req in model.reqs:
         if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
             count_reqs += 1
-            # count as 'served' only when the request is complete, i.e. the dropoff time is not -1
-            if not np.isclose(req.Td, -1.0):
-                count_served += 1
-                wait_time += req.Tp - req.Cep
-                in_veh_time += req.Td - req.Tp
-                in_veh_delay += req.Td - req.Tp - req.Ts
-                detour_factor += req.D
+            if not np.isclose(req.Tp, -1.0):
+                count_serving += 1
+                if req.Tp > req.Clp:
+                    count_wait_viol += 1
+                    wait_viol_time += req.Tp - req.Clp
+                # count as 'served' only when the request is complete, i.e. the dropoff time is not -1
+                if not np.isclose(req.Td, -1.0):
+                    count_serving -= 1
+                    count_served += 1
+                    wait_time += req.Tp - req.Cep
+                    in_veh_time += req.Td - req.Tp
+                    in_veh_delay += req.Td - req.Tp - req.Ts
+                    detour_factor += req.D
+                    if req.Td > req.Cld:
+                        count_arri_viol += 1
+                        arri_viol_time += req.Td - req.Cld
     if not count_served == 0:
         wait_time /= count_served
         in_veh_time /= count_served
         in_veh_delay /= count_served
         detour_factor /= count_served
+    if not count_wait_viol == 0:
+        wait_viol_time /= count_wait_viol
+    if not count_arri_viol == 0:
+        arri_viol_time /= count_arri_viol
 
     # service rate
     served_rate = 0.0
+    serving_rate = 0.0
+    total_service_rate = 0.0
+    wait_viol_rate = 0.0
+    arri_viol_rate = 0.0
     if not count_reqs == 0:
         served_rate = 100.0 * count_served / count_reqs
+        serving_rate = 100.0 * count_serving / count_reqs
+        count_service = count_served + count_serving + len(model.reqs_picking)
+        total_service_rate = 100 * count_service / count_reqs
+        wait_viol_rate = 100 * count_wait_viol / (count_served + count_serving)
+        arri_viol_rate = 100 * count_arri_viol / count_served
 
     # vehicle performance
     veh_service_dist = 0.0
@@ -68,32 +95,35 @@ def print_results(model, runtime):
     veh_load_by_dist /= model.V
     veh_load_by_time /= model.V
 
-
-
     print('*' * 80)
     print('scenario: %s' % (DMD_STR))
     print('simulation ends at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
     print('system settings:')
-    print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
+    print('  - from %s to %s, with %d intervals'
+          % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; ride-sharing size: %d' % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - waiting time: %d; max detour: %.1f' % (MAX_WAIT, MAX_DETOUR))
+    print('  - max waiting time: %d; max detour: %.1f, stochastic: %s' % (MAX_WAIT, MAX_DETOUR, IS_STOCHASTIC))
     print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
     print('simulation results:')
-    print('  - requests:')
-    print('    + served rate: %.2f%% (%d/%d), wait time: %.1f s' % (served_rate, count_served, count_reqs, wait_time))
-    print('    + in-vehicle travel time: %.2f s, in-vehicle travel delay: %.2f s' % (in_veh_time, in_veh_delay))
-    print('    + detour factor: %.2f' % detour_factor)
-    print('    + total service rate: %.2f%%' % ((count_served+len(model.reqs_serving)+len(model.reqs_picking))/count_reqs*100))
-    # print('    + total service rate: %.2f%%' % (100-(len(model.reqs_unassigned)+len(model.rejs))/model.N*100))
+    print('  - requests (%d):' % count_reqs)
+    print('    + served rate: %.2f%% (%d), serving rate: %.2f%% (%d), total service rate: %.2f%% (%d)'
+          % (served_rate, count_served, serving_rate, count_serving, total_service_rate, count_service))
+    print('    + waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time, in_veh_delay))
+    print('    + in-vehicle travel time: %.2f s, detour factor: %.2f' % (in_veh_time, detour_factor))
+    print('    + waiting time violation rate: %.2f%% (%d/%d), average exceeding: %.2f s'
+          % (wait_viol_rate, count_wait_viol, (count_served + count_serving), wait_viol_time))
+    print('    + travel delay violation rate: %.2f%% (%d/%d), average exceeding: %.2f s'
+          % (arri_viol_rate, count_arri_viol, count_served, arri_viol_time))
     print('  - vehicles:')
+    print('    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)'
+          % (veh_load_by_dist, veh_load_by_time))
     print('    + vehicle service distance travelled: %.1f m' % veh_service_dist)
     print('    + vehicle service time travelled: %.1f s' % veh_service_time)
     print('    + vehicle service time percentage: %.1f%%' % veh_service_time_percent)
     print('    + vehicle rebalancing distance travelled: %.1f m' % veh_rebl_dist)
     print('    + vehicle rebalancing time travelled: %.1f s' % veh_rebl_time)
     print('    + vehicle rebalancing time percentage: %.1f%%' % veh_rebl_time_percent)
-    print('    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)' % (veh_load_by_dist, veh_load_by_time))
     print('*' * 80)
 
     # write and save the result analysis
