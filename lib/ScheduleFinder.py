@@ -187,13 +187,8 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
         if pod == -1:
             for req in reqs_in_schedule:
                 if rid == req.id:
-                    c_delay += round(T + t - (req.Tr + req.Ts))
-
-                    if TRAVEL_ENGINE == 'OSRM':
-                        if round(T + t - (req.Tr + req.Ts)) < 0:
-                            c_delay -= round(T + t - (req.Tr + req.Ts))
-                    else:
-                        assert round(T + t - (req.Tr + req.Ts)) >= 0
+                    if T + t - (req.Tr + req.Ts) > 0:
+                        c_delay += round(T + t - (req.Tr + req.Ts))
                     break
         lng = tlng
         lat = tlat
@@ -227,12 +222,9 @@ def compute_schedule_cost(veh, trip, schedule):
         if pod == -1:
             for req in reqs_in_schedule:
                 if rid == req.id:
-                    c_delay += round(T + t - (req.Tr + req.Ts))
-                    if TRAVEL_ENGINE == 'OSRM':
-                        if round(T + t - (req.Tr + req.Ts)) < 0:
-                            c_delay -= round(T + t - (req.Tr + req.Ts))
-                    else:
-                        assert round(T + t - (req.Tr + req.Ts)) >= 0
+                    if T + t - (req.Tr + req.Ts) > 0:
+                        c_delay += round(T + t - (req.Tr + req.Ts))
+                    break
         lng = tlng
         lat = tlat
         nid = tnid

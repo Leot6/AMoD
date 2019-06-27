@@ -25,15 +25,15 @@ def load_Manhattan_graph():
     num_edges = edges.shape[0]
     rng = tqdm(edges.iterrows(), total=num_edges, ncols=100, desc='Loading Manhattan Graph')
     for i, edge in rng:
-        src = edge['source']
-        sink = edge['sink']
+        u = edge['source']
+        v = edge['v']
         travel_time = round(travel_time_edges.iloc[i], 2)
-        G.add_edge(src, sink, weight=travel_time)
+        G.add_edge(u, v, weight=travel_time)
 
-        src_pos = np.array([nodes.iloc[src - 1]['lng'], nodes.iloc[src - 1]['lat']])
-        sink_pos = np.array([nodes.iloc[sink - 1]['lng'], nodes.iloc[sink - 1]['lat']])
-        G.add_node(src, pos=src_pos)
-        G.add_node(sink, pos=sink_pos)
+        u_pos = np.array([nodes.iloc[u - 1]['lng'], nodes.iloc[u - 1]['lat']])
+        v_pos = np.array([nodes.iloc[v - 1]['lng'], nodes.iloc[v - 1]['lat']])
+        G.add_node(u, pos=u_pos)
+        G.add_node(v, pos=v_pos)
 
     # pos = nx.shell_layout(G)
     # nx.draw_networkx_nodes(G, pos, node_size=700)
@@ -72,6 +72,29 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
             duration = get_duration_from_osrm(olng, olat, dlng, dlat)
             if duration is not None:
                 travel_time_table.iloc[o - 1, d - 1] = round(duration, 2)
+
+
+def compute_shortest_path_table(nodes, G):
+    # nodes = pd.read_csv('nodes.csv')
+    nodes_id = list(range(1, nodes.shape[0] + 1))
+    num_nodes = len(nodes_id)
+    shortest_path_table = [[-1 for i in range(num_nodes)] for j in range(num_nodes)]
+    time1 = time.time()
+    len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='weight'))
+    print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))
+    for o in tqdm(nodes_id):
+        for d in tqdm(nodes_id):
+            try:
+                duration = round(len_path[o][0][d], 2)
+                path = len_path[o][1][d]
+                shortest_path_table[o - 1][d - 1] = tuple((duration, path))
+            except nx.NetworkXNoPath:
+                print('no path between', o, d)
+    return shortest_path_table
+
+
+def compute_k_shortest_path_table(nodes, G, NOD_SPT):
+    pass
 
 
 def store_map_as_pickle_file():

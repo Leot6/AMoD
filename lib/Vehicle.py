@@ -28,6 +28,7 @@ class Veh(object):
         tlng: target (end of route) longtitude
         K: capacity
         n: number of passengers on board
+        schedule: a list of pick-up and drop-off points
         route: a list of legs
         t: total duration of the route
         d: total distance of the route
@@ -60,6 +61,7 @@ class Veh(object):
         self.tnid = self.nid
         self.K = K
         self.n = 0
+        self.schedule = []
         self.route = deque([])
         self.t = 0.0
         self.d = 0.0
@@ -271,6 +273,7 @@ class Veh(object):
             return
         else:
             if self.step_to_nid:
+                # add the unfinished step from last move updating
                 rid = -2
                 pod = 0
                 tlng = self.step_to_nid.geo[1][0]

@@ -3,18 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="d5ee899f-d42d-4c4b-a527-9b398d4ed0fd" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/TripFilter.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/TripFilter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/Configure.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configure.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/Route.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Route.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ScheduleFinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ScheduleFinder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Vehicle.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Vehicle.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/anim.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/requests.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/requests.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -30,10 +24,22 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/k_shortest_paths.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="182">
+              <caret line="21" column="26" lean-forward="true" selection-start-line="20" selection-start-column="4" selection-end-line="21" selection-end-column="26" />
+              <folding>
+                <element signature="e#331#366#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="550">
-              <caret line="233" column="4" selection-start-line="233" selection-start-column="6" selection-end-line="234" selection-end-column="54" />
+            <state relative-caret-position="292">
+              <caret line="121" lean-forward="true" selection-start-line="121" selection-end-line="121" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -42,22 +48,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/Analysis.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="12" column="115" selection-start-line="12" selection-start-column="115" selection-end-line="12" selection-end-column="115" />
-              <folding>
-                <element signature="e#42#52#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/Route.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
-              <caret line="168" column="12" selection-start-line="168" selection-start-column="12" selection-end-line="170" selection-end-column="60" />
+            <state relative-caret-position="265">
+              <caret line="192" selection-start-line="192" selection-end-line="192" />
               <folding>
                 <element signature="e#50#61#0" expanded="true" />
               </folding>
@@ -66,80 +60,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/ScheduleFinder.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="587">
-              <caret line="216" column="24" selection-start-line="216" selection-start-column="13" selection-end-line="216" selection-end-column="24" />
-              <folding>
-                <element signature="e#72#83#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/Main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1584">
-              <caret line="88" column="12" selection-start-line="88" selection-start-column="12" selection-end-line="88" selection-end-column="12" />
-              <folding>
-                <element signature="e#47#58#0" expanded="true" />
-                <element signature="e#2790#2811#0" />
-                <element signature="e#8814#8835#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/run.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="25" column="80" selection-start-line="25" selection-end-line="26" />
-              <folding>
-                <element signature="e#1#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/Vehicle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="433">
-              <caret line="337" column="81" selection-start-line="337" selection-start-column="81" selection-end-line="337" selection-end-column="81" />
+            <state relative-caret-position="170">
+              <caret line="334" column="39" selection-start-line="334" selection-start-column="39" selection-end-line="334" selection-end-column="39" />
               <folding>
                 <element signature="e#52#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/Configure.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="10" column="8" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/Request.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="39" column="11" selection-start-line="39" selection-start-column="11" selection-end-line="39" selection-end-column="11" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="96" column="8" selection-start-line="96" selection-start-column="8" selection-end-line="96" selection-end-column="8" />
-              <folding>
-                <element signature="e#62#73#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -156,6 +82,23 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
+      <find>reqs_serving</find>
+      <find>done.append</find>
+      <find>bad</find>
+      <find>assert len(frames</find>
+      <find>T_COOL_DOWN</find>
+      <find>TRAVEL_ENGINE</find>
+      <find>in_veh_delay</find>
+      <find>get_duration_from_osrm</find>
+      <find>.Ts</find>
+      <find>t</find>
+      <find>get_dura</find>
+      <find>get_routing</find>
+      <find>get_duration_from_table</find>
+      <find>rid_assigned</find>
+      <find>.rid_unassigned</find>
+      <find>rid_unassigned</find>
+      <find>.rid_assigned</find>
       <find>update</find>
       <find>.rejs</find>
       <find>l_old_trips_k</find>
@@ -166,26 +109,9 @@
       <find>MAX_DETOUR</find>
       <find>Parallel</find>
       <find>lambda</find>
+      <find>get_routing_from_networkx</find>
       <find>weight</find>
       <find>get_path_length</find>
-      <find>rc</find>
-      <find>src</find>
-      <find>sink</find>
-      <find>edge_duration</find>
-      <find>attr</find>
-      <find>not in</find>
-      <find>G_original</find>
-      <find>nodes_id</find>
-      <find>num_nodes</find>
-      <find>num_nodes`</find>
-      <find>] *</find>
-      <find>aa =</find>
-      <find>NOD_TTT</find>
-      <find>TRAVEL_ENGINE</find>
-      <find>store_map_as_pickle_file</find>
-      <find>get_routing_from_networkx</find>
-      <find>OSRM</find>
-      <find>step_to_nid</find>
     </findStrings>
     <replaceStrings>
       <replace>point_list</replace>
@@ -199,8 +125,6 @@
       <replace>reqs</replace>
       <replace>old</replace>
       <replace>onboard_rid</replace>
-      <replace>u</replace>
-      <replace>v</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -221,30 +145,30 @@
         <option value="$PROJECT_DIR$/lib/RTVgenerator.py" />
         <option value="$PROJECT_DIR$/lib/VTtableReplan0.py" />
         <option value="$PROJECT_DIR$/lib/Rebalancer.py" />
+        <option value="$PROJECT_DIR$/run.py" />
+        <option value="$PROJECT_DIR$/lib/Vehicle.py" />
+        <option value="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" />
         <option value="$PROJECT_DIR$/lib/Vehicle_osrm.py" />
         <option value="$PROJECT_DIR$/data/SerializeData.py" />
+        <option value="$PROJECT_DIR$/lib/ScheduleFinder.py" />
+        <option value="$PROJECT_DIR$/lib/Analysis.py" />
         <option value="$PROJECT_DIR$/lib/VTtableReplan.py" />
         <option value="$PROJECT_DIR$/lib/Request.py" />
+        <option value="$PROJECT_DIR$/lib/Main.py" />
         <option value="$PROJECT_DIR$/lib/AssignPlanner.py" />
         <option value="$PROJECT_DIR$/lib/VTtable.py" />
         <option value="$PROJECT_DIR$/temp.py" />
+        <option value="$PROJECT_DIR$/lib/Configure.py" />
         <option value="$PROJECT_DIR$/data/TripFilter.py" />
         <option value="$PROJECT_DIR$/lib/k_shortest_paths.py" />
-        <option value="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" />
-        <option value="$PROJECT_DIR$/lib/Vehicle.py" />
-        <option value="$PROJECT_DIR$/lib/ScheduleFinder.py" />
-        <option value="$PROJECT_DIR$/lib/Main.py" />
-        <option value="$PROJECT_DIR$/run.py" />
-        <option value="$PROJECT_DIR$/lib/Analysis.py" />
         <option value="$PROJECT_DIR$/lib/Route.py" />
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/lib/Configure.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="width" value="1280" />
+    <option name="height" value="800" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -421,19 +345,17 @@
       <workItem from="1560028265498" duration="473000" />
       <workItem from="1560097497530" duration="1520000" />
       <workItem from="1560445838614" duration="473000" />
-      <workItem from="1561133584213" duration="1800000" />
-      <workItem from="1561300918741" duration="13730000" />
+      <workItem from="1561133584213" duration="2718000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="532226000" />
+    <option name="totallyTimeSpent" value="505976000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
-    <editor active="true" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23642172" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23182553" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -447,7 +369,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.26633662" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.26712328" />
       <window_info anchor="bottom" id="Python Console" order="12" show_stripe_button="false" weight="0.32970297" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -502,6 +424,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/ScheduleFinder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2790">
+          <caret line="186" column="21" lean-forward="true" selection-start-line="186" selection-start-column="21" selection-end-line="186" selection-end-column="21" />
+          <folding>
+            <element signature="e#72#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/VTtableReplan.py" />
     <entry file="file://$PROJECT_DIR$/data/NYC trip data statistics.png">
       <provider selected="true" editor-type-id="images" />
@@ -516,6 +448,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/VTtable_backup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="14" column="43" lean-forward="true" selection-start-line="14" selection-start-column="43" selection-end-line="14" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/data/TripFilter.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="454">
@@ -523,6 +462,13 @@
           <folding>
             <element signature="e#64#75#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -538,18 +484,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/AssignPlanner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="108" column="48" selection-start-line="108" selection-start-column="48" selection-end-line="108" selection-end-column="48" />
+        <state relative-caret-position="458">
+          <caret line="219" column="84" selection-start-line="219" selection-start-column="80" selection-end-line="219" selection-end-column="84" />
           <folding>
             <element signature="e#54#65#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/VTtable_backup.py">
+    <entry file="file://$PROJECT_DIR$/run.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="14" column="43" selection-start-line="14" selection-start-column="43" selection-end-line="14" selection-end-column="43" />
+        <state relative-caret-position="285">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
+          <folding>
+            <element signature="e#1#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Vehicle_osrm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-712">
+          <caret line="308" column="33" selection-start-line="308" selection-start-column="12" selection-end-line="308" selection-end-column="33" />
         </state>
       </provider>
     </entry>
@@ -563,117 +519,90 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-522">
+          <caret line="270" column="37" selection-start-line="270" selection-start-column="37" selection-end-line="270" selection-end-column="37" />
+          <folding>
+            <element signature="e#47#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/data/SerializeData.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="17" selection-end-column="31" />
+        <state relative-caret-position="165">
+          <caret line="11" column="44" selection-start-line="11" selection-start-column="44" selection-end-line="11" selection-end-column="44" />
           <folding>
             <element signature="e#70#83#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="96" column="8" selection-start-line="96" selection-start-column="8" selection-end-line="96" selection-end-column="8" />
-          <folding>
-            <element signature="e#62#73#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/k_shortest_paths.py" />
-    <entry file="file://$PROJECT_DIR$/lib/Vehicle_osrm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="658">
-          <caret line="308" column="33" selection-start-line="308" selection-start-column="12" selection-end-line="308" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Vehicle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="337" column="81" selection-start-line="337" selection-start-column="81" selection-end-line="337" selection-end-column="81" />
-          <folding>
-            <element signature="e#52#63#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/Request.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="39" column="11" selection-start-line="39" selection-start-column="11" selection-end-line="39" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/ScheduleFinder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="587">
-          <caret line="216" column="24" selection-start-line="216" selection-start-column="13" selection-end-line="216" selection-end-column="24" />
-          <folding>
-            <element signature="e#72#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1584">
-          <caret line="88" column="12" selection-start-line="88" selection-start-column="12" selection-end-line="88" selection-end-column="12" />
-          <folding>
-            <element signature="e#47#58#0" expanded="true" />
-            <element signature="e#2790#2811#0" />
-            <element signature="e#8814#8835#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="80" selection-start-line="25" selection-end-line="26" />
-          <folding>
-            <element signature="e#1#12#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="375">
+          <caret line="27" column="24" lean-forward="true" selection-start-line="12" selection-start-column="4" selection-end-line="27" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/Analysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="115" selection-start-line="12" selection-start-column="115" selection-end-line="12" selection-end-column="115" />
+        <state relative-caret-position="3000">
+          <caret line="200" column="43" selection-start-line="200" selection-start-column="43" selection-end-line="200" selection-end-column="43" />
           <folding>
             <element signature="e#42#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
+    <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="550">
-          <caret line="233" column="4" selection-start-line="233" selection-start-column="6" selection-end-line="234" selection-end-column="54" />
+        <state relative-caret-position="-1042">
+          <caret line="30" column="49" lean-forward="true" selection-start-line="30" selection-start-column="49" selection-end-line="30" selection-end-column="49" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#62#73#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Vehicle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="334" column="39" selection-start-line="334" selection-start-column="39" selection-end-line="334" selection-end-column="39" />
+          <folding>
+            <element signature="e#52#63#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/Route.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="168" column="12" selection-start-line="168" selection-start-column="12" selection-end-line="170" selection-end-column="60" />
+        <state relative-caret-position="265">
+          <caret line="192" selection-start-line="192" selection-end-line="192" />
           <folding>
             <element signature="e#50#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+    <entry file="file://$PROJECT_DIR$/lib/k_shortest_paths.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="10" column="8" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
+        <state relative-caret-position="182">
+          <caret line="21" column="26" lean-forward="true" selection-start-line="20" selection-start-column="4" selection-end-line="21" selection-end-column="26" />
+          <folding>
+            <element signature="e#331#366#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="121" lean-forward="true" selection-start-line="121" selection-end-line="121" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
