@@ -11,7 +11,7 @@ import networkx as nx
 from collections import deque
 from heapq import heappush, heappop
 from itertools import count
-from lib.Configure import NOD_LOC, NOD_TTT, NET_NYC, COEF_TRAVEL
+from lib.Configure import NOD_LOC, NOD_TTT, NOD_SPT, NET_NYC, COEF_TRAVEL
 
 G = copy.deepcopy(NET_NYC)
 
@@ -73,13 +73,6 @@ def get_duration(olng, olat, dlng, dlat, onid, dnid):
     return duration
 
 
-# get the duration of the best route from origin to destination
-def get_routing(olng, olat, dlng, dlat, onid, dnid):
-    route = get_routing_from_osrm(olng, olat, dlng, dlat)
-    # route = get_routing_from_networkx(onid, dnid)
-    return route
-
-
 # generate the request in url format
 def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
     ghost = '0.0.0.0'
@@ -139,10 +132,38 @@ def get_duration_from_table(onid, dnid):
         None
 
 
-# get the best route from origin to destination
+# get the best path from origin to destination
 def get_routing_from_networkx(onid, dnid):
-    duration, path = nx.bidirectional_dijkstra(G, onid, dnid)
-    duration = duration * COEF_TRAVEL
+    dur, path = nx.bidirectional_dijkstra(NET_NYC, onid, dnid)
+    duration, distance, steps = build_route_from_path(path)
+    # assert np.isclose(dur * COEF_TRAVEL, duration)
+    # print('NET', path, duration, distance)
+    return duration, distance, steps
+
+
+# get the best path from origin to destination
+def get_routing_from_SPtable(onid, dnid):
+    path = [onid, dnid]
+    sub_path = NOD_SPT[onid-1, dnid-1]
+    while sub_path > 10000:
+        a = int(sub_path / 10000)
+        b = int(sub_path - a * 10000)
+        c = int(len(path) / 2)
+        path.insert(c, b)
+        path.insert(c, a)
+        sub_path = NOD_SPT[a-1, b-1]
+    if sub_path > 0:
+        path.insert(int(len(path) / 2), int(sub_path))
+    if onid == dnid:
+        path = [onid]
+    duration, distance, steps = build_route_from_path(path)
+    # print('SPT', path, duration, distance)
+    return duration, distance, steps
+
+
+# get the best route information from origin to destination
+def build_route_from_path(path):
+    duration = 0.0
     distance = 0.0
     steps = []
     for i in range(len(path) - 1):
@@ -155,9 +176,10 @@ def get_routing_from_networkx(onid, dnid):
         t = G.get_edge_data(u, v, default={'weight': np.inf})['weight'] * COEF_TRAVEL
         steps.append((t, d, [u_geo, v_geo], [u, v]))
         distance += d
+        duration += t * COEF_TRAVEL
+    dnid = path[-1]
     dnid_geo = [NOD_LOC[dnid - 1][1], NOD_LOC[dnid - 1][2]]
     steps.append((0.0, 0.0, [dnid_geo, dnid_geo], [dnid, dnid]))
-    assert np.isclose(duration, sum([s[0] for s in steps]))
     return duration, distance, steps
 
 

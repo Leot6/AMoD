@@ -4,6 +4,7 @@ import requests
 import pickle
 import pandas as pd
 import numpy as np
+import re
 import networkx as nx
 import copy
 from heapq import heappush, heappop
@@ -90,36 +91,8 @@ def get_haversine_distance(olng, olat, dlng, dlat):
 
 if __name__ == "__main__":
 
-    # l = 200
-    # aa = time.time()
-    # a = deque([])
-    # for i in range(l):
-    #     a.append(i)
-    # a.popleft()
-    # print('deque running time:', (time.time() - aa))
-    #
-    # bb = time.time()
-    # b = []
-    # for i in range(l):
-    #     b.append(i)
-    # del b[0:3]
-    # print('list running time:', (time.time() - bb))
-
-    # G = nx.DiGraph()
-    # G.add_edge('C', 'D', weight=3)
-    # G.add_edge('C', 'E', weight=2)
-    # G.add_edge('D', 'F', weight=4)
-    # G.add_edge('E', 'D', weight=1)
-    # G.add_edge('E', 'F', weight=2)
-    # G.add_edge('E', 'G', weight=3)
-    # G.add_edge('F', 'G', weight=2)
-    # G.add_edge('F', 'H', weight=1)
-    # G.add_edge('G', 'H', weight=2)
-    # source = 'C'
-    # target = 'H'
-
-    # with open('./data/NET_NYC.pickle', 'rb') as f:
-    #     G = pickle.load(f)
+    with open('./data/NET_NYC.pickle', 'rb') as f:
+        G = pickle.load(f)
     # G_original = copy.deepcopy(G)
     # with open('./data/NOD_TTT.pickle', 'rb') as f:
     #     NOD_TTT = pickle.load(f)
@@ -128,108 +101,26 @@ if __name__ == "__main__":
 
     # nodes_id = list(range(1, 6))
     # num_nodes = len(nodes_id)
-    # shortest_path_table = [[-1 for i in range(num_nodes)] for j in range(num_nodes)]
-    #
-    # time1 = time.time()
-    # len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='weight'))
-    # print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))
 
-    # for o in tqdm(nodes_id):
-    #     for d in tqdm(nodes_id):
-    #         try:
-    #             duration = round(len_path[o][0][d], 2)
-    #             # path = len_path[o][1][d]
+    aa = time.time()
+    count = 0
+    for u, v in G.edges():
+        u_v = str(u) + str(v)
+        if '0660' in u_v:
+            print('not ok: ', u, v)
+        # print(u_v)
+        count += 1
+        # if count > 3:
     #
-    #             # shortest_path_table[o - 1][d - 1] = tuple((duration, path))
-    #             shortest_path_table[o - 1][d - 1] = duration
-    #         except nx.NetworkXNoPath:
-    #             print('no path between', o, d)
-    #
-    # with open('NOD_SPT1.pickle', 'wb') as f:
-    #     pickle.dump(shortest_path_table, f)
+    print('aa running time:', (time.time() - aa))
+    print(count)
+
+    bb = time.time()
+    duration, path = nx.bidirectional_dijkstra(G, 21, 6)
+    print('bb running time:', (time.time() - bb))
+    print(duration, path)
 
 
-    # # Determine the shortest path from the source to the target
-    # duration, path = nx.bidirectional_dijkstra(G, source, target)
-    # A = [tuple([duration, path])]  # k_shortest_paths
-    # B = []
-    # # G_copy = G.copy()  # computational time might be long
-    #
-    # for i in range(1, k):
-    #     i_path = A[-1][1]  # k-1 shortest path
-    #     #  The spur node ranges from the first node to the next to last node in the previous k-shortest path
-    #     for j in range(len(i_path) - 1):
-    #         # Spur node is retrieved from the previous k-shortest path, k − 1.
-    #         spur_node = i_path[j]
-    #         root_path = i_path[:j + 1]
-    #
-    #         root_path_duration = 0
-    #         for u_i in range(len(root_path)-1):
-    #             u = root_path[u_i]
-    #             v = root_path[u_i+1]
-    #             root_path_duration += G.edges[u, v]['weight']
-    #
-    #         # print('root_path', root_path)
-    #         # print('root_path_duration', root_path_duration)
-    #
-    #         edges_removed = []
-    #         for path_k in A:
-    #             curr_path = path_k[1]
-    #             # Remove the links that are part of the previous shortest paths which share the same root path
-    #             if len(curr_path) > j and root_path == curr_path[:j + 1]:
-    #                 u = curr_path[j]
-    #                 v = curr_path[j + 1]
-    #                 if G.has_edge(u, v):
-    #                     edge_duration = G.edges[u, v]['weight']  # need to be compared to NOD_TTT
-    #                     G.remove_edge(u, v)
-    #                     edges_removed.append((u, v, edge_duration))
-    #                     # print('u, v, edge_duration (remove)', u, v, edge_duration)
-    #
-    #         # # remove rootPathNode (except spurNode) from Graph
-    #         # for n in range(len(root_path) - 1):
-    #         #     node = root_path[n]
-    #         #     print('node', node)
-    #         #     # out-edges
-    #         #     for u, v, edge_duration in G.edges_iter(node, data=True):
-    #         #         print('u, v, edge_duration (out)', u, v, edge_duration)
-    #         #         G.remove_edge(u, v)
-    #         #         edges_removed.append((u, v, edge_duration))
-    #         #
-    #         #     if G.is_directed():
-    #         #         # in-edges
-    #         #         for u, v, edge_duration in G.in_edges_iter(node, data=True):
-    #         #             print('u, v, edge_duration (in)', u, v, edge_duration)
-    #         #             G.remove_edge(u, v)
-    #         #             edges_removed.append((u, v, edge_duration))
-    #
-    #         try:
-    #             # Calculate the spur path from the spur node to the target
-    #             spur_path_duration, spur_path = nx.bidirectional_dijkstra(G, spur_node, target)
-    #             # Entire path is made up of the root path and spur path
-    #             total_path = root_path[:-1] + spur_path
-    #             total_path_duration = root_path_duration + spur_path_duration
-    #             potential_k = tuple([total_path_duration, total_path])
-    #             # Add the potential k-shortest path to the heap
-    #             if potential_k not in B:
-    #                 B.append(potential_k)
-    #                 # print('potential_k', potential_k)
-    #         except nx.NetworkXNoPath:
-    #             # print('NetworkXNoPath')
-    #             pass
-    #
-    #         # Add back the edges and nodes that were removed from the graph
-    #         for u, v, edge_duration in edges_removed:
-    #             G.add_edge(u, v, weight=edge_duration)
-    #             # print('u, v, edge_duration (add)', u, v, edge_duration)
-    #
-    #     if len(B):
-    #         B = sorted(B, key=lambda e: e[0])
-    #         A.append(B[0])
-    #         B.pop(0)
-    #     else:
-    #         break
 
-    dur = 2
-    sample = np.random.normal(dur, dur * 0.2236)
-    # while sample < 0:
-    #     sample = np.random.normal(dur, dur * 0.2236)
+
+

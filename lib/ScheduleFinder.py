@@ -5,7 +5,7 @@ compute all feasible schedules for given vehicle v and trip T.
 import copy
 import time
 import numpy as np
-from lib.Configure import COEF_WAIT, COEF_INVEH, TRAVEL_ENGINE
+from lib.Configure import COEF_WAIT, COEF_INVEH, TRAVEL_ENGINE, NOD_SPT, NOD_TTT
 from lib.Route import get_duration, get_duration_from_osrm
 
 
@@ -147,16 +147,21 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
         idx += 1
         dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
 
-        # # codes to fix bugs that caused by using travel time table (starts)
-        # # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
-        # #     if travel times are computed from travel time table (which is not accurate))
-        # if rid in {leg.rid for leg in veh.route}:
-        #     dt = get_duration_from_osrm(lng, lat, tlng, tlat)
-        # # codes to fix bugs that caused by using travel time table (ends)
-
         if dt is None:
             return False, None, 1  # no route found between points
-        t += dt
+
+        # # temp solution
+        # SP = NOD_SPT[nid-1, tnid-1].replace('[', '').replace(']', '').split(', ')
+        # mean = float(SP[0])
+        # assert np.isclose(dt, mean)
+        # path = list(map(int, SP[1:]))
+        # variance = 0
+        # for i in range(len(path) - 1):
+        #     u = path[i]
+        #     v = path[i + 1]
+        #     variance += 0.05 * np.square(NOD_TTT[u-1, v-1])
+        # standard_deviation = np.sqrt(variance)
+        standard_deviation = 0
 
         # # debug code starts
         # if veh.id == 2 and {95, 243, 250} < set(veh.onboard_rid):
@@ -164,7 +169,8 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
         #     print('   ', nid, tnid, T+dt)
         # # debug code ends
 
-        if T + t > ddl:
+        t += dt
+        if T + t + standard_deviation/100 > ddl:
 
             # # debug code starts
             # if veh.id in {1, 2}:
@@ -201,7 +207,7 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
     # return True, c_delay, -1
 
 
-# compute the schedule cost using osrm
+# compute the schedule cost, used to update the costs in VT table
 def compute_schedule_cost(veh, trip, schedule):
     c_delay = 0.0
     c_wait = 0.0

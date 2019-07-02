@@ -55,9 +55,8 @@ def compute_table_nx(nodes_id, travel_time_table):
     for o in tqdm(nodes_id):
         for d in tqdm(nodes_id):
             try:
-                # duration, path = nx.bidirectional_dijkstra(G, o, d)
-                duration = length[o][d]
-                travel_time_table.iloc[o - 1, d - 1] = round(duration, 2)
+                duration = round(length[o][d], 2)
+                travel_time_table.iloc[o - 1, d - 1] = duration
             except nx.NetworkXNoPath:
                 print('no path between', o, d)
 
@@ -75,21 +74,30 @@ def compute_table_OSRM(nodes, nodes_id, travel_time_table):
 
 
 def compute_shortest_path_table(nodes, G):
-    # nodes = pd.read_csv('nodes.csv')
-    nodes_id = list(range(1, nodes.shape[0] + 1))
-    num_nodes = len(nodes_id)
-    shortest_path_table = [[-1 for i in range(num_nodes)] for j in range(num_nodes)]
     time1 = time.time()
     len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='weight'))
     print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))
+    # nodes = pd.read_csv('nodes.csv')
+    nodes_id = list(range(1, nodes.shape[0] + 1))
+    num_nodes = len(nodes_id)
+    shortest_path_table = pd.DataFrame(([['-1']*num_nodes]*num_nodes), index=nodes_id, columns=nodes_id)
     for o in tqdm(nodes_id):
         for d in tqdm(nodes_id):
             try:
-                duration = round(len_path[o][0][d], 2)
+                # duration = round(len_path[o][0][d], 2)
                 path = len_path[o][1][d]
-                shortest_path_table[o - 1][d - 1] = tuple((duration, path))
+                if len(path) == 1 or len(path) == 2:
+                    continue
+                if len(path) == 3:
+                    sub_path = path[1]
+                else:
+                    u_1 = path[1]
+                    v_1 = path[-2]
+                    sub_path = u_1 * 10000 + v_1
+                shortest_path_table.iloc[o - 1, d - 1] = sub_path
             except nx.NetworkXNoPath:
                 print('no path between', o, d)
+    # shortest_path_table.to_csv('shortest-path-table.csv')
     return shortest_path_table
 
 
@@ -129,7 +137,8 @@ if __name__ == '__main__':
     # print(travel_time_table.iloc[5:10, 1800:2000])
 
     # for routing server
-    store_map_as_pickle_file()
+    # store_map_as_pickle_file()
+
     with open('map.pickle', 'rb') as f:
         G = pickle.load(f)
 

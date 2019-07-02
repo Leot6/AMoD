@@ -333,6 +333,17 @@ class Model(object):
                 rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
                 if rid_fail:
                     R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
+            for veh in self.vehs:
+                schedule = []
+                if veh.id not in V_id_assigned:
+                    if not veh.idle:
+                        for leg in veh.route:
+                            if leg.pod == 1 or leg.pod == -1:
+                                schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
+                        rid_fail = veh.build_route(schedule, self.reqs, self.T)
+                        if rid_fail:
+                            R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
+
             R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
             self.reqs_picking.update(R_assigned)
             R_unassigned = set(self.queue) - R_assigned
@@ -349,12 +360,14 @@ class Model(object):
                 schedule = []
                 if veh.id in V_id_assigned:
                     schedule = schedule_assigned[V_id_assigned.index(veh.id)]
-                    if schedule == [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]:
-                        continue
+                    # if schedule == [(leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl) for leg in veh.route]:
+                    #     # vehicles with the same trip
+                    #     continue
                 else:
                     if not veh.idle:
-                        if 1 not in {leg.pod for leg in veh.route}:
-                            continue
+                        # if 1 not in {leg.pod for leg in veh.route}:
+                        #     # vehicles neither assigned new requests nor having new request to pick up
+                        #     continue
                         for leg in veh.route:
                             if leg.rid in veh.onboard_rid:
                                 schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))

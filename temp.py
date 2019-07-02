@@ -1,10 +1,13 @@
 import mosek
 import time
 import requests
+import pickle
 import numpy as np
 import pandas as pd
-from tqdm import trange
+import networkx as nx
+from tqdm import tqdm
 from time import sleep
+
 
 
 # get the best route from origin to destination
@@ -58,23 +61,74 @@ def call_url(url):
 
 
 if __name__ == "__main__":
-    a = get_duration(-73.98590087890625, 40.76803970336913, -73.9839859008789, 40.73009872436523)
-    b = get_duration(-73.97929382324219, 40.75576400756836, -73.98801422119139, 40.75846862792969)
-    c = get_duration(-73.9915771484375, 40.7447509765625, -73.97570037841797, 40.7654685974121)
 
-    print(a, b, c)
-    # b = get_routing(-73.958875, 40.820005, -73.958871, 40.820003)
-    # # print(a, b['distance'])
+    # with open('NOD_SPT.pickle', 'rb') as f:
+    #     SPT = pickle.load(f)
+    #
+    # print(SPT)
+    # SPT = SPT.values
+    #
+    # aa = time.time()
+    #
+    # c = SPT[0, 0].replace('[', '').replace(']', '').split(', ')
+    # dur = float(c[0])
+    # path = list(map(int, c[1:]))
+    #
+    # print('aa running time:', (time.time() - aa))
+    # print(dur, path)
+
+    with open('./data/NET_NYC.pickle', 'rb') as f:
+        G = pickle.load(f)
+    time1 = time.time()
+    print('computing all pairs dijkstra...')
+    len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='weight'))
+    print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))
+
+    print(len_path[799][1][811], len_path[799][0][811])
+
+    # NOD_LOC = pd.read_csv('./data/nodes.csv')
+    # nodes_id = list(range(1, NOD_LOC.shape[0] + 1))
+    # num_nodes = len(nodes_id)
+    # NOD_SPT = pd.DataFrame(-np.ones((num_nodes, num_nodes)), index=nodes_id, columns=nodes_id)
+    #
+    # # paths = []
+    #
+    # for o in tqdm(nodes_id):
+    #     for d in tqdm(nodes_id):
+    #         try:
+    #             # aa = time.time()
+    #
+    #             # duration = round(len_path[o][0][d], 2)
+    #             path = len_path[o][1][d]
+    #             if len(path) == 1 or len(path) == 2:
+    #                 continue
+    #             if len(path) == 3:
+    #                 pp = path[1]
+    #             else:
+    #                 u_1 = path[1]
+    #                 v_1 = path[-2]
+    #                 pp = u_1 * 10000 + v_1
+    #
+    #             NOD_SPT.iloc[o - 1, d - 1] = pp
+    #
+    #             # paths.append(path)
+    #             # item = str(duration)
+    #             # item = str([duration, path])
+    #             # print('aa1 running time:', (time.time() - aa))
+    #             # duration = 238711119999999922223333444555
+    #             # NOD_SPT.iloc[o - 1, d - 1] = duration
+    #             # NOD_SPT[o - 1, d - 1] = item
+    #             # print('aa2 running time:', (time.time() - aa))
+    #
+    #         except nx.NetworkXNoPath:
+    #             print('no path between', o, d)
+    #
+    # # paths = sorted(paths, key=lambda p: len(p))
+    # # print(len(paths))
+    # # print(paths[-1])
+    # # with open('NOD_SPT.pickle', 'wb') as f:
+    # #     pickle.dump(NOD_SPT, f)
     # #
-    # # for i in trange(4, desc='1st loop'):
-    # #     for j in trange(5, desc='2nd loop'):
-    # #         for k in trange(50, desc='3nd loop', leave=False):
-    # #             sleep(0.01)
-    #
-    # dates = pd.date_range('20130101', periods=6)
-    # df = pd.DataFrame(np.arange(24).reshape((6, 4)), index=dates, columns=['A', 'B', 'C', 'D'])
-    # print(df)
-    # df.loc['20130101', 'B'] = 2
-    # print(df.loc['20130101', 'B'])
-    #
+    # NOD_SPT.to_csv('NOD_SPT.csv')
+
 
