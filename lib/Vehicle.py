@@ -3,12 +3,13 @@ defination of vehicles for the AMoD system
 """
 
 import copy
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
 from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE, MODEE
-from lib.Route import Step, Leg, get_routing_from_networkx, find_nearest_node
+from lib.Route import Step, Leg, get_routing_from_networkx, get_routing_from_SPtable, find_nearest_node
 
 
 class Veh(object):
@@ -335,7 +336,17 @@ class Veh(object):
 
     # add a leg based on (rid, pod, tlng, tlat, tnid, ddl)
     def add_leg_from_networkx(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
-        duration, distance, segments = get_routing_from_networkx(self.tnid, tnid)
+        # aa = time.time()
+        # duration, distance, segments = get_routing_from_networkx(self.tnid, tnid)
+        # print('aa running time:', (time.time() - aa))
+
+        # bb = time.time()
+        duration, distance, segments = get_routing_from_SPtable(self.tnid, tnid)
+        # print('bb running time:', (time.time() - bb))
+
+        # assert np.isclose(duration, duration1)
+        # assert np.isclose(distance, distance1)
+
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
         leg = Leg(rid, pod, tlng, tlat, tnid, ddl, duration, distance, steps)
         # the last step of a leg is always of length 2,

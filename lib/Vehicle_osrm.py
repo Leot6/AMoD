@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from collections import deque
 
 from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, COEF_TRAVEL, RIDESHARING_SIZE
-from lib.Route import Step, Leg, get_routing_from_osrm, get_routing_from_networkx, find_nearest_node
+from lib.Route import Step, Leg, get_routing_from_osrm, find_nearest_node
 
 
 class Veh(object):

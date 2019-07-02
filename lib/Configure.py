@@ -29,16 +29,18 @@ else:
     # NOD_TTT = pd.read_csv('./data/travel-time-table.csv', index_col=0).values
     with open('./data/NOD_TTT.pickle', 'rb') as f:
         NOD_TTT = pickle.load(f)
+with open('./data/NOD_SPT.pickle', 'rb') as f:
+    NOD_SPT = pickle.load(f)
 with open('./data/NET_NYC.pickle', 'rb') as f:
     NET_NYC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1
+DMD_VOL = 0.05
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
+FLEET_SIZE = 150
 VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
