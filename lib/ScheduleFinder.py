@@ -5,8 +5,8 @@ compute all feasible schedules for given vehicle v and trip T.
 import copy
 import time
 import numpy as np
-from lib.Configure import COEF_WAIT, COEF_INVEH, TRAVEL_ENGINE, NOD_SPT, NOD_TTT
-from lib.Route import get_duration, get_duration_from_osrm
+from lib.Configure import COEF_WAIT, COEF_INVEH, NOD_TTT, IS_STOCHASTIC_CONSIDERED, NET_NYC
+from lib.Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx, get_edge_dur, get_edge_std
 
 
 # (schedules of trip T of size k are computed based on schedules of its subtrip of size k-1)
@@ -25,7 +25,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         # # check if the req has same origin-destination as any other req in the schedule
         # p = set()
         # d = set()
-        # for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        # for (rid, pod, tnid, ddl) in schedule:
         #     if pod == 1 and req.onid == tnid:
         #         p.add(rid)
         #         # print(' # check if the req has same origin as any other req in the schedule')
@@ -38,7 +38,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #     i = 0
         #     i_p = 0
         #     i_d = 0
-        #     for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+        #     for (rid, pod, tnid, ddl) in schedule:
         #         i += 1
         #         if pod == 1 and rid in same_req:
         #             if req.Clp <= ddl:
@@ -50,8 +50,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #                 i_d = i
         #             else:
         #                 i_d = i+1
-        #     schedule.insert(i_p, (req.id, 1, req.olng, req.olat, req.onid, req.Clp))
-        #     schedule.insert(i_d, (req.id, -1, req.dlng, req.dlat, req.dnid, req.Cld))
+        #     schedule.insert(i_p, (req.id, 1, req.onid, req.Clp))
+        #     schedule.insert(i_d, (req.id, -1, req.dnid, req.Cld))
         #     flag, c, viol = test_constraints_get_cost(schedule, veh, req, i_d)
         #     if flag:
         #         feasible_schedules.append(copy.deepcopy(schedule))
@@ -65,20 +65,20 @@ def compute_schedule(veh, trip, _trip, _schedules):
         # if {r.id for r in trip} == {56, 505}:
         #     print()
         #     print('veh', veh.id)
-        #     print('_sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
+        #     print('_sche', [(rid, pod) for (rid, pod, tnid, ddl) in schedule])
 
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constrain of a req already in the schedule,
         # it cannot be picked-up before that req.
-        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
+        dt = get_duration(veh.nid, req.onid)
         for i in reversed(range(l)):
-            if veh.T + dt > schedule[i][5]:
+            if veh.T + dt > schedule[i][3]:
                 ealist_pick_up_point = i + 1
                 break
         # if the shortest travel time of req is longer than the time constrain of a leg in the schedule,
         # it cannot be dropped-off before that leg.
         for i in reversed(range(l)):
-            if veh.T + req.Ts > schedule[i][5]:
+            if veh.T + req.Ts > schedule[i][3]:
                 ealist_drop_off_point = i + 2
                 break
 
@@ -91,8 +91,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
                 viol = 0
                 if j < ealist_drop_off_point:
                     continue
-                schedule.insert(i, (req.id, 1, req.olng, req.olat, req.onid, req.Clp))
-                schedule.insert(j, (req.id, -1, req.dlng, req.dlat, req.dnid, req.Cld))
+                schedule.insert(i, (req.id, 1, req.onid, req.Clp))
+                schedule.insert(j, (req.id, -1, req.dnid, req.Cld))
                 flag, c, viol = test_constraints_get_cost(veh, trip, schedule, req, j)  # j: req's drop-off point index
                 if flag:
                     feasible_schedules.append(copy.deepcopy(schedule))
@@ -114,69 +114,62 @@ def compute_schedule(veh, trip, _trip, _schedules):
 
 # test if a schedule can satisfy all constraints, return the cost (if yes) or the type of violation (if no)
 def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
-    c_delay = 0.0
-    c_wait = 0.0
-    c_inveh = 0.0
     t = 0.0
     n = veh.n
     T = veh.T + veh.t_to_nid
     K = veh.K
-    lng = veh.lng
-    lat = veh.lat
     nid = veh.nid
     insert_req_id = req.id
-    reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
-
-    # # debug code starts
-    # if veh.id == 2 and 95 in veh.onboard_rid:
-    #     print('veh:', veh.id, ', trip:', )
-    #     print('   sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
-    #     print('   rout', [(leg.rid, leg.pod) for leg in veh.route])
-    # # debug code ends
 
     # test the capacity constraint during the whole schedule
-    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+    for (rid, pod, tnid, ddl) in schedule:
         n += pod
         if n > K:
             return False, None, 1  # over capacity
-    n = veh.n
 
     # test the pick-up and drop-off time constraint for each passenger on board
     idx = 0
-    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
+    for (rid, pod, tnid, ddl) in schedule:
         idx += 1
-        dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
-
-        if dt is None:
-            return False, None, 1  # no route found between points
-
-        # # temp solution
-        # SP = NOD_SPT[nid-1, tnid-1].replace('[', '').replace(']', '').split(', ')
-        # mean = float(SP[0])
-        # assert np.isclose(dt, mean)
-        # path = list(map(int, SP[1:]))
-        # variance = 0
-        # for i in range(len(path) - 1):
-        #     u = path[i]
-        #     v = path[i + 1]
-        #     variance += 0.05 * np.square(NOD_TTT[u-1, v-1])
-        # standard_deviation = np.sqrt(variance)
-        standard_deviation = 0
-
-        # # debug code starts
-        # if veh.id == 2 and {95, 243, 250} < set(veh.onboard_rid):
-        #     print('go test', (rid, pod, ddl), veh.T, T, t, dt,)
-        #     print('   ', nid, tnid, T+dt)
-        # # debug code ends
-
+        dt = get_duration(nid, tnid)
         t += dt
-        if T + t + standard_deviation/100 > ddl:
 
-            # # debug code starts
-            # if veh.id in {1, 2}:
-            #     print('ddl failed', (rid, pod), ddl, veh.T, T, t, dt)
-            # # debug code ends
+        # temp solution
+        if T + t <= ddl and IS_STOCHASTIC_CONSIDERED:
+            # solution 1
+            path = get_path_from_SPtable(nid, tnid)
+            variance = 0
+            for i in range(len(path) - 1):
+                u = path[i]
+                v = path[i + 1]
+                variance += np.square(get_edge_std(u, v))
+            standard_deviation = np.sqrt(variance)
 
+            # solution 2
+            # if T + t + 2.5 * standard_deviation > ddl:
+            #     KSP = k_shortest_paths_nx(nid, tnid, 10, 'dur')
+            #     min_mean = np.inf
+            #     min_thre = np.inf
+            #     for path in KSP:
+            #         mean = 0
+            #         variance = 0.0
+            #         for i in range(len(path) - 1):
+            #             u = path[i]
+            #             v = path[i + 1]
+            #             mean += get_edge_dur(u, v)
+            #             variance += get_edge_std(u, v)
+            #         standard_deviation = np.sqrt(variance)
+            #         mean = round(mean, 2)
+            #         thre = round(mean + 2.5 * standard_deviation, 2)
+            #         if mean < min_mean:
+            #             min_mean = mean
+            #         if thre < min_thre:
+            #             min_thre = thre
+            #     standard_deviation = (min_thre - min_mean) / 2.5
+        else:
+            standard_deviation = 0
+
+        if T + t + 1.5 * standard_deviation > ddl:
             if rid == insert_req_id:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
@@ -186,7 +179,26 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
                 # since the violation happens before the drop-off of req
                 return False, None, 4
             return False, None, 0
-        c_inveh += n * dt * COEF_INVEH
+        nid = tnid
+
+    cost = compute_schedule_cost(veh, trip, schedule)
+    return True, cost, -1
+
+
+# compute the schedule cost, used to update the costs in VT table
+def compute_schedule_cost(veh, trip, schedule):
+    c_delay = 0.0
+    c_wait = 0.0
+    # c_inveh = 0.0
+    t = 0.0
+    n = veh.n
+    T = veh.T + veh.t_to_nid
+    nid = veh.nid
+    reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
+    for (rid, pod, tnid, ddl) in schedule:
+        dt = get_duration(nid, tnid)
+        t += dt
+        # c_inveh += n * dt * COEF_INVEH
         n += pod
         assert n <= veh.K
         c_wait += t * COEF_WAIT if pod == 1 else 0
@@ -196,42 +208,9 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
                     if T + t - (req.Tr + req.Ts) > 0:
                         c_delay += round(T + t - (req.Tr + req.Ts))
                     break
-        lng = tlng
-        lat = tlat
         nid = tnid
+    cost = c_delay
+    # cost = c_wait + c_delay
+    # cost = c_wait
+    return cost
 
-    return True, c_wait + c_delay, -1
-    # return True, round(t*8/c_inveh), -1
-    # return True, c_wait+c_inveh, -1
-    # return True, c_wait, -1
-    # return True, c_delay, -1
-
-
-# compute the schedule cost, used to update the costs in VT table
-def compute_schedule_cost(veh, trip, schedule):
-    c_delay = 0.0
-    c_wait = 0.0
-    c_inveh = 0.0
-    t = 0.0
-    n = veh.n
-    T = veh.T + veh.t_to_nid
-    lng = veh.lng
-    lat = veh.lat
-    nid = veh.nid
-    reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
-    for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
-        dt = get_duration(lng, lat, tlng, tlat, nid, tnid)
-        t += dt
-        c_inveh += n * dt * COEF_INVEH
-        n += pod
-        c_wait += t * COEF_WAIT if pod == 1 else 0
-        if pod == -1:
-            for req in reqs_in_schedule:
-                if rid == req.id:
-                    if T + t - (req.Tr + req.Ts) > 0:
-                        c_delay += round(T + t - (req.Tr + req.Ts))
-                    break
-        lng = tlng
-        lat = tlat
-        nid = tnid
-    return c_delay

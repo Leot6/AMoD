@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from collections import deque
 
 from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE, MODEE
-from lib.Route import Step, Leg, get_routing_from_networkx, get_routing_from_SPtable, find_nearest_node
+from lib.Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
 
 
 class Veh(object):
@@ -23,10 +23,9 @@ class Veh(object):
         lat: current lngitude
         lng: current longtitude
         nid: current nearest node id in network
-        step_to_nid: step from current location to the nearest node in network
-        t_to_nid = 0: travel time from current location to the nearest node in network
-        tlat: target (end of route) lngitude
-        tlng: target (end of route) longtitude
+        step_to_nid: step from current location (when veh is on an edge) to the sink node in network
+        t_to_nid = 0: travel time from current location (when veh is on an edge) to the sink node in network
+        tnid: target (end of route) node id
         K: capacity
         n: number of passengers on board
         schedule: a list of pick-up and drop-off points
@@ -43,8 +42,8 @@ class Veh(object):
         VTtable = stored feasible trips from last interval plan
         onboard_reqs = requests currently on board
         onboard_rid = id of requests currently on board
-        new_pick_rid = id of requests picked up in this interval
-        new_drop_rid = id of requests dropped off in this interval
+        new_pick_rid = id of requests newly picked up in current interval
+        new_drop_rid = id of requests newly dropped off in current interval
     """
 
     def __init__(self, id, lng, lat, K=4, T=0.0):
@@ -57,8 +56,6 @@ class Veh(object):
         self.nid = find_nearest_node(lng, lat)
         self.step_to_nid = None
         self.t_to_nid = 0
-        self.tlng = self.lng
-        self.tlat = self.lat
         self.tnid = self.nid
         self.K = K
         self.n = 0
@@ -73,7 +70,7 @@ class Veh(object):
         self.Tr = 0.0
         self.Lt = 0.0
         self.Ld = 0.0
-        self.VTtable = [[] for i in range(RIDESHARING_SIZE*2)]
+        self.VTtable = [[] for i in range(RIDESHARING_SIZE+2)]
         self.onboard_reqs = set()
         self.onboard_rid = []
         self.new_pick_rid = []
@@ -127,7 +124,7 @@ class Veh(object):
                     self.Dr += leg.d if leg.rid == -1 else 0
                     self.Lt += leg.t * self.n if leg.rid != -1 else 0
                     self.Ld += leg.d * self.n if leg.rid != -1 else 0
-                self.jump_to_location(leg.tlng, leg.tlat, leg.tnid)
+                self.jump_to_location(leg.tnid)
                 self.n += leg.pod
                 if leg.rid != -2:
                     done.append((leg.rid, leg.pod, self.T))
@@ -161,7 +158,7 @@ class Veh(object):
                             self.Dr += step.d if leg.rid == -1 else 0
                             self.Lt += step.t * self.n if leg.rid != -1 else 0
                             self.Ld += step.d * self.n if leg.rid != -1 else 0
-                        self.jump_to_location(step.geo[1][0], step.geo[1][1], step.nid[1])
+                        self.jump_to_location(step.nid[1], step.geo[1][0], step.geo[1][1])
                         self.pop_step()
 
                         if len(leg.steps) == 0:
@@ -173,7 +170,7 @@ class Veh(object):
 
                             # corner case: leg.t extremely small, but still larger than dT
                             # this is due to the limited precision of the floating point numbers
-                            self.jump_to_location(leg.tlng, leg.tlat, leg.tnid)
+                            self.jump_to_location(leg.tnid)
                             self.n += leg.pod
                             if leg.rid != -2:
                                 done.append((leg.rid, leg.pod, self.T))
@@ -201,7 +198,7 @@ class Veh(object):
                             self.Ld += step.d * pct * self.n if leg.rid != -1 else 0
                         # find the exact location the vehicle stops and update the step
                         self.cut_step(pct)
-                        self.jump_to_location(step.geo[0][0], step.geo[0][1], step.nid[0])
+                        self.jump_to_location(step.nid[0], step.geo[0][0], step.geo[0][1])
                         self.T = T
 
                         # # debug
@@ -252,10 +249,12 @@ class Veh(object):
         assert self.route[0].steps[0].nid[0] == self.route[0].steps[0].nid[1]
         self.step_to_nid = copy.deepcopy(self.route[0].steps[0])
 
-    def jump_to_location(self, lng, lat, nid):
+    def jump_to_location(self, nid, lng=None, lat=None):
+        self.nid = nid
+        if lng is None:
+            [lng, lat] = get_node_geo(nid)
         self.lng = lng
         self.lat = lat
-        self.nid = nid
 
     # build the route of the vehicle based on a series of quadruples (rid, pod, tlng, tlat)
     # update t, d, c, idle, rebl accordingly
@@ -277,26 +276,24 @@ class Veh(object):
                 # add the unfinished step from last move updating
                 rid = -2
                 pod = 0
+                tnid = self.step_to_nid.nid[1]
                 tlng = self.step_to_nid.geo[1][0]
                 tlat = self.step_to_nid.geo[1][1]
-                tnid = self.step_to_nid.nid[1]
                 ddl = self.T + self.step_to_nid.t
                 duration = self.step_to_nid.t
                 distance = self.step_to_nid.d
-                steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [[tlng, tlat], [tlng, tlat]], [tnid, tnid])]
-                leg = Leg(rid, pod, tlng, tlat, tnid, ddl, duration, distance, steps)
+                steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [tnid, tnid], [[tlng, tlat], [tlng, tlat]])]
+                leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
                 # the last step of a leg is always of length 2,
                 # consisting of 2 identical points as a flag of the end of the leg
                 assert len(leg.steps[-1].geo) == 2
                 assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
                 self.route.append(leg)
-                self.tlng = leg.steps[-1].geo[1][0]
-                self.tlat = leg.steps[-1].geo[1][1]
                 self.tnid = leg.steps[-1].nid[1]
                 self.d += leg.d
                 self.t += leg.t
-            for (rid, pod, tlng, tlat, tnid, ddl) in schedule:
-                self.add_leg_from_networkx(rid, pod, tlng, tlat, tnid, ddl, reqs, T)
+            for (rid, pod, tnid, ddl) in schedule:
+                self.add_leg(rid, pod, tnid, ddl, reqs, T)
             # if self.step_to_nid:
             #     self.d += self.step_to_nid.d
             #     self.t += self.step_to_nid.t
@@ -334,21 +331,11 @@ class Veh(object):
             self.c = c
         return
 
-    # add a leg based on (rid, pod, tlng, tlat, tnid, ddl)
-    def add_leg_from_networkx(self, rid, pod, tlng, tlat, tnid, ddl, reqs, T):
-        # aa = time.time()
-        # duration, distance, segments = get_routing_from_networkx(self.tnid, tnid)
-        # print('aa running time:', (time.time() - aa))
-
-        # bb = time.time()
-        duration, distance, segments = get_routing_from_SPtable(self.tnid, tnid)
-        # print('bb running time:', (time.time() - bb))
-
-        # assert np.isclose(duration, duration1)
-        # assert np.isclose(distance, distance1)
-
+    # add a leg based on (rid, pod, tnid, ddl)
+    def add_leg(self, rid, pod, tnid, ddl, reqs, T):
+        duration, distance, segments = get_routing(self.tnid, tnid)
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
-        leg = Leg(rid, pod, tlng, tlat, tnid, ddl, duration, distance, steps)
+        leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         assert len(leg.steps[-1].geo) == 2
@@ -360,8 +347,6 @@ class Veh(object):
                 leg.steps[-1].t += wait
                 leg.t += wait
         self.route.append(leg)
-        self.tlng = leg.steps[-1].geo[1][0]
-        self.tlat = leg.steps[-1].geo[1][1]
         self.tnid = leg.steps[-1].nid[1]
         self.d += leg.d
         self.t += leg.t
@@ -372,9 +357,8 @@ class Veh(object):
         self.d = 0.0
         self.t = 0.0
         self.c = 0.0
-        self.tlng = self.lng
-        self.tlat = self.lat
         self.tnid = self.nid
+        self.idle = True
 
     # visualize
     def draw(self):
@@ -393,7 +377,8 @@ class Veh(object):
         count = 0
         for leg in self.route:
             count += 1
-            plt.plot(leg.tlng, leg.tlat, color=color,
+            [leg_tlng, leg_tlat] = get_node_geo(leg.tnid)
+            plt.plot(leg_tlng, leg_tlat, color=color,
                      marker='s' if leg.pod == 1 else 'x' if leg.pod == -1 else None, markersize=3, alpha=0.5)
             for step in leg.steps:
                 geo = np.transpose(step.geo)
@@ -408,8 +393,8 @@ class Veh(object):
         str += '\n  has %d leg(s), dist = %.1f, dura = %.1f，cost = %.1f' % (
             len(self.route), self.d, self.t, self.c)
         for leg in self.route:
-            str += '\n    %s req %d at (%.7f, %.7f), dist = %.1f, dura = %.1f' % (
+            str += '\n    %s req %d at (%d), dist = %.1f, dura = %.1f' % (
                 'pickup' if leg.pod == 1 else 'dropoff' if leg.pod == -1 else 'rebalancing',
-                leg.rid, leg.tlng, leg.tlat, leg.d, leg.t)
+                leg.rid, leg.tnid, leg.d, leg.t)
         return str
 

@@ -5,6 +5,7 @@ compute the travel time table for edges in Manhattan
 import time
 import sys
 import pickle
+import math
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -12,44 +13,49 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
-sys.path.append('../..')
+# sys.path.append('../..')
 
-# from lib.Route import get_duration_from_osrm
+
+# get the duration based on haversine formula
+def get_haversine_distance(olng, olat, dlng, dlat):
+    dist = (6371000 * 2 * math.pi / 360 * np.sqrt((math.cos((olat + dlat) * math.pi / 360)
+                                                   * (olng - dlng)) ** 2 + (olat - dlat) ** 2))
+    return dist
 
 
 def load_Manhattan_graph():
     edges = pd.read_csv('edges.csv')
     nodes = pd.read_csv('nodes.csv')
-    travel_time_edges = pd.read_csv('time-sat.csv', index_col=0).mean(1)
+    aa = time.time()
+    # set the mean travel time of all day (24 hours) as the travel time
+    travel_time_edges = pd.read_csv('time-sat.csv', index_col=0)
+    mean_travel_times = travel_time_edges.mean(1)
+    std_travel_times = travel_time_edges.std(1)
     G = nx.DiGraph()
     num_edges = edges.shape[0]
     rng = tqdm(edges.iterrows(), total=num_edges, ncols=100, desc='Loading Manhattan Graph')
     for i, edge in rng:
         u = edge['source']
-        v = edge['v']
-        travel_time = round(travel_time_edges.iloc[i], 2)
-        G.add_edge(u, v, weight=travel_time)
-
+        v = edge['sink']
         u_pos = np.array([nodes.iloc[u - 1]['lng'], nodes.iloc[u - 1]['lat']])
         v_pos = np.array([nodes.iloc[v - 1]['lng'], nodes.iloc[v - 1]['lat']])
         G.add_node(u, pos=u_pos)
         G.add_node(v, pos=v_pos)
+        travel_time = round(mean_travel_times.iloc[i], 2)
+        standard_deviation = round(std_travel_times.iloc[i], 2)
+        travel_dist = get_haversine_distance(u_pos[0], u_pos[1], v_pos[0], v_pos[1])
+        G.add_edge(u, v, dur=travel_time, std=standard_deviation, dist=travel_dist)
+    print('...running time : %.05f seconds' % (time.time() - aa))
 
-    # pos = nx.shell_layout(G)
-    # nx.draw_networkx_nodes(G, pos, node_size=700)
-    # nx.draw_networkx_edges(G, pos, width=6)
-    # nx.draw_networkx_labels(G, pos, font_size=20, font_family='sans-serif')
-    # plt.axis('off')
-    # plt.show()
-
+    # # store_map_as_pickle_file
+    # with open('map.pickle', 'wb') as f:
+    #     pickle.dump(G, f)
     return G
 
 
-def compute_table_nx(nodes_id, travel_time_table):
-    G = load_Manhattan_graph()
-
+def compute_table_nx(G, nodes_id, travel_time_table):
     time1 = time.time()
-    length = dict(nx.all_pairs_dijkstra_path_length(G, cutoff=None, weight='weight'))
+    length = dict(nx.all_pairs_dijkstra_path_length(G, cutoff=None, weight='dur'))
     print('...running time : %.05f seconds' % (time.time() - time1))
 
     for o in tqdm(nodes_id):
@@ -61,40 +67,23 @@ def compute_table_nx(nodes_id, travel_time_table):
                 print('no path between', o, d)
 
 
-def compute_table_OSRM(nodes, nodes_id, travel_time_table):
-    for o in tqdm(nodes_id):
-        olng = nodes.iloc[o - 1]['lng']
-        olat = nodes.iloc[o - 1]['lat']
-        for d in tqdm(nodes_id):
-            dlng = nodes.iloc[d - 1]['lng']
-            dlat = nodes.iloc[d - 1]['lat']
-            duration = get_duration_from_osrm(olng, olat, dlng, dlat)
-            if duration is not None:
-                travel_time_table.iloc[o - 1, d - 1] = round(duration, 2)
-
-
 def compute_shortest_path_table(nodes, G):
     time1 = time.time()
-    len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='weight'))
+    len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='dur'))
     print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))
     # nodes = pd.read_csv('nodes.csv')
     nodes_id = list(range(1, nodes.shape[0] + 1))
     num_nodes = len(nodes_id)
-    shortest_path_table = pd.DataFrame(([['-1']*num_nodes]*num_nodes), index=nodes_id, columns=nodes_id)
+    shortest_path_table = pd.DataFrame(-np.ones((num_nodes, num_nodes), dtype=int), index=nodes_id, columns=nodes_id)
     for o in tqdm(nodes_id):
         for d in tqdm(nodes_id):
             try:
-                # duration = round(len_path[o][0][d], 2)
                 path = len_path[o][1][d]
-                if len(path) == 1 or len(path) == 2:
+                if len(path) == 1:
                     continue
-                if len(path) == 3:
-                    sub_path = path[1]
                 else:
-                    u_1 = path[1]
-                    v_1 = path[-2]
-                    sub_path = u_1 * 10000 + v_1
-                shortest_path_table.iloc[o - 1, d - 1] = sub_path
+                    pre_node = path[-2]
+                    shortest_path_table.iloc[o - 1, d - 1] = pre_node
             except nx.NetworkXNoPath:
                 print('no path between', o, d)
     # shortest_path_table.to_csv('shortest-path-table.csv')
@@ -105,13 +94,9 @@ def compute_k_shortest_path_table(nodes, G, NOD_SPT):
     pass
 
 
-def store_map_as_pickle_file():
-    G = load_Manhattan_graph()
-    with open('map.pickle', 'wb') as f:
-        pickle.dump(G, f)
-
-
 if __name__ == '__main__':
+    load_Manhattan_graph()
+
     # # for travel time table
     # nodes = pd.read_csv('nodes.csv')
     # nodes_id = list(range(1, nodes.shape[0] + 1))
@@ -125,7 +110,7 @@ if __name__ == '__main__':
     #
     # compute_table_OSRM(nodes, nodes_id, travel_time_table)
     #
-    # # compute_table_nx(nodes_id, travel_time_table)
+    # # compute_table_nx(G, nodes_id, travel_time_table)
     #
     # travel_time_table.to_csv('time-table-osrm.csv')
 
@@ -136,21 +121,6 @@ if __name__ == '__main__':
     # travel_time_table = pd.read_csv('time-table-sat.csv', index_col=0)
     # print(travel_time_table.iloc[5:10, 1800:2000])
 
-    # for routing server
-    # store_map_as_pickle_file()
-
-    with open('map.pickle', 'rb') as f:
-        G = pickle.load(f)
-
-    aa = time.time()
-    path = nx.dijkstra_path(G, 1, 10)
-    print(path)
-    print('aa running time:', (time.time() - aa))
-
-    bb = time.time()
-    path = nx.bidirectional_dijkstra(G, 1, 4000)
-    print(path)
-    print('bb running time:', (time.time() - bb))
 
 
 

@@ -1,11 +1,12 @@
 
+
 import time
-import datetime
-import copy
-import matplotlib.pyplot as plt
 # start time of initialization
 istime = time.time()
 print('initializing the model ...')
+import datetime
+import copy
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.Main import Model
 from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_STR, \
@@ -19,10 +20,13 @@ if __name__ == '__main__':
     model = Model()
     print('*' * 80)
     print('scenario: %s' % (DMD_STR))
-    print('simulation starts at %s, initializing time: %.02f s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), time.time() - istime))
+    print('simulation starts at %s, initializing time: %.02f s'
+          % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), time.time() - istime))
     print('system settings:')
-    print('  - from %s to %s, with %d intervals' % (DMD_SST, DMD_SST+datetime.timedelta(seconds=T_TOTAL), T_TOTAL/INT_ASSIGN))
-    print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d' % (model.V, model.K, RIDESHARING_SIZE))
+    print('  - from %s to %s, with %d intervals'
+          % (DMD_SST, DMD_SST + datetime.timedelta(seconds=T_TOTAL), T_TOTAL / INT_ASSIGN))
+    print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
+          % (model.V, model.K, RIDESHARING_SIZE))
     print('  - max waiting time: %d; max detour: %.1f, stochastic: %s' % (MAX_WAIT, MAX_DETOUR, IS_STOCHASTIC))
     print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))

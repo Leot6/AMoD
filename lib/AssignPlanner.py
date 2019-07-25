@@ -92,7 +92,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
             #     print()
             #     print('veh:', veh.id)
             #     print('   -trip:', {r.id for r in trip})
-            #     print('   -sche:', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
+            #     print('   -sche:', [(rid, pod) for (rid, pod, tnid, ddl) in schedule])
             #     print('   -cost:', cost)
 
         numvar = numedges + numreqs

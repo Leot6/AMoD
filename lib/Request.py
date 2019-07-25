@@ -3,8 +3,8 @@ defination of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR, TRAVEL_ENGINE
-from lib.Route import find_nearest_node, get_duration_from_osrm, get_duration_from_table
+from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
+from lib.Route import find_nearest_node, get_duration
 
 
 class Req(object):
@@ -28,7 +28,7 @@ class Req(object):
         D: detour factor
     """
 
-    def __init__(self, id, Tr, olng=-0.162139, olat=51.490439, dlng=-0.104428, dlat=51.514180):
+    def __init__(self, id, Tr, olng, olat, dlng, dlat):
         self.id = id
         self.Tr = Tr
         self.olng = olng
@@ -37,10 +37,7 @@ class Req(object):
         self.dlat = dlat
         self.onid = find_nearest_node(olng, olat)
         self.dnid = find_nearest_node(dlng, dlat)
-        if TRAVEL_ENGINE == 'OSRM':
-            self.Ts = get_duration_from_osrm(olng, olat, dlng, dlat)
-        else:  # networkx
-            self.Ts = get_duration_from_table(self.onid, self.dnid)
+        self.Ts = get_duration(self.onid, self.dnid)
         self.Cep = Tr
         # self.Clp = Tr + MAX_WAIT
         # self.Cld = Tr + self.Ts + MAX_DELAY
