@@ -65,29 +65,27 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
     if not veh.idle:
         for leg in veh.route:
             if MODEE == 'VT':
-                _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
+                _schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl))
             else:  # 'VT_replan'
                 if leg.rid in veh.onboard_rid:
-                    _schedule.append((leg.rid, leg.pod, leg.tlng, leg.tlat, leg.tnid, leg.ddl))
+                    _schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl))
     for req in reqs_new:
         # filter the req which can not be served even when the veh is idle
-        dt = get_duration(veh.lng, veh.lat, req.olng, req.olat, veh.nid, req.onid)
-        if dt is None:  # no available route is found
+        if get_duration(veh.nid, req.onid) + T > req.Clp:
             continue
-        if dt + T <= req.Clp:
-            trip = tuple([req])  # trip is defined as tuple
-            best_schedule, min_cost, schedules = compute_schedule(veh, trip, [], [_schedule])
-            if best_schedule:
-                trip_list[0].append(trip)
-                schedule_list[0].append(best_schedule)
-                cost_list[0].append(min_cost)
-                schedules_k.append(schedules)
+        trip = tuple([req])  # trip is defined as tuple
+        best_schedule, min_cost, schedules = compute_schedule(veh, trip, [], [_schedule])
+        if best_schedule:
+            trip_list[0].append(trip)
+            schedule_list[0].append(best_schedule)
+            cost_list[0].append(min_cost)
+            schedules_k.append(schedules)
 
-                # debug code
-                assert {req.id for req in trip} <= {req.id for req in reqs_new}
+            # debug code
+            assert {req.id for req in trip} <= {req.id for req in reqs_new}
 
-                # if veh.id == 3 or veh.id == 4:
-                #     print('veh', veh.id, ': size 1 add', req.id, 'schedules_num', len(schedules))
+            # if veh.id == 3 or veh.id == 4:
+            #     print('veh', veh.id, ': size 1 add', req.id, 'schedules_num', len(schedules))
 
     # print('veh', veh.id, ', trip size:', 1, ', num of trips:', len(trip_list[0]),
     #       ', running time:', round((time.time() - time1), 2))
@@ -192,7 +190,7 @@ def get_old_trips(veh, rid_old, k):
     # debug
     veh_id = 3
     # if veh.id == veh_id and len(veh.route) != 0:
-    #     print('new start           veh', veh.id, ' has route, new pick:', veh.new_pick_rid, ', new drop:', veh.new_drop_rid)
+    #     print('new start veh', veh.id, ' has route, new pick:', veh.new_pick_rid, ', new drop:', veh.new_drop_rid)
     #     print([(leg.rid, leg.pod) for leg in veh.route], veh.onboard_rid)
     #     print('trip size', k)
     #     print('veh.VTtable[0]', len(veh.VTtable[0]))
@@ -248,7 +246,7 @@ def get_old_trips(veh, rid_old, k):
 
                 # # debug
                 # if veh.id == veh_id and len(veh.route) != 0:
-                #     print('sche', [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule])
+                #     print('sche', [(rid, pod) for (rid, pod, tnid, ddl) in schedule])
 
                 if l_new_both != 0:
                     if {schedule[i][0] for i in range(l_new_both)} != new_both_rid:
@@ -257,11 +255,11 @@ def get_old_trips(veh, rid_old, k):
                         assert sum([schedule[i][1] for i in range(l_new_both)]) == l_new_pick - 1 * l_new_drop
                         del schedule[0:l_new_both]
 
-                # codes to fix bugs that caused by using travel time table (starts)
+                # codes to fix bugs that caused by non-static travel times (starts)
                 # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
-                #     if travel times are computed from travel time table (which is not accurate))
+                #     if travel times are not static)
                 trip_id_ = {req.id for req in trip_}
-                trip_sche_ = [(rid, pod) for (rid, pod, tlng, tlat, tnid, ddl) in schedule]
+                trip_sche_ = [(rid, pod) for (rid, pod, tnid, ddl) in schedule]
                 if trip_sche_ == veh_route:
                     flag = True
                     c = compute_schedule_cost(veh, trip_, schedule)
@@ -297,17 +295,17 @@ def get_old_trips(veh, rid_old, k):
                         #     print('veh', veh.id, ' go to test (partial route)')
                 else:
                     flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
-                # codes to fix bugs that caused by using travel time table (ends)
+                # codes to fix bugs that caused by non-static travel times  (ends)
 
                 # flag, c, viol = test_constraints_get_cost(veh, trip_, schedule, trip_[0], 0)
 
-                # debug:
-                if veh.id == 91:
-                    if trip_id == {17142}:
-                        if flag:
-                            print('veh 91 and reqs 17142 added')
-                        else:
-                            print('veh 91 and reqs 17142 failed')
+                # # debug:
+                # if veh.id == 91:
+                #     if trip_id == {17142}:
+                #         if flag:
+                #             print('veh 91 and reqs 17142 added')
+                #         else:
+                #             print('veh 91 and reqs 17142 failed')
 
                 if flag:
 

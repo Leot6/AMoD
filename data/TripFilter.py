@@ -7,7 +7,6 @@ import pickle
 import pandas as pd
 import numpy as np
 import sys
-# from lib.Route import get_duration_from_osrm
 
 NOD_LOC = pd.read_csv('nodes.csv').values.tolist()
 with open('NOD_TTT.pickle', 'rb') as f:
@@ -53,7 +52,6 @@ def IsPtInPoly(lng, lat):
 def LongerThan2Min(olng, olat, dlng, dlat):
     onid = find_nearest_node(olng, olat)
     dnid = find_nearest_node(dlng, dlat)
-    # d = get_duration_from_osrm(olng, olat, dlng, dlat)
     d = NOD_TTT[onid - 1, dnid - 1]
     if d and d > 120:
         return True
