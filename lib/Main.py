@@ -135,66 +135,6 @@ class Model(object):
             if IS_DEBUG:
                 print('        a5 running time:', round((time.time() - a5), 2))
 
-            # # debug code starts
-            # # print('   Veh route after assign:')
-            # for veh in self.vehs:
-            # # if True:
-            # #     veh = self.vehs[91]
-            #     d_to_nid = 0
-            #     if veh.step_to_nid:
-            #         d_to_nid = veh.step_to_nid.d
-            #     # print('          veh:', veh.id, (veh.nid, round(veh.lng, 4), round(veh.lat, 4)),
-            #     #       ', onboard:', veh.onboard_rid, ', Ts:', round(veh.Ts, 2), ', Ts+V.t:', round(veh.Ts + veh.t, 2),
-            #     #       ', Ds:', round(veh.Ds, 2), ', Ds+V.d', round(veh.Ds + veh.d, 2),
-            #     #       ', t2nid', round(veh.t_to_nid, 2), ', d2nid', round(d_to_nid, 2))
-            #     sche = [(leg.rid, leg.pod, leg.tnid, leg.ddl) for leg in veh.route]
-            #     trip = tuple({self.reqs[leg.rid] for leg in veh.route})
-            #     # print('              *route:', [(leg.rid, leg.pod, leg.tnid) for leg in veh.route],
-            #     #       't:', round(veh.t, 2), 'd:', round(veh.d, 2), ', c:', compute_schedule_cost(veh, trip, sche))
-            #     nids = [veh.nid] + [leg.tnid for leg in veh.route]
-            #     t = 0
-            #     d = 0
-            #     for i in range(len(nids) - 1):
-            #         duration1 = get_duration(nids[i], nids[i + 1])
-            #         duration, distance, steps = get_routing(nids[i], nids[i + 1])
-            #         assert np.isclose(duration1, duration)
-            #         t += duration
-            #         d += distance
-            #     # print('               travel time total', round(t, 2), round(t + veh.t_to_nid, 2))
-            #     # print('               travel dist total', round(d, 2), round(d + d_to_nid, 2))
-            #     if not np.isclose(t + veh.t_to_nid, veh.t):
-            #         schedule = []
-            #         if len(veh.route) != 0:
-            #             schedule = [(leg.rid, leg.pod) for leg in veh.route]
-            #         print('')
-            #         print('error veh.t, veh', veh.id, ', passengers', veh.n)
-            #         print('route record', veh.route_record)
-            #         print('schedule', schedule)
-            #         print('rid on board', veh.onboard_rid, ', new pick',
-            #               veh.new_pick_rid, ', new drop', veh.new_drop_rid)
-            #         print('  veh.t - t + t_to_nid', veh.t - (t+veh.t_to_nid))
-            #         if self.reqs[17142] in self.reqs_unassigned:
-            #             print('self.reqs[17142] becomes unassigned')
-            #         if self.reqs[17142] in self.reqs_picking:
-            #             print('self.reqs[17142] becomes picking')
-            #         if self.reqs[17142] in self.reqs_serving:
-            #             print('self.reqs[17142] becomes serving')
-            #         print('')
-            #     if not np.isclose(d + d_to_nid, veh.d):
-            #         schedule = []
-            #         if len(veh.route) != 0:
-            #             schedule = [(leg.rid, leg.pod) for leg in veh.route]
-            #         print('error veh.d, veh', veh.id, ', passengers', veh.n)
-            #         print('route record', veh.route_record)
-            #         print('schedule', schedule)
-            #         print('rid on board', veh.onboard_rid, ', new pick',
-            #               veh.new_pick_rid, ', new drop', veh.new_drop_rid)
-            #         print('  veh.d - d + d_to_nid', veh.d - (d + d_to_nid))
-            #         print()
-            #     assert np.isclose(t+veh.t_to_nid, veh.t)
-            #     # assert d + d_to_nid <= veh.d <= d + d_to_nid + 5
-            # # debug code ends
-
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'naive':
                 if IS_DEBUG:
@@ -271,7 +211,7 @@ class Model(object):
                         if not veh.idle:
                             for leg in veh.route:
                                 if leg.pod == 1 or leg.pod == -1:
-                                    schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl))
+                                    schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
                             rid_fail = veh.build_route(schedule, self.reqs, self.T)
                             if rid_fail:
                                 R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
@@ -292,7 +232,7 @@ class Model(object):
                 if veh.id in V_id_assigned:
                     schedule = schedule_assigned[V_id_assigned.index(veh.id)]
                     if not IS_STOCHASTIC:
-                        if schedule == [(leg.rid, leg.pod, leg.tnid, leg.ddl) for leg in veh.route]:
+                        if schedule == [(leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path) for leg in veh.route]:
                             # vehicles with the same trip
                             continue
                 else:
@@ -303,7 +243,7 @@ class Model(object):
                                 continue
                         for leg in veh.route:
                             if leg.rid in veh.onboard_rid:
-                                schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl))
+                                schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
                 rid_fail = veh.build_route(schedule, self.reqs, self.T)
                 if rid_fail:
                     R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
@@ -327,7 +267,7 @@ class Model(object):
         for rid, vid, schedule in zip(R_id_rebl, V_id_rebl, schedule_rebl):
             rid_fail = self.vehs[vid].build_route(schedule, self.reqs, self.T)
             assert rid_fail is None
-            self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), [schedule])]
+            self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), schedule, 0, [schedule])]
         self.rid_assigned_last.update(R_id_rebl)
         R_rebl = {self.reqs[rid] for rid in R_id_rebl}
         self.reqs_picking.update(R_rebl)

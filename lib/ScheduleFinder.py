@@ -5,7 +5,7 @@ compute all feasible schedules for given vehicle v and trip T.
 import copy
 import time
 import numpy as np
-from lib.Configure import COEF_WAIT, COEF_INVEH, NOD_TTT, IS_STOCHASTIC_CONSIDERED, NET_NYC
+from lib.Configure import COEF_WAIT, COEF_INVEH, IS_STOCHASTIC_CONSIDERED
 from lib.Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx, get_edge_dur, get_edge_std
 
 
@@ -69,8 +69,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
 
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constrain of a req already in the schedule,
-        # it cannot be picked-up before that req.
-        dt = get_duration(veh.nid, req.onid)
+        # then it cannot be picked-up before that req. (seems not work as expected)
+        dt = get_duration(veh.nid, req.onid) + veh.t_to_nid
         for i in reversed(range(l)):
             if veh.T + dt > schedule[i][3]:
                 ealist_pick_up_point = i + 1
@@ -91,8 +91,8 @@ def compute_schedule(veh, trip, _trip, _schedules):
                 viol = 0
                 if j < ealist_drop_off_point:
                     continue
-                schedule.insert(i, (req.id, 1, req.onid, req.Clp))
-                schedule.insert(j, (req.id, -1, req.dnid, req.Cld))
+                schedule.insert(i, (req.id, 1, req.onid, req.Clp, None))
+                schedule.insert(j, (req.id, -1, req.dnid, req.Cld, None))
                 flag, c, viol = test_constraints_get_cost(veh, trip, schedule, req, j)  # j: req's drop-off point index
                 if flag:
                     feasible_schedules.append(copy.deepcopy(schedule))
@@ -106,30 +106,27 @@ def compute_schedule(veh, trip, _trip, _schedules):
             if viol == 3:
                 break
 
-    # # calibrate the min_cost to osrm result, instead using the travel time table
-    # if best_schedule is not None:
-    #     min_cost = compute_schedule_cost(best_schedule, veh)
     return best_schedule, min_cost, feasible_schedules
 
 
 # test if a schedule can satisfy all constraints, return the cost (if yes) or the type of violation (if no)
-def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
-    t = 0.0
+def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_drop_idx):
+    t = veh.t_to_nid
     n = veh.n
-    T = veh.T + veh.t_to_nid
+    T = veh.T
     K = veh.K
     nid = veh.nid
-    insert_req_id = req.id
+    insert_req_id = newly_insert_req.id
 
     # test the capacity constraint during the whole schedule
-    for (rid, pod, tnid, ddl) in schedule:
+    for (rid, pod, tnid, ddl, pf_path) in schedule:
         n += pod
         if n > K:
             return False, None, 1  # over capacity
 
     # test the pick-up and drop-off time constraint for each passenger on board
-    idx = 0
-    for (rid, pod, tnid, ddl) in schedule:
+    idx = -1
+    for (rid, pod, tnid, ddl, pf_path) in schedule:
         idx += 1
         dt = get_duration(nid, tnid)
         t += dt
@@ -174,8 +171,8 @@ def test_constraints_get_cost(veh, trip, schedule, req, drop_point):
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
                 return False, None, 2 if pod == -1 else 3
-            if idx <= drop_point:
-                # idx<=drop_point means the violation is caused by the pick-up of req,
+            if idx < new_req_drop_idx:
+                # idx<=new_req_drop_idx means the violation is caused by the pick-up of req,
                 # since the violation happens before the drop-off of req
                 return False, None, 4
             return False, None, 0
@@ -190,12 +187,12 @@ def compute_schedule_cost(veh, trip, schedule):
     c_delay = 0.0
     c_wait = 0.0
     # c_inveh = 0.0
-    t = 0.0
+    t = veh.t_to_nid
     n = veh.n
-    T = veh.T + veh.t_to_nid
+    T = veh.T
     nid = veh.nid
     reqs_in_schedule = list(trip) + list(veh.onboard_reqs)
-    for (rid, pod, tnid, ddl) in schedule:
+    for (rid, pod, tnid, ddl, pf_path) in schedule:
         dt = get_duration(nid, tnid)
         t += dt
         # c_inveh += n * dt * COEF_INVEH
