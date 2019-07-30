@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, RIDESHARING_SIZE, \
-    MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, IS_STOCHASTIC
+from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, \
+    RIDESHARING_SIZE, MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, \
+    MODEE, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
 
 # print and save results
@@ -101,10 +102,12 @@ def print_results(model, runtime):
     print('system settings:')
     print('  - from %s to %s, with %d intervals'
           % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
-    print('  - fleet size: %d; capacity: %d; ride-sharing size: %d' % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - max waiting time: %d; max detour: %.1f, stochastic: %s' % (MAX_WAIT, MAX_DETOUR, IS_STOCHASTIC))
+    print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
+          % (model.V, model.K, RIDESHARING_SIZE))
+    print('  - demand value:%.02f, max waiting time: %d; max detour: %.1f' % (DMD_VOL, MAX_WAIT, MAX_DETOUR))
     print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('simulation results:')
     print('  - requests (%d):' % count_reqs)
     print('    + served rate: %.2f%% (%d), serving rate: %.2f%% (%d), total service rate: %.2f%% (%d)'

@@ -1,11 +1,9 @@
 """
-defination of routes for the AMoD system
+definition of routes for the AMoD system
 """
 
-import time
 import math
 import copy
-import requests
 import numpy as np
 import networkx as nx
 from collections import deque
@@ -47,9 +45,10 @@ class Leg(object):
         t: total duration
         d: total distance
         steps: a list of steps
+        pf_path: preferred path rather than the shortest path
     """
 
-    def __init__(self, rid, pod, tnid, ddl, t=0.0, d=0.0, steps=[]):
+    def __init__(self, rid, pod, tnid, ddl, t=0.0, d=0.0, steps=[], pf_path=None):
         self.rid = rid
         self.pod = pod
         self.tnid = tnid
@@ -57,9 +56,30 @@ class Leg(object):
         self.t = t
         self.d = d
         self.steps = deque(steps)
+        self.pf_path = pf_path
 
     def __str__(self):
         return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
+
+
+class ScheTask(object):  # not used, cause using class will consume more time than just using tuple
+    """
+    ScheTask is a class for tasks in a schedule,
+    where a schedule is a sequence of pick up and drop off tasks in a route
+    Attributes:
+        rid: request id (if rebalancing then -1)
+        pod: pickup (+1) or dropoff (-1), rebalancing (0)
+        tnid: target (end of task) node id in network
+        ddl: latest arriving time
+        pf_path: preferred path rather than the shortest path
+    """
+
+    def __init__(self, rid, pod, tnid, ddl, pf_path=None):
+        self.rid = rid
+        self.pod = pod
+        self.tnid = tnid
+        self.ddl = ddl
+        self.pf_path = pf_path
 
 
 # get the duration of the best route from origin to destination
@@ -268,57 +288,6 @@ def k_shortest_paths(G, source, target, k=1, weight='dur'):
 
 def k_shortest_paths_nx(source, target, k, weight='dur'):
     return list(islice(nx.shortest_simple_paths(G, source, target, weight=weight), k))
-
-
-# # codes for OSRM, not used now
-# # generate the request in url format
-# def create_url(olng, olat, dlng, dlat, steps='false', annotations='false'):
-#     ghost = '0.0.0.0'
-#     gport = 5000
-#     return 'http://{0}:{1}/route/v1/driving/{2},{3};{4},{5}?alternatives=false&steps=' \
-#            '{6}&annotations={7}&geometries=geojson'.format(
-#             ghost, gport, olng, olat, dlng, dlat, steps, annotations)
-#
-#
-# # send the request and get the response in Json format
-# def call_url(url):
-#     while True:
-#         try:
-#             response = requests.get(url, timeout=1)
-#             json_response = response.json()
-#             code = json_response['code']
-#             if code == 'Ok':
-#                 return json_response, True
-#             else:
-#                 print('Error: %s' % (json_response['message']))
-#                 return json_response, False
-#         except requests.exceptions.Timeout:
-#             # print('Time out: %s' % url)
-#             time.sleep(2)
-#         except Exception as err:
-#             print('Failed: %s' % url)
-#             # return None
-#             time.sleep(2)
-#
-#
-# # get the best route from origin to destination
-# def get_routing_from_osrm(olng, olat, dlng, dlat):
-#     url = create_url(olng, olat, dlng, dlat, steps='true', annotations='false')
-#     response, code = call_url(url)
-#     if code:
-#         return response['routes'][0]['legs'][0]
-#     else:
-#         return None
-#
-#
-# # get the duration of the best route from origin to destination
-# def get_duration_from_osrm(olng, olat, dlng, dlat):
-#     url = create_url(olng, olat, dlng, dlat, steps='false', annotations='false')
-#     response, code = call_url(url)
-#     if code:
-#         return response['routes'][0]['duration']
-#     else:
-#         return None
 
 
 

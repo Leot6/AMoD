@@ -9,8 +9,8 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.Main import Model
-from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_STR, \
-    RIDESHARING_SIZE, MAX_WAIT, MAX_DETOUR, MET_ASSIGN, MET_REBL, INT_REBL, IS_STOCHASTIC
+from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
+    RIDESHARING_SIZE, MAX_WAIT, MAX_DETOUR, MET_ASSIGN, MET_REBL, INT_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
@@ -27,16 +27,17 @@ if __name__ == '__main__':
           % (DMD_SST, DMD_SST + datetime.timedelta(seconds=T_TOTAL), T_TOTAL / INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - max waiting time: %d; max detour: %.1f, stochastic: %s' % (MAX_WAIT, MAX_DETOUR, IS_STOCHASTIC))
+    print('  - demand value:%.02f, max waiting time: %d; max detour: %.1f' % (DMD_VOL, MAX_WAIT, MAX_DETOUR))
     print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('*' * 80)
     print('')
 
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in tqdm(range(INT_ASSIGN, T_TOTAL, INT_ASSIGN), desc='AMoD simulation'):
+    for T in tqdm(range(INT_ASSIGN, T_TOTAL+INT_ASSIGN, INT_ASSIGN), desc='AMoD simulation'):
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)

@@ -1,5 +1,5 @@
 """
-defination of vehicles for the AMoD system
+definition of vehicles for the AMoD system
 """
 
 import copy
@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE, MODEE
+from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
 from lib.Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
 
 
@@ -24,7 +24,7 @@ class Veh(object):
         lng: current longtitude
         nid: current nearest node id in network
         step_to_nid: step from current location (when veh is on an edge) to the sink node in network
-        t_to_nid = 0: travel time from current location (when veh is on an edge) to the sink node in network
+        t_to_nid: travel time from current location (when veh is on an edge) to the sink node in network
         tnid: target (end of route) node id
         K: capacity
         n: number of passengers on board
@@ -70,7 +70,7 @@ class Veh(object):
         self.Tr = 0.0
         self.Lt = 0.0
         self.Ld = 0.0
-        self.VTtable = [[] for i in range(RIDESHARING_SIZE+2)]
+        self.VTtable = [[] for i in range(RIDESHARING_SIZE)]
         self.onboard_reqs = set()
         self.onboard_rid = []
         self.new_pick_rid = []
@@ -87,34 +87,12 @@ class Veh(object):
             return []
         self.step_to_nid = None
         self.t_to_nid = 0
-
-        # # debug
-        # print('total  time', round(self.Ts + self.t, 2))
-        # print('remain time', round(self.t, 2))
-        # print('t2nid before move', round(self.t_to_nid, 2))
-
-        # # debug
-        # if self.id == 91:
-        #     move_d = 0
-        #     print(' move 111', move_d)
-
         # done is a list of finished legs
         done = []
         while dT > 0 and len(self.route) > 0:
-
-            # # debug
-            # if self.id == 91:
-            #     print(' move 222')
-
             leg = self.route[0]
             # if the first leg could be finished by then
             if leg.t < dT:
-
-                # # debug
-                # if self.id == 91:
-                #     move_d -= leg.d
-                #     print(' move 333', move_d)
-
                 dT -= leg.t
                 self.T += leg.t
                 if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
@@ -134,21 +112,10 @@ class Veh(object):
 
                 self.pop_leg()
             else:
-
-                # # debug
-                # if self.id == 91:
-                #     print(' move 444')
-
                 while dT > 0 and len(leg.steps) > 0:
                     step = leg.steps[0]
                     # if the first leg could not be finished, but the first step of the leg could be finished by then
                     if step.t < dT:
-
-                        # # debug
-                        # if self.id == 91:
-                        #     move_d -= step.d
-                        #     print(' move 555', move_d, step.d)
-
                         dT -= step.t
                         self.T += step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
@@ -162,12 +129,6 @@ class Veh(object):
                         self.pop_step()
 
                         if len(leg.steps) == 0:
-
-                            # # debug
-                            # if self.id == 91:
-                            #     moove_d -= leg.d
-                            #     print(' move 666', move_d, step.d)
-
                             # corner case: leg.t extremely small, but still larger than dT
                             # this is due to the limited precision of the floating point numbers
                             self.jump_to_location(leg.tnid)
@@ -183,11 +144,6 @@ class Veh(object):
                     # the vehicle has to stop somewhere within the step
                     else:
 
-                        # # debug
-                        # if self.id == 91:
-                        #     move_d -= dT / step.t * step.d
-                        #     print(' move 777', move_d, step.d)
-
                         pct = dT / step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
                             self.Ts += dT if leg.rid != -1 else 0
@@ -200,12 +156,6 @@ class Veh(object):
                         self.cut_step(pct)
                         self.jump_to_location(step.nid[0], step.geo[0][0], step.geo[0][1])
                         self.T = T
-
-                        # # debug
-                        # print('total  time', round(self.Ts + self.t, 2))
-                        # print('remain time', round(self.t, 2))
-                        # print('t2nid after cut', round(self.t_to_nid, 2))
-
                         return done
         assert dT > 0 or np.isclose(dT, 0.0)
         assert self.T < T or np.isclose(self.T, T)
@@ -236,9 +186,9 @@ class Veh(object):
     # find the exact location the vehicle stops and update the step
     def cut_step(self, pct):
         step = self.route[0].steps[0]
+        step.nid[0] = step.nid[1]
         step.geo[0][0] += pct * (step.geo[1][0] - step.geo[0][0])
         step.geo[0][1] += pct * (step.geo[1][1] - step.geo[0][1])
-        step.nid[0] = step.nid[1]
         self.t_to_nid = step.t * (1 - pct)
         self.t -= step.t * pct
         self.d -= step.d * pct
@@ -248,6 +198,7 @@ class Veh(object):
         self.route[0].steps[0].d -= step.d * pct
         assert self.route[0].steps[0].nid[0] == self.route[0].steps[0].nid[1]
         self.step_to_nid = copy.deepcopy(self.route[0].steps[0])
+        assert np.isclose(self.step_to_nid.t, self.t_to_nid)
 
     def jump_to_location(self, nid, lng=None, lat=None):
         self.nid = nid
@@ -292,11 +243,8 @@ class Veh(object):
                 self.tnid = leg.steps[-1].nid[1]
                 self.d += leg.d
                 self.t += leg.t
-            for (rid, pod, tnid, ddl) in schedule:
+            for (rid, pod, tnid, ddl, pf_path) in schedule:
                 self.add_leg(rid, pod, tnid, ddl, reqs, T)
-            # if self.step_to_nid:
-            #     self.d += self.step_to_nid.d
-            #     self.t += self.step_to_nid.t
         # if rid is -1, vehicle is rebalancing
         if self.route[0].rid == -1:
             self.idle = True

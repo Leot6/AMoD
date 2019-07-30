@@ -31,8 +31,8 @@ def naive_rebalance(vehs, reqs_unassigned):
             for req in reqs_unassigned:
                 schedule = []
                 dt = get_duration(veh.nid, req.onid)
-                schedule.append((req.id, 1, req.onid, req.Clp))
-                schedule.append((req.id, -1, req.dnid, req.Cld))
+                schedule.append((req.id, 1, req.onid, req.Clp, None))
+                schedule.append((req.id, -1, req.dnid, req.Cld, None))
                 rebl_veh_req.append((veh, tuple([req]), copy.deepcopy(schedule), dt))
     R_id_rebl, V_id_rebl, schedule_rebl = greedy_assign(rebl_veh_req)
     assert len(R_id_rebl) == len(V_id_rebl)
