@@ -132,7 +132,7 @@ def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_dro
         t += dt
 
         # temp solution
-        if T + t <= ddl and IS_STOCHASTIC_CONSIDERED:
+        if IS_STOCHASTIC_CONSIDERED and T + t <= ddl:
             # solution 1
             path = get_path_from_SPtable(nid, tnid)
             variance = 0
@@ -142,11 +142,11 @@ def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_dro
                 variance += np.square(get_edge_std(u, v))
             standard_deviation = np.sqrt(variance)
 
-            # solution 2
-            # if T + t + 2.5 * standard_deviation > ddl:
+            # # solution 2
+            # if ddl + 50 > T + t + 1.5 * standard_deviation > ddl:
             #     KSP = k_shortest_paths_nx(nid, tnid, 10, 'dur')
-            #     min_mean = np.inf
-            #     min_thre = np.inf
+            #     best_mean = np.inf
+            #     best_thre = np.inf
             #     for path in KSP:
             #         mean = 0
             #         variance = 0.0
@@ -157,16 +157,16 @@ def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_dro
             #             variance += get_edge_std(u, v)
             #         standard_deviation = np.sqrt(variance)
             #         mean = round(mean, 2)
-            #         thre = round(mean + 2.5 * standard_deviation, 2)
-            #         if mean < min_mean:
-            #             min_mean = mean
-            #         if thre < min_thre:
-            #             min_thre = thre
-            #     standard_deviation = (min_thre - min_mean) / 2.5
+            #         thre = round(mean + 1.5 * standard_deviation, 2)
+            #         if thre < best_thre:
+            #             best_thre = thre
+            #             best_mean = mean
+            #     standard_deviation = (best_thre - best_mean) / 1.5
+            #     t = t - dt + best_mean
         else:
             standard_deviation = 0
 
-        if T + t + 1.5 * standard_deviation > ddl:
+        if T + t + 2.5 * standard_deviation > ddl:
             if rid == insert_req_id:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time

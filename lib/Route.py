@@ -92,8 +92,11 @@ def get_duration(onid, dnid):
 
 
 # get the best route from origin to destination
-def get_routing(onid, dnid):
-    path = get_path_from_SPtable(onid, dnid)
+def get_routing(onid, dnid, pf_path=None):
+    if pf_path:
+        path = pf_path
+    else:
+        path = get_path_from_SPtable(onid, dnid)
     duration, distance, steps = build_route_from_path(path)
     # print('SPT', path, duration, distance)
     return duration, distance, steps
@@ -118,13 +121,13 @@ def build_route_from_path(path):
     for i in range(len(path) - 1):
         u = path[i]
         v = path[i + 1]
-        t = get_edge_dur(u, v)
+        t = G.get_edge_data(u, v, default={'dur': None})['dur']
         d = get_edge_dist(u, v)
         u_geo = get_node_geo(u)
         v_geo = get_node_geo(v)
         steps.append((t, d, [u, v], [u_geo, v_geo]))
-        distance += d
         duration += t
+        distance += d
     tnid = path[-1]
     tnid_geo = get_node_geo(tnid)
     steps.append((0.0, 0.0, [tnid, tnid], [tnid_geo, tnid_geo]))
@@ -177,7 +180,7 @@ def get_edge_dist(u, v):
 
 # return the geo of node [lng, lat]
 def get_node_geo(nid):
-    return list(G.nodes[nid]['pos'])
+    return list(NET_NYC.nodes[nid]['pos'])
 
 
 # find the nearest node to[lng, lat] in Manhattan network

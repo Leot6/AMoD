@@ -32,7 +32,6 @@ class Veh(object):
         route: a list of legs
         t: total duration of the route
         d: total distance of the route
-        c: total cost (generalized time) of the passegners
         Ds: accumulated service distance traveled
         Ts: accumulated service time traveled
         Dr: accumulated rebalancing distance traveled
@@ -63,7 +62,6 @@ class Veh(object):
         self.route = deque([])
         self.t = 0.0
         self.d = 0.0
-        self.c = 0.0
         self.Ds = 0.0
         self.Ts = 0.0
         self.Dr = 0.0
@@ -207,83 +205,51 @@ class Veh(object):
         self.lng = lng
         self.lat = lat
 
-    # build the route of the vehicle based on a series of quadruples (rid, pod, tlng, tlat)
-    # update t, d, c, idle, rebl accordingly
+    # build the route of the vehicle based on a series of schedule tasks (rid, pod, tnid, ddl, pf_path)
+    # update t, d, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
     def build_route(self, schedule, reqs=None, T=None):
         self.clear_route()
-        # if the route is null, vehicle is idle
-        if len(schedule) == 0:
-            self.idle = True
-            self.rebl = False
-            self.t = 0.0
-            self.d = 0.0
-            self.c = 0.0
-            self.step_to_nid = None
-            self.t_to_nid = 0
-            return
-        else:
-            if self.step_to_nid:
-                # add the unfinished step from last move updating
-                rid = -2
-                pod = 0
-                tnid = self.step_to_nid.nid[1]
-                tlng = self.step_to_nid.geo[1][0]
-                tlat = self.step_to_nid.geo[1][1]
-                ddl = self.T + self.step_to_nid.t
-                duration = self.step_to_nid.t
-                distance = self.step_to_nid.d
-                steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [tnid, tnid], [[tlng, tlat], [tlng, tlat]])]
-                leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
-                # the last step of a leg is always of length 2,
-                # consisting of 2 identical points as a flag of the end of the leg
-                assert len(leg.steps[-1].geo) == 2
-                assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
-                self.route.append(leg)
-                self.tnid = leg.steps[-1].nid[1]
-                self.d += leg.d
-                self.t += leg.t
-            for (rid, pod, tnid, ddl, pf_path) in schedule:
-                self.add_leg(rid, pod, tnid, ddl, reqs, T)
-        # if rid is -1, vehicle is rebalancing
-        if self.route[0].rid == -1:
-            self.idle = True
-            self.rebl = True
-            self.c = 0.0
-        # else, the vehicle is in service to pick-up or drop-off
-        else:
+        if self.step_to_nid:
+            assert self.lng == self.step_to_nid.geo[0][0]
+            # add the unfinished step from last move updating
+            rid = -2
+            pod = 0
+            tnid = self.step_to_nid.nid[1]
+            tlng = self.step_to_nid.geo[1][0]
+            tlat = self.step_to_nid.geo[1][1]
+            ddl = self.T + self.step_to_nid.t
+            duration = self.step_to_nid.t
+            distance = self.step_to_nid.d
+            steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [tnid, tnid], [[tlng, tlat], [tlng, tlat]])]
+            leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
+            # the last step of a leg is always of length 2,
+            # consisting of 2 identical points as a flag of the end of the leg
+            assert len(leg.steps[-1].geo) == 2
+            assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
+            self.route.append(leg)
+            self.tnid = leg.steps[-1].nid[1]
+            self.d += leg.d
+            self.t += leg.t
+        for (rid, pod, tnid, ddl, pf_path) in schedule:
+            self.add_leg(rid, pod, tnid, ddl, pf_path, reqs, T)
+
+        if len(self.route) != 0:
             # verify the route with capacity constraint and get the cost of the route
-            c = 0.0
             self.idle = False
             self.rebl = False
             t = 0.0
             n = self.n
             for leg in self.route:
                 t += leg.t
-                c += n * leg.t * COEF_INVEH
                 n += leg.pod
-                c += t * COEF_WAIT if leg.pod == 1 else 0
-
-            # debug code starts
-            if n != 0:
-                schedule = [(leg.rid, leg.pod) for leg in self.route]
-                print('')
-                print('error n!=0, veh', self.id, ', passengers', self.n)
-                print('route record', self.route_record)
-                print('schedule', schedule)
-                print('rid on board', self.onboard_rid, ', new pick', self.new_pick_rid, ', new drop', self.new_drop_rid)
-                print('')
-            # debug code ends
-
             assert n == 0
-            self.c = c
-        return
 
-    # add a leg based on (rid, pod, tnid, ddl)
-    def add_leg(self, rid, pod, tnid, ddl, reqs, T):
-        duration, distance, segments = get_routing(self.tnid, tnid)
+    # add a leg based on (rid, pod, tnid, ddl, pf_path)
+    def add_leg(self, rid, pod, tnid, ddl, pf_path, reqs, T):
+        duration, distance, segments = get_routing(self.tnid, tnid, pf_path)
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
-        leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
+        leg = Leg(rid, pod, tnid, ddl, duration, distance, steps, pf_path)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         assert len(leg.steps[-1].geo) == 2
@@ -304,9 +270,9 @@ class Veh(object):
         self.route.clear()
         self.d = 0.0
         self.t = 0.0
-        self.c = 0.0
         self.tnid = self.nid
         self.idle = True
+        self.rebl = False
 
     # visualize
     def draw(self):
@@ -338,8 +304,8 @@ class Veh(object):
             self.n, self.K)
         str += '\n  service dist/time: %.1f, %.1f; rebalancing dist/time: %.1f, %.1f' % (
             self.Ds, self.Ts, self.Dr, self.Tr)
-        str += '\n  has %d leg(s), dist = %.1f, dura = %.1f，cost = %.1f' % (
-            len(self.route), self.d, self.t, self.c)
+        str += '\n  has %d leg(s), dist = %.1f, dura = %.1f' % (
+            len(self.route), self.d, self.t)
         for leg in self.route:
             str += '\n    %s req %d at (%d), dist = %.1f, dura = %.1f' % (
                 'pickup' if leg.pod == 1 else 'dropoff' if leg.pod == -1 else 'rebalancing',
