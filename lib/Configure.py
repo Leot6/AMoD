@@ -10,7 +10,7 @@ from dateutil.parser import parse
 MODEE = 'VT_replan'
 # MODEE = 'VT_replan_all'
 
-# travel mode
+# travel time mode
 # IS_STOCHASTIC = True
 IS_STOCHASTIC = False
 # IS_STOCHASTIC_CONSIDERED = True
@@ -41,7 +41,7 @@ VEH_CAPACITY = 4
 RIDESHARING_SIZE = 4
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
-MAX_WAIT = 30 * 5
+MAX_WAIT = 60 * 5
 MAX_DELAY = MAX_WAIT * 2
 MAX_DETOUR = 1.3
 
@@ -50,15 +50,15 @@ INT_ASSIGN = 60
 INT_REBL = INT_ASSIGN * 1
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 0
+T_WARM_UP = 60 * 30
 T_STUDY = 60 * 30
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # methods for vehicle-request assignment and rebalancing
 MET_ASSIGN = 'ILP'
-MET_REBL = 'naive'
-# MET_REBL = 'None'
+# MET_REBL = 'naive'
+MET_REBL = 'None'
 
 # running time threshold for RTV building(each single vehicle) and ILP solver
 CUTOFF_RTV = 600
@@ -67,7 +67,7 @@ CUTOFF_ILP = 15
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
-IS_DEBUG = False
+IS_DEBUG = True
 
 # coefficients for wait time, in-vehicle travel time in the cost function
 COEF_WAIT = 1.0

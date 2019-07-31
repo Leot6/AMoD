@@ -47,7 +47,7 @@ def feasible_trips_search(veh, reqs_new, reqs_old, T):
         veh.VTtable[0].clear()
     else:
         veh.VTtable[0] = get_old_trips(veh, rid_old, k=1)
-    l_old_trips_k = len(veh.VTtable[0])  # number of old trips of size 0
+    l_old_trips_k = len(veh.VTtable[0])  # number of old trips of size 1
 
     # add new trips (size 1)
     _schedule = []

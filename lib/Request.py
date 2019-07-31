@@ -67,23 +67,3 @@ class Req(object):
         str += '\n  latest pickup at t = %.3f, latest dropoff at t = %.3f' % (self.Clp, self.Cld)
         str += '\n  pickup at t = %.3f, dropoff at t = %.3f' % (self.Tp, self.Td)
         return str
-
-
-class Trip(object):
-    """
-    Trip is a group of requests that can be served together by a single vehicle
-    Attributes:
-        reqs: a group of requests
-        sche: the optimal schedule
-        cost: travel cost
-        all_sches: a list of all feasible schedules
-    """
-
-    def __init__(self, reqs, sche, cost, all_sches=[]):
-        self.reqs = reqs
-        self.sche = sche
-        self.cost = cost
-        self.all_schedules = all_sches
-
-
-

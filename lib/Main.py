@@ -199,11 +199,8 @@ class Model(object):
     # execute the assignment from AssignPlanner and build (update) route for vehicles
     def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
         if MODEE == 'VT':
-            R_assigned_failed = set()
             for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-                rid_fail = self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
-                if rid_fail:
-                    R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
+                self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
             if IS_STOCHASTIC:
                 for veh in self.vehs:
                     schedule = []
@@ -212,10 +209,8 @@ class Model(object):
                             for leg in veh.route:
                                 if leg.pod == 1 or leg.pod == -1:
                                     schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                            rid_fail = veh.build_route(schedule, self.reqs, self.T)
-                            if rid_fail:
-                                R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
-            R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
+                            veh.build_route(schedule, self.reqs, self.T)
+            R_assigned = {self.reqs[rid] for rid in R_id_assigned}
             self.reqs_picking.update(R_assigned)
             R_unassigned = set(self.queue) - R_assigned
             self.reqs_unassigned.update(R_unassigned)
@@ -226,7 +221,6 @@ class Model(object):
             assert len(reqs_pool) == len(set(reqs_pool))
             self.queue.clear()
             self.reqs_picking.clear()
-            R_assigned_failed = set()
             for veh in self.vehs:
                 schedule = []
                 if veh.id in V_id_assigned:
@@ -243,14 +237,12 @@ class Model(object):
                                 continue
                         for leg in veh.route:
                             if leg.rid in veh.onboard_rid:
-                                schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                rid_fail = veh.build_route(schedule, self.reqs, self.T)
-                if rid_fail:
-                    R_assigned_failed.update({self.reqs[rid] for rid in rid_fail})
-            R_assigned = {self.reqs[rid] for rid in R_id_assigned} - R_assigned_failed
+                                    schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
+                veh.build_route(schedule, self.reqs, self.T)
+            R_assigned = {self.reqs[rid] for rid in R_id_assigned}
             self.reqs_picking.update(R_assigned)
             self.reqs_unassigned = set(reqs_pool) - R_assigned
-            self.rid_assigned_last = set(R_id_assigned) - {req.id for req in R_assigned_failed}
+            self.rid_assigned_last = set(R_id_assigned)
 
         # debug code starts
         reqs_on_vehs = []
@@ -265,8 +257,7 @@ class Model(object):
     # execute the assignment from Rebalancer and build route for ilde vehicles
     def exec_rebl(self, R_id_rebl, V_id_rebl, schedule_rebl):
         for rid, vid, schedule in zip(R_id_rebl, V_id_rebl, schedule_rebl):
-            rid_fail = self.vehs[vid].build_route(schedule, self.reqs, self.T)
-            assert rid_fail is None
+            self.vehs[vid].build_route(schedule, self.reqs, self.T)
             self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), schedule, 0, [schedule])]
         self.rid_assigned_last.update(R_id_rebl)
         R_rebl = {self.reqs[rid] for rid in R_id_rebl}

@@ -14,10 +14,6 @@ def greedy_assign(veh_trip_edges):
     V_id_assigned = []
     schedule_assigned = []
 
-    # debug
-    cost_a = 0
-    V_T_assigned = []
-
     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
     for (veh, trip, schedule, cost) in edges:
         veh_id = veh.id
@@ -34,11 +30,6 @@ def greedy_assign(veh_trip_edges):
         schedule_assigned.append(schedule)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
 
-        # debug
-        cost_a += cost
-
-    # if IS_DEBUG:
-    #     print('        greedy assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
     return R_id_assigned, V_id_assigned, schedule_assigned
 
 
@@ -85,15 +76,6 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
             V_T_idx[-1].append(idx)
             for req in trip:
                 R_T_idx[R_id.index(req.id)].append(idx)
-
-            # # debug
-            # if veh.id == 0:
-            #     print()
-            #     print()
-            #     print('veh:', veh.id)
-            #     print('   -trip:', {r.id for r in trip})
-            #     print('   -sche:', [(rid, pod) for (rid, pod, tnid, ddl) in schedule])
-            #     print('   -cost:', cost)
 
         numvar = numedges + numreqs
         numvehs = len(V_id)
@@ -188,43 +170,12 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
 
         # debug code starts
         assert len(R_id_assigned) == len(set(R_id_assigned))
-        # assigned_req = []
-        for i in range(numedges, numvar):
-            if assign_idx[i] == 1.0:
-                if R_id[i-numedges] in rid_assigned_last:
-                    cost_a += cost_ignore_high
-                else:
-                    cost_a += cost_ignore_normal
-        #     else:
-        #         assigned_req.append(R_id[i-numedges])
-        # wrong_req = set(assigned_req) - set(R_id_assigned)
-        # print('wrong req', wrong_req)
-        # for rid in wrong_req:
-        #     idx1 = R_id.index(rid)
-        #     idx2 = R_T_idx[idx1]
-        #     ass_rid = [assign_idx[i] for i in idx2]
-        #     print('wrong req', rid, 'assign', assign_idx[idx2[0]], sum(ass_rid))
-        #     for i in idx2:
-        #         if assign_idx[i] > 0.9:
-        #             # veh_trip_edges[i][]
-        #             print(i, assign_idx[i], round(assign_idx[i]))
-        # debug code ends
-
-        # if IS_DEBUG:
-        #     print('        ILP assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
-        #     # print('number of reqs', len(reqs_pool), ', number of vehs', len(V_id), ', number of edges', len(veh_trip_edges))
-        #     print('        ILP running time:', (time.time() - ss))
 
         if MODEE == 'VT_replan':
             rid_assigned_last_not_assigned_this_time = \
                 rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
             # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
             assert len(rid_assigned_last_not_assigned_this_time) == 0
-
-    # # debug
-    # print('   ILP assign cost:', round(cost_a, 2), ', num of req and veh:', [len(R_id_assigned), len(V_id_assigned)])
-    # for (vid, tid) in V_T_assigned:
-    #     print('          veh:', vid, ', trip:', tid)
 
     return R_id_assigned, V_id_assigned, schedule_assigned
 
