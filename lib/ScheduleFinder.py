@@ -6,7 +6,7 @@ import copy
 import time
 import numpy as np
 from lib.Configure import COEF_WAIT, COEF_INVEH, IS_STOCHASTIC_CONSIDERED
-from lib.Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx, get_edge_dur, get_edge_std
+from lib.Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx, get_edge_mean_dur, get_edge_std
 
 
 # (schedules of trip T of size k are computed based on schedules of its subtrip of size k-1)
@@ -93,7 +93,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
                     continue
                 schedule.insert(i, (req.id, 1, req.onid, req.Clp, None))
                 schedule.insert(j, (req.id, -1, req.dnid, req.Cld, None))
-                flag, c, viol = test_constraints_get_cost(veh, trip, schedule, req, j)  # j: req's drop-off point index
+                flag, c, viol = test_constraints_get_cost(veh, trip, schedule, req, i, j)
                 if flag:
                     feasible_schedules.append(copy.deepcopy(schedule))
                     if c < min_cost:
@@ -110,7 +110,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
 
 
 # test if a schedule can satisfy all constraints, return the cost (if yes) or the type of violation (if no)
-def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_drop_idx):
+def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_pick_idx, new_req_drop_idx):
     t = veh.t_to_nid
     n = veh.n
     T = veh.T
@@ -153,7 +153,7 @@ def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_dro
             #         for i in range(len(path) - 1):
             #             u = path[i]
             #             v = path[i + 1]
-            #             mean += get_edge_dur(u, v)
+            #             mean += get_edge_mean_dur(u, v)
             #             variance += get_edge_std(u, v)
             #         standard_deviation = np.sqrt(variance)
             #         mean = round(mean, 2)
@@ -166,7 +166,7 @@ def test_constraints_get_cost(veh, trip, schedule, newly_insert_req, new_req_dro
         else:
             standard_deviation = 0
 
-        if T + t + 2.5 * standard_deviation > ddl:
+        if idx >= new_req_pick_idx and T + t + 2.5 * standard_deviation > ddl:
             if rid == insert_req_id:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
@@ -206,8 +206,8 @@ def compute_schedule_cost(veh, trip, schedule):
                         c_delay += round(T + t - (req.Tr + req.Ts))
                     break
         nid = tnid
-    cost = c_delay
-    # cost = c_wait + c_delay
+    # cost = c_delay
+    cost = c_wait + c_delay
     # cost = c_wait
     return cost
 

@@ -66,9 +66,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
 
         V_id = [veh_trip_edges[0][0].id]
         V_T_idx = [[]]
-        idx = -1
-        for (veh, trip, schedule, cost) in veh_trip_edges:
-            idx += 1
+        for idx, (veh, trip, schedule, cost) in zip(range(numedges), veh_trip_edges):
             vid = veh.id
             if vid != V_id[-1]:
                 V_id.append(vid)
@@ -138,7 +136,8 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
                 # init_assign_idx = [0.] * numedges + [1.0] * numreqs
                 # R_id_init_assigned, V_id_init_assigned, schedule_init_assigned = greedy_assign(veh_trip_edges)
                 # for i, (veh, trip, schedule, cost) in zip(range(numedges), veh_trip_edges):
-                #     if veh.id in V_id_init_assigned and schedule == schedule_init_assigned[V_id_init_assigned.index(veh.id)]:
+                #     if veh.id in V_id_init_assigned \
+                #             and schedule == schedule_init_assigned[V_id_init_assigned.index(veh.id)]:
                 #         init_assign_idx[i] = 1.0
                 #         a.append(veh.id)
                 # for i, rid in zip(range(numreqs), R_id):

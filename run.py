@@ -3,14 +3,14 @@
 import time
 # start time of initialization
 istime = time.time()
-print('initializing the model ...')
+print('initializing the simulator ...')
 import datetime
 import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.Main import Model
 from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
-    RIDESHARING_SIZE, MAX_WAIT, MAX_DETOUR, MET_ASSIGN, MET_REBL, INT_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
+    RIDESHARING_SIZE, MAX_WAIT, MAX_DETOUR, NON_SHARE, MET_REBL, INT_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
     print('  - demand value:%.02f, max waiting time: %d; max detour: %.1f' % (DMD_VOL, MAX_WAIT, MAX_DETOUR))
-    print('  - assignment method: %s, interval: %.1f s, mode: %s' % (MET_ASSIGN, INT_ASSIGN, MODEE))
+    print('  - assignment mode: %s, interval: %.1f s, enable non-shared trip: %s' % (MODEE, INT_ASSIGN, NON_SHARE))
     print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('*' * 80)

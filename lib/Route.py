@@ -8,7 +8,7 @@ import numpy as np
 import networkx as nx
 from collections import deque
 from itertools import islice
-from lib.Configure import NOD_LOC, NOD_TTT, NOD_SPT, NET_NYC
+from lib.Configure import NET_NYC, NOD_LOC, NOD_TTT, NOD_SPT, EDG_NOD, EDG_TTH
 
 G = copy.deepcopy(NET_NYC)
 
@@ -121,7 +121,7 @@ def build_route_from_path(path):
     for i in range(len(path) - 1):
         u = path[i]
         v = path[i + 1]
-        t = G.get_edge_data(u, v, default={'dur': None})['dur']
+        t = get_edge_real_dur(u, v)
         d = get_edge_dist(u, v)
         u_geo = get_node_geo(u)
         v_geo = get_node_geo(v)
@@ -145,15 +145,21 @@ def get_dur_from_path(path):
 
 
 # update the traffic on road network
-def upd_traffic_on_network():
-    for u, v in G.edges():
-        dur = get_edge_dur(u, v)
-        std = get_edge_std(u, v)
-        if dur is not np.inf:
-            sample = np.random.normal(dur, std)
-            while sample < 0:
-                sample = np.random.normal(dur, std)
-            G.edges[u, v]['dur'] = sample
+def upd_traffic_on_network(h=0):
+    # # sample from normal distribution
+    # for u, v in G.edges():
+    #     dur = get_edge_mean_dur(u, v)
+    #     std = get_edge_std(u, v)
+    #     if dur is not np.inf:
+    #         sample = np.random.normal(dur, std)
+    #         while sample < 0:
+    #             sample = np.random.normal(dur, std)
+    #         G.edges[u, v]['dur'] = sample
+
+    # update on hours
+    for e, u, v in EDG_NOD:
+        dur = EDG_TTH[e-1, h]
+        G.edges[u, v]['dur'] = dur
 
 
 # get the duration based on haversine formula
@@ -164,8 +170,13 @@ def get_haversine_distance(olng, olat, dlng, dlat):
 
 
 # return the mean travel time of edge (u, v)
-def get_edge_dur(u, v):
+def get_edge_mean_dur(u, v):
     return NET_NYC.get_edge_data(u, v, default={'dur': None})['dur']
+
+
+# return the mean travel time of edge (u, v)
+def get_edge_real_dur(u, v):
+    return G.get_edge_data(u, v, default={'dur': None})['dur']
 
 
 # return the standard deviation of travel time of edge (u, v)
@@ -223,7 +234,7 @@ def k_shortest_paths(G, source, target, k=1, weight='dur'):
             for u_i in range(len(root_path) - 1):
                 u = root_path[u_i]
                 v = root_path[u_i + 1]
-                root_path_duration += G.edges[u, v]['dur']
+                root_path_duration += get_edge_real_dur(u, v)
 
             # print('root_path', root_path)
             # print('root_path_duration', root_path_duration)
@@ -236,9 +247,8 @@ def k_shortest_paths(G, source, target, k=1, weight='dur'):
                     u = curr_path[j]
                     v = curr_path[j + 1]
                     if G.has_edge(u, v):
-                        edge_duration = G.edges[u, v]['dur']  # need to be compared to NOD_TTT
                         G.remove_edge(u, v)
-                        edges_removed.append((u, v, edge_duration))
+                        edges_removed.append((u, v,get_edge_real_dur(u, v)))
                         # print('u, v, edge_duration (remove)', u, v, edge_duration)
 
             # remove rootPathNode (except spurNode) from Graph
@@ -248,9 +258,8 @@ def k_shortest_paths(G, source, target, k=1, weight='dur'):
                 # out-edges
                 nodes = copy.deepcopy(G[u])
                 for v in nodes:
-                    edge_duration = G.edges[u, v]['dur']
                     G.remove_edge(u, v)
-                    edges_removed.append((u, v, edge_duration))
+                    edges_removed.append((u, v, get_edge_real_dur(u, v)))
                     # print('u, v, edge_duration (remove)', u, v, edge_duration)
                 # if G.is_directed():
                 #     # in-edges
