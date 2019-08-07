@@ -42,6 +42,7 @@ class Req(object):
         # self.Clp = Tr + MAX_WAIT
         # self.Cld = Tr + self.Ts + MAX_DELAY
         self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
+        self.Clp_backup = self.Clp
         self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
         self.Tp = -1.0
         self.Td = -1.0

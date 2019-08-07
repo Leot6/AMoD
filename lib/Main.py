@@ -3,20 +3,19 @@ main structure for the AMoD simulator
 """
 
 import time
-import copy
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
-from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, DMD_SST, \
-    INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
+from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, NON_SHARE, MET_REBL, STN_LOC, REQ_DATA, \
+    DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
 from lib.Request import Req
 from lib.VTtable import build_vt_table
 from lib.AssignPlanner import ILP_assign
-from lib.Rebalancer import naive_rebalance
+from lib.Rebalancer import find_non_shared_trips, naive_rebalancing
 from lib.Route import upd_traffic_on_network
 from lib.Vehicle import Veh
-from lib.Route import get_duration, get_routing
 
 
 class Model(object):
@@ -78,13 +77,16 @@ class Model(object):
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
 
-        if IS_DEBUG:
-            print('    -updating traffics...')
-        a11 = time.time()
         if IS_STOCHASTIC:
-            upd_traffic_on_network()
-        if IS_DEBUG:
-            print('        a11 running time:', round((time.time() - a11), 2))
+            _h = int((T-30)/3600)
+            h = int(T/3600)
+            if IS_DEBUG:
+                print('    -updating traffics (h = %d) ...' % h)
+            a11 = time.time()
+            if T == 30 or _h != h:
+                upd_traffic_on_network(h)
+            if IS_DEBUG:
+                print('        a11 running time:', round((time.time() - a11), 2))
 
         if IS_DEBUG:
             print('    -loading new reqs ...')
@@ -119,6 +121,20 @@ class Model(object):
             if IS_DEBUG:
                 print('        a3 running time:', round((time.time() - a3), 2))
 
+            # # debug
+            # if len(self.rid_assigned_last) != 0:
+            #     vehs = self.vehs
+            #     with open('vehs.pickle', 'wb') as f:
+            #         pickle.dump(vehs, f)
+            #     with open('veh_trip_edges.pickle', 'wb') as f:
+            #         pickle.dump(veh_trip_edges, f)
+            #     reqs_pool = reqs_old + reqs_new
+            #     with open('reqs_pool.pickle', 'wb') as f:
+            #         pickle.dump(reqs_pool, f)
+            #     rid_assigned_last = self.rid_assigned_last
+            #     with open('rid_assigned_last.pickle', 'wb') as f:
+            #         pickle.dump(rid_assigned_last, f)
+
             if self.assign == 'ILP':
                 if IS_DEBUG:
                     print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
@@ -128,6 +144,10 @@ class Model(object):
                 if IS_DEBUG:
                     print('        a4 running time:', round((time.time() - a4), 2))
 
+            # # debug
+            # if len(self.rid_assigned_last) != 0:
+            #     quit()
+
             if IS_DEBUG:
                 print('    -execute the assignments...')
             a5 = time.time()
@@ -135,15 +155,40 @@ class Model(object):
             if IS_DEBUG:
                 print('        a5 running time:', round((time.time() - a5), 2))
 
+            if NON_SHARE:
+                if IS_DEBUG:
+                    print('    -start assigning non-shared trips...')
+                a6 = time.time()
+                R_id_non_shared, V_id_non_shared, schedule_non_shared = find_non_shared_trips(self.vehs,
+                                                                                              self.reqs_unassigned)
+                self.exec_non_shared_assign(R_id_non_shared, V_id_non_shared, schedule_non_shared)
+                if IS_DEBUG:
+                    print('        a6 running time:', round((time.time() - a6), 2))
+                    # debug code starts
+                    noi = 0  # number of idle vehicles
+                    for veh in self.vehs:
+                        if veh.idle:
+                            noi += 1
+                    print('            idle vehs: %d / %d' % (noi, self.V))
+                    # debug code ends
+
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'naive':
                 if IS_DEBUG:
                     print('    -start rebalancing...')
-                a6 = time.time()
-                R_id_rebl, V_id_rebl, schedule_rebl = naive_rebalance(self.vehs, self.reqs_unassigned)
-                self.exec_rebl(R_id_rebl, V_id_rebl, schedule_rebl)
+                a7 = time.time()
+                rebalancing_reqs = [self.reqs[rid] for rid in R_id_non_shared]
+                V_id_rebl, schedule_rebl = naive_rebalancing(self.vehs, rebalancing_reqs)
+                self.exec_rebalancing(V_id_rebl, schedule_rebl)
                 if IS_DEBUG:
-                    print('        a6 running time:', round((time.time() - a6), 2))
+                    print('        a7 running time:', round((time.time() - a7), 2))
+                    # debug code starts
+                    noi = 0  # number of idle vehicles
+                    for veh in self.vehs:
+                        if veh.idle:
+                            noi += 1
+                    print('            idle vehs: %d / %d' % (noi, self.V))
+                    # debug code ends
 
         if len(self.reqs_unassigned) > 0:
             reqs_rejected = set()
@@ -176,6 +221,7 @@ class Model(object):
                     self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
                     self.reqs_serving.remove(self.reqs[rid])
                     self.reqs_served.add(self.reqs[rid])
+            assert len(veh.onboard_rid) == len(veh.onboard_reqs)
 
     # generate requests up to time T, loading from reqs data file
     def gen_reqs_to_time(self):
@@ -185,18 +231,15 @@ class Model(object):
                       self.reqs_data.iloc[req_idx]['olng'], self.reqs_data.iloc[req_idx]['olat'],
                       self.reqs_data.iloc[req_idx]['dlng'], self.reqs_data.iloc[req_idx]['dlat'])
             # print('req_idx:', req_idx, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds, req.Ts)
-
+            self.reqs.append(req)
+            self.N += 1
+            req_idx = self.req_init_idx + int(self.N / self.D)
+            self.queue.append(self.reqs[-1])
             # check the travel time of a trip is not zero
-            if req.Ts > 1:
-                self.reqs.append(req)
-                self.N += 1
-                req_idx = self.req_init_idx + int(self.N / self.D)
-                self.queue.append(self.reqs[-1])
-            else:
-                print('bad data found: req', self.N, req.olng, req.olat)
+            assert req.Ts > 1
         assert self.N == len(self.reqs)
 
-    # execute the assignment from AssignPlanner and build (update) route for vehicles
+    # execute the assignment from AssignPlanner and build (update) route for assigned vehicles
     def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
         if MODEE == 'VT':
             for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
@@ -254,15 +297,17 @@ class Model(object):
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
 
-    # execute the assignment from Rebalancer and build route for ilde vehicles
-    def exec_rebl(self, R_id_rebl, V_id_rebl, schedule_rebl):
-        for rid, vid, schedule in zip(R_id_rebl, V_id_rebl, schedule_rebl):
+    # execute the assignment from 'find_non_shared_trips' and build route for assigned vehicles
+    def exec_non_shared_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
+        for rid, vid, schedule in zip(R_id_assigned, V_id_assigned, schedule_assigned):
+            assert self.vehs[vid].idle
             self.vehs[vid].build_route(schedule, self.reqs, self.T)
             self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), schedule, 0, [schedule])]
-        self.rid_assigned_last.update(R_id_rebl)
-        R_rebl = {self.reqs[rid] for rid in R_id_rebl}
-        self.reqs_picking.update(R_rebl)
-        self.reqs_unassigned.difference_update(R_rebl)
+        R_assigned = {self.reqs[rid] for rid in R_id_assigned}
+        self.reqs_picking.update(R_assigned)
+        self.reqs_unassigned.difference_update(R_assigned)
+        if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
+            self.rid_assigned_last.update(R_id_assigned)
 
         # debug code starts
         reqs_on_vehs = []
@@ -273,6 +318,14 @@ class Model(object):
             reqs_on_vehs.extend(list(trip))
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
+
+    # execute the assignment from Rebalancer and build route for rebalancing vehicles
+    def exec_rebalancing(self, V_id_assigned, schedule_assigned):
+        for vid, schedule in zip(V_id_assigned, schedule_assigned):
+            assert self.vehs[vid].idle
+            assert self.vehs[vid].t_to_nid == 0
+            self.vehs[vid].build_route(schedule, self.reqs, self.T)
+            assert schedule[0][0] == -1
 
     # visualize
     def draw(self):

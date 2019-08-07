@@ -38,11 +38,12 @@ class Veh(object):
         Tr: accumulated rebalancing time traveled
         Lt: accumulated load, weighed by service time
         Ld: accumulated load, weighed by service distance
-        VTtable = stored feasible trips from last interval plan
         onboard_reqs = requests currently on board
         onboard_rid = id of requests currently on board
         new_pick_rid = id of requests newly picked up in current interval
         new_drop_rid = id of requests newly dropped off in current interval
+        VTtable = feasible trips (trip, best_schedule, min_cost, feasible_schedules)
+
     """
 
     def __init__(self, id, lng, lat, K=4, T=0.0):
@@ -68,11 +69,11 @@ class Veh(object):
         self.Tr = 0.0
         self.Lt = 0.0
         self.Ld = 0.0
-        self.VTtable = [[] for i in range(RIDESHARING_SIZE)]
         self.onboard_reqs = set()
         self.onboard_rid = []
         self.new_pick_rid = []
         self.new_drop_rid = []
+        self.VTtable = [[] for i in range(RIDESHARING_SIZE)]
 
         # debug code starts
         self.route_record = []
@@ -165,6 +166,7 @@ class Veh(object):
         self.d = 0.0
         self.t = 0.0
         self.idle = True
+        self.rebl = False
         return done
 
     # pop the first leg from the route list
@@ -235,15 +237,18 @@ class Veh(object):
             self.add_leg(rid, pod, tnid, ddl, pf_path, reqs, T)
 
         if len(self.route) != 0:
-            # verify the route with capacity constraint and get the cost of the route
-            self.idle = False
-            self.rebl = False
-            t = 0.0
-            n = self.n
-            for leg in self.route:
-                t += leg.t
-                n += leg.pod
-            assert n == 0
+            if self.route[0].rid == -1:
+                assert len(self.route) == 1
+                self.idle = True
+                self.rebl = True
+            else:
+                self.idle = False
+                self.rebl = False
+                # verify the route with capacity constraint
+                n = self.n
+                for leg in self.route:
+                    n += leg.pod
+                assert n == 0
 
     # add a leg based on (rid, pod, tnid, ddl, pf_path)
     def add_leg(self, rid, pod, tnid, ddl, pf_path, reqs, T):
@@ -252,14 +257,21 @@ class Veh(object):
         leg = Leg(rid, pod, tnid, ddl, duration, distance, steps, pf_path)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
+        # (this check is due to using OSRM, might not necessary now)
         assert len(leg.steps[-1].geo) == 2
         assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
-        # if pickup and the vehicle arrives in advance, add an extra wait
         if pod == 1:
+            # if pickup and the vehicle arrives in advance, add an extra wait (not used when all trips are real time)
             if T + self.t + leg.t < reqs[rid].Cep:
                 wait = reqs[rid].Cep - (T + self.t + leg.t)
                 leg.steps[-1].t += wait
                 leg.t += wait
+
+            # latest pick-up time is reduced to the expected pick-up time (as Alonso-Mora's paper)
+            buffer = 30
+            if T + self.t + leg.t + buffer <= reqs[rid].Clp:
+                reqs[rid].Clp = T + self.t + leg.t + buffer
+
         self.route.append(leg)
         self.tnid = leg.steps[-1].nid[1]
         self.d += leg.d
