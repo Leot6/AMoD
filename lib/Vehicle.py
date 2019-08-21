@@ -268,7 +268,7 @@ class Veh(object):
                 leg.t += wait
 
             # latest pick-up time is reduced to the expected pick-up time (as Alonso-Mora's paper)
-            buffer = 30
+            buffer = 20
             if T + self.t + leg.t + buffer <= reqs[rid].Clp:
                 reqs[rid].Clp = T + self.t + leg.t + buffer
 

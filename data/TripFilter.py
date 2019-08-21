@@ -7,9 +7,12 @@ import pickle
 import pandas as pd
 import numpy as np
 import sys
+from dateutil.parser import parse
+import datetime
 
-NOD_LOC = pd.read_csv('nodes.csv').values.tolist()
-with open('NOD_TTT.pickle', 'rb') as f:
+with open('NYC_NOD_LOC.pickle', 'rb') as f:
+    NOD_LOC = pickle.load(f)
+with open('NYC_TTT_WEEK.pickle', 'rb') as f:
     NOD_TTT = pickle.load(f)
 
 
@@ -52,8 +55,7 @@ def IsPtInPoly(lng, lat):
 def LongerThan2Min(olng, olat, dlng, dlat):
     onid = find_nearest_node(olng, olat)
     dnid = find_nearest_node(dlng, dlat)
-    d = NOD_TTT[onid - 1, dnid - 1]
-    if d and d > 120:
+    if NOD_TTT[onid - 1, dnid - 1] > 120:
         return True
     else:
         return False
@@ -75,17 +77,18 @@ if __name__ == '__main__':
     stime = time.time()
 
     # # labels' names
-    # for green taxi
-    pickup_time = 'lpep_pickup_datetime'
-    dropoff_time = 'Lpep_dropoff_datetime'
-    olng = 'Pickup_longitude'
-    olat = 'Pickup_latitude'
-    dlng = 'Dropoff_longitude'
-    dlat = 'Dropoff_latitude'
-    passenger_count = 'Passenger_count'
-    trip_dist = 'Trip_distance'
+    # # for green taxi
+    # pickup_time = 'lpep_pickup_datetime'
+    # dropoff_time = 'Lpep_dropoff_datetime'
+    # olng = 'Pickup_longitude'
+    # olat = 'Pickup_latitude'
+    # dlng = 'Dropoff_longitude'
+    # dlat = 'Dropoff_latitude'
+    # passenger_count = 'Passenger_count'
+    # trip_dist = 'Trip_distance'
 
-    # # for yellow taxi
+    # # for yellow taxi in 2015
+    # file_name = 'yellow_tripdata_2015-05.csv'
     # pickup_time = 'tpep_pickup_datetime'
     # dropoff_time = 'tpep_dropoff_datetime'
     # olng = 'pickup_longitude'
@@ -95,41 +98,46 @@ if __name__ == '__main__':
     # passenger_count = 'passenger_count'
     # trip_dist = 'trip_distance'
 
+    # for taxi trip in 2013
+    file_name = 'trip_data_5.csv'
+    pickup_time = ' pickup_datetime'
+    dropoff_time = ' dropoff_datetime'
+    olng = ' pickup_longitude'
+    olat = ' pickup_latitude'
+    dlng = ' dropoff_longitude'
+    dlat = ' dropoff_latitude'
+    passenger_count = ' passenger_count'
+    trip_dist = ' trip_distance'
+
     # # read all trips
-    # CSV_FILE_PATH = '/Users/leot/Downloads/green_tripdata_2015-05.csv'
+    # CSV_FILE_PATH = '/Users/leot/Downloads/' + file_name
     # df = pd.read_csv(CSV_FILE_PATH, usecols=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], index_col=False)
     # print('number of all trips:', df.shape[0])
-    # print(df.head(2))  # get the label for pickup time in csv file
-    # print(df.columns.values)
+    # print(df.head(2))
+    # print(df.columns.values)  # get the label for pickup time in csv file
 
-    # # find out the number of trips in a week
-    # df1 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-01')]
-    # print('number of trips in selected day:', df1.shape[0])
-    # df2 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-02')]
-    # print('number of trips in selected day:', df2.shape[0])
-    # df3 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-03')]
-    # print('number of trips in selected day:', df3.shape[0])
-    # df4 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-04')]
-    # print('number of trips in selected day:', df4.shape[0])
-    # df5 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-05')]
-    # print('number of trips in selected day:', df5.shape[0])
-    # df6 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-06')]
-    # print('number of trips in selected day:', df6.shape[0])
-    # df7 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-07')]
-    # print('number of trips in selected day:', df7.shape[0])
-    # df8 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-08')]
-    # print('number of trips in selected day:', df8.shape[0])
-    # df9 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-09')]
-    # print('number of trips in selected day:', df9.shape[0])
+    # # find out the number of trips in a everyday
+    # year = '2013'
+    # month = '05'
+    # day = '09'
+    # date = year + '-' + month + '-' + day
+    # for i in range(1, 31):
+    #     if i < 10:
+    #         day = '0' + str(i)
+    #     else:
+    #         day = '' + str(i)
+    #     date = year + '-' + month + '-' + day
+    #     df1 = df.loc[lambda x: x[pickup_time].str.startswith(date)]
+    #     print('number of trips on selected day (%s): %d' % (date, df1.shape[0]))
 
     # # filter out trips in one day
-    # df1 = df.loc[lambda x: x[pickup_time].str.startswith('2015-05-02')]
+    # df1 = df.loc[lambda x: x[pickup_time].str.startswith(date)]
     # df1[pickup_time] = pd.to_datetime(df1[pickup_time])
     # df1.sort_values(pickup_time, inplace=True)
-    # df1.to_csv('green-taxi-20150502.csv', index=False)
-
-    # df1 = pd.read_csv('green-taxi-20150502.csv')
-    # print('number of trips in selected day:', df1.shape[0])
+    # df1.to_csv('yellow-taxi-20150509.csv', index=False)
+    #
+    # df1 = pd.read_csv('yellow-taxi-20150509.csv')
+    # print('number of trips on selected day (%s): %d' % (date, df1.shape[0]))
     # # filter out useful parameters: time, lng & lat, passenger number...
     # df2 = df1.loc[:, [pickup_time, passenger_count, olng, olat, dlng, dlat, trip_dist, dropoff_time]]
     # print(df2.head(2))  # check the format
@@ -144,14 +152,13 @@ if __name__ == '__main__':
     # # filter out the trips ending in Manhattan
     # df5 = df4[df4.apply(lambda x: IsPtInPoly(x[dlng], x[dlat]), axis=1)]
     # print('number of trips in Manhattan:', df5.shape[0])
-    # df5.to_csv('Manhattan-green-taxi-20150502.csv', index=False)
+    # df5.to_csv('Manhattan-yellow-taxi-20150509.csv', index=False)
 
-    # filter out the trips longer than 2 min
-    df6 = pd.read_csv('Manhattan-taxi-20150502.csv')
-    print('number of trips in that day:', df6.shape[0])
-    # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
+    # # filter out the trips longer than 2 min
+    # df6 = pd.read_csv('Manhattan-yellow-taxi-20150509.csv')
+    # print('number of trips on selected day (%s): %d' % (date, df6.shape[0]))
+    # # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
     # df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
-
     # print('number of trips longer than 2 min :', df6.shape[0])
     # df6.to_csv('Manhattan-taxi-20160507-1.csv', index=False)
 
@@ -161,7 +168,7 @@ if __name__ == '__main__':
     # df7.columns = ['ptime', 'npass', 'olng', 'olat', 'dlng', 'dlat', 'dist', 'dtime']
     # df7.to_csv('Manhattan-green-taxi-20150502-1.csv', index=False)
 
-    # merge green taxi and yellow taxi together
+    # # merge green taxi and yellow taxi together
     # df8 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
     # df8['taxi'] = 'green'
     # print('number of green taxi trips:', df8.shape[0])
@@ -174,8 +181,21 @@ if __name__ == '__main__':
     # print('number of all taxi trips:', df10.shape[0])
     # df10.to_csv('Manhattan-taxi-20150502.csv', index=False)
 
-    # df11 = pd.read_csv('Manhattan-taxi-20160507.csv')
-    # print('number of all taxi trips in 20160507:', df11.shape[0])
+    # # merge two different days' trip to together
+    # df11 = pd.read_csv('Manhattan-taxi-20160501.csv')
+    # print('number of all taxi trips in 20160501:', df11.shape[0])
+    # df11['ptime'] = df11['ptime'].map(lambda x: str(parse(x) + datetime.timedelta(days=6)))
+    # df11['dtime'] = df11['dtime'].map(lambda x: str(parse(x) + datetime.timedelta(days=6)))
+    # df11 = df11.iloc[1::5]  # [start：end：step]
+    # df12 = pd.read_csv('Manhattan-taxi-20160507.csv')
+    # frames = [df11, df12]
+    # df13 = pd.concat(frames, ignore_index=True)
+    # df13.sort_values('ptime', inplace=True)
+    # print('number of all taxi trips:', df13.shape[0])
+    # df13.to_csv('Manhattan-taxi-20130507.csv', index=False)
+
+    df11 = pd.read_csv('Manhattan-taxi-20130503.csv')
+    print('number of all taxi trips in 20160501:', df11.shape[0])
 
     runtime = time.time() - stime
     print('...running time : %.05f seconds' % runtime)

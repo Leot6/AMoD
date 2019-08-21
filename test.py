@@ -138,47 +138,56 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
     return R_id_assigned, V_id_assigned, schedule_assigned
 
 
-if __name__ == "__main__":
-    print(' -reading file...')
-    aa = time.time()
-    with open('vehs.pickle', 'rb') as f:
-        vehs = pickle.load(f)
-    with open('veh_trip_edges.pickle', 'rb') as f:
-        veh_trip_edges = pickle.load(f)
-    with open('reqs_pool.pickle', 'rb') as f:
-        reqs_pool = pickle.load(f)
-    with open('rid_assigned_last.pickle', 'rb') as f:
-        rid_assigned_last = pickle.load(f)
-    print('    reading file running time:', round((time.time() - aa), 2))
+def test(a, b, c):
+    if a > b:
+        c.append(2)
 
+
+if __name__ == "__main__":
+    # print(' -reading file...')
+    # aa = time.time()
+    # with open('vehs.pickle', 'rb') as f:
+    #     vehs = pickle.load(f)
+    # with open('veh_trip_edges.pickle', 'rb') as f:
+    #     veh_trip_edges = pickle.load(f)
+    # with open('reqs_pool.pickle', 'rb') as f:
+    #     reqs_pool = pickle.load(f)
+    # with open('rid_assigned_last.pickle', 'rb') as f:
+    #     rid_assigned_last = pickle.load(f)
+    # print('    reading file running time:', round((time.time() - aa), 2))
+    #
     # print(' -start ILP assign with %d edges...' % len(veh_trip_edges))
     # bb = time.time()
     # R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last)
     # print('    ILP running time:', round((time.time() - bb), 2))
 
-    print(' -start CBS assign with %d edges...' % len(veh_trip_edges))
-    cc = time.time()
-    assign_group = []
-    VTtables = [[] for i in range(len(vehs))]
-    for idx, veh in zip(range(len(vehs)), vehs):
-        for VTtable_k in veh.VTtable:
-            for (trip, best_schedule, cost, all_schedules) in VTtable_k:
-                VTtables[idx].append((veh, trip, best_schedule, cost))
-    for VTtable in VTtables:
-        VTtable.sort(key=lambda e: (-len(e[1]), e[3]))
-        if len(VTtable) != 0:
-            veh = VTtable[0][0]
-            trip = VTtable[0][1]
-            assign_group.append((veh.id, [req.id for req in trip]))
-    for assign in assign_group:
-        assert len([req.id for req in trip]) != 0
+    # print(' -start CBS assign with %d edges...' % len(veh_trip_edges))
+    # cc = time.time()
+    # assign_group = []
+    # VTtables = [[] for i in range(len(vehs))]
+    # for idx, veh in zip(range(len(vehs)), vehs):
+    #     for VTtable_k in veh.VTtable:
+    #         for (trip, best_schedule, cost, all_schedules) in VTtable_k:
+    #             VTtables[idx].append((veh, trip, best_schedule, cost))
+    # for VTtable in VTtables:
+    #     VTtable.sort(key=lambda e: (-len(e[1]), e[3]))
+    #     if len(VTtable) != 0:
+    #         veh = VTtable[0][0]
+    #         trip = VTtable[0][1]
+    #         assign_group.append((veh.id, [req.id for req in trip]))
+    # for assign in assign_group:
+    #     assert len([req.id for req in trip]) != 0
+    #
+    # print('    CBS running time:', round((time.time() - cc), 2))
+    # print('assign_group', len(assign_group))
+    #
+    # print('len(rid_assigned_last', len(rid_assigned_last))
 
-    print('    CBS running time:', round((time.time() - cc), 2))
-    print('assign_group', len(assign_group))
-
-    print('len(rid_assigned_last', len(rid_assigned_last))
-
-
+    a = 1
+    b = 2
+    c = []
+    test(a, b, c)
+    print(c)
 
 
 
