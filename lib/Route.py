@@ -8,9 +8,10 @@ import numpy as np
 import networkx as nx
 from collections import deque
 from itertools import islice
-from lib.Configure import NET_NYC, NOD_LOC, NOD_TTT, NOD_SPT, EDG_NOD, EDG_TTH
+from lib.Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT
 
-G = copy.deepcopy(NET_NYC)
+G = copy.deepcopy(NOD_NET)
+COEF_TRAVEL = 1.0
 
 
 class Step(object):
@@ -84,7 +85,7 @@ class ScheTask(object):  # not used, cause using class will consume more time th
 
 # get the duration of the best route from origin to destination
 def get_duration(onid, dnid):
-    duration = NOD_TTT[onid - 1, dnid - 1]
+    duration = NOD_TTT[onid - 1, dnid - 1] * COEF_TRAVEL
     if duration != -1:
         return duration
     else:
@@ -97,6 +98,7 @@ def get_routing(onid, dnid, pf_path=None):
         path = pf_path
     else:
         path = get_path_from_SPtable(onid, dnid)
+        # length, path = nx.bidirectional_dijkstra(G, onid, dnid)
     duration, distance, steps = build_route_from_path(path)
     # print('SPT', path, duration, distance)
     return duration, distance, steps
@@ -140,26 +142,25 @@ def get_dur_from_path(path):
     for node_idx in range(len(path) - 1):
         u = path[node_idx]
         v = path[node_idx + 1]
-        dur += G.edges[u, v]['dur']
+        dur += get_edge_real_dur(u, v)
     return dur
 
 
 # update the traffic on road network
 def upd_traffic_on_network(h=0):
-    # # sample from normal distribution
-    # for u, v in G.edges():
-    #     dur = get_edge_mean_dur(u, v)
-    #     std = get_edge_std(u, v)
-    #     if dur is not np.inf:
-    #         sample = np.random.normal(dur, std)
-    #         while sample < 0:
-    #             sample = np.random.normal(dur, std)
-    #         G.edges[u, v]['dur'] = sample
-
-    # update on hours
-    for e, u, v in EDG_NOD:
-        dur = EDG_TTH[e-1, h]
-        G.edges[u, v]['dur'] = dur
+    # sample from normal distribution
+    for u, v in G.edges():
+        dur = get_edge_mean_dur(u, v)
+        std = get_edge_std(u, v)
+        if dur is not np.inf:
+            sample = np.random.normal(dur, std)
+            while sample < 0:
+                sample = np.random.normal(dur, std)
+            G.edges[u, v]['dur'] = sample
+    # # update on hours
+    # for e, u, v in EDG_NOD:
+    #     dur = EDG_TTH[e-1, h]
+    #     G.edges[u, v]['dur'] = dur
 
 
 # get the duration based on haversine formula
@@ -171,27 +172,27 @@ def get_haversine_distance(olng, olat, dlng, dlat):
 
 # return the mean travel time of edge (u, v)
 def get_edge_mean_dur(u, v):
-    return NET_NYC.get_edge_data(u, v, default={'dur': None})['dur']
+    return NOD_NET.get_edge_data(u, v, default={'dur': None})['dur'] * COEF_TRAVEL
 
 
 # return the mean travel time of edge (u, v)
 def get_edge_real_dur(u, v):
-    return G.get_edge_data(u, v, default={'dur': None})['dur']
+    return G.get_edge_data(u, v, default={'dur': None})['dur'] * COEF_TRAVEL
 
 
 # return the standard deviation of travel time of edge (u, v)
 def get_edge_std(u, v):
-    return NET_NYC.get_edge_data(u, v, default={'std': None})['std']
+    return NOD_NET.get_edge_data(u, v, default={'std': None})['std']
 
 
 # return the distance of edge (u, v)
 def get_edge_dist(u, v):
-    return NET_NYC.get_edge_data(u, v, default={'dist': None})['dist']
+    return NOD_NET.get_edge_data(u, v, default={'dist': None})['dist']
 
 
 # return the geo of node [lng, lat]
 def get_node_geo(nid):
-    return list(NET_NYC.nodes[nid]['pos'])
+    return list(NOD_NET.nodes[nid]['pos'])
 
 
 # find the nearest node to[lng, lat] in Manhattan network

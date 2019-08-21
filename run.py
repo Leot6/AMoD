@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.Main import Model
 from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
-    RIDESHARING_SIZE, MAX_WAIT, MAX_DETOUR, NON_SHARE, MET_REBL, INT_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
+    RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, MET_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 from lib.Analysis import anim, print_results
 
 if __name__ == '__main__':
@@ -20,16 +20,14 @@ if __name__ == '__main__':
     model = Model()
     print('*' * 80)
     print('scenario: %s' % (DMD_STR))
-    print('simulation starts at %s, initializing time: %.02f s'
-          % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), time.time() - istime))
+    print('simulation starts at %s, initializing time: %.02f s' % (model.start_time, time.time() - istime))
     print('system settings:')
     print('  - from %s to %s, with %d intervals'
           % (DMD_SST, DMD_SST + datetime.timedelta(seconds=T_TOTAL), T_TOTAL / INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - demand value:%.02f, max waiting time: %d; max detour: %.1f' % (DMD_VOL, MAX_WAIT, MAX_DETOUR))
-    print('  - assignment mode: %s, interval: %.1f s, enable non-shared trip: %s' % (MODEE, INT_ASSIGN, NON_SHARE))
-    print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
+    print('  - assignment mode: %s, ebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('*' * 80)
     print('')
@@ -59,10 +57,13 @@ if __name__ == '__main__':
     print('End of this simulation.')
     # end time
     etime = time.time()
+    end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
     # run time of this simulation
-    runtime = etime - stime
+    runtime = str(datetime.timedelta(seconds=int(etime - stime)))
+    mean_runtime = round((etime - stime) / T_TOTAL * INT_ASSIGN, 2)
 
-    print('...running time of simulation: %.05f seconds' % runtime)
+    # print('...running time of simulation: %s, average: %.02f'
+    #       % (str(datetime.timedelta(seconds=int(runtime))), runtime / T_TOTAL * INT_ASSIGN))
 
     # generate, show and save the animation of this simulation
     if IS_ANIMATION:
@@ -73,4 +74,4 @@ if __name__ == '__main__':
 
     # output the simulation results and save data
     if IS_ANALYSIS:
-        print_results(model, runtime)
+        print_results(model, runtime, mean_runtime, end_time)

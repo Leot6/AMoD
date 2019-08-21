@@ -166,6 +166,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
                 # debug
                 cost_a += round(cost)
                 V_T_assigned.append((veh.id, {req.id for req in trip}))
+                # debug
 
         # debug code starts
         assert len(R_id_assigned) == len(set(R_id_assigned))
@@ -174,6 +175,9 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
             rid_assigned_last_not_assigned_this_time = \
                 rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
             # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
+            if len(rid_assigned_last_not_assigned_this_time) != 0:
+                print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
+                print('cost_a', cost_a)
             assert len(rid_assigned_last_not_assigned_this_time) == 0
 
     return R_id_assigned, V_id_assigned, schedule_assigned

@@ -39,11 +39,11 @@ class Req(object):
         self.dnid = find_nearest_node(dlng, dlat)
         self.Ts = get_duration(self.onid, self.dnid)
         self.Cep = Tr
-        # self.Clp = Tr + MAX_WAIT
-        # self.Cld = Tr + self.Ts + MAX_DELAY
-        self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
+        self.Clp = Tr + MAX_WAIT
+        self.Cld = Tr + self.Ts + MAX_DELAY
+        # self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
+        # self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
         self.Clp_backup = self.Clp
-        self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
         self.Tp = -1.0
         self.Td = -1.0
         self.D = 0.0

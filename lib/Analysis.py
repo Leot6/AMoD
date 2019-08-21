@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DETOUR, \
-    RIDESHARING_SIZE, MET_ASSIGN, MET_REBL, INT_ASSIGN, INT_REBL, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, \
-    MODEE, NON_SHARE, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
+from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
+    RIDESHARING_SIZE, MET_REBL, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, \
+    IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
 
 # print and save results
-def print_results(model, runtime):
+def print_results(model, runtime, mean_runtime, end_time):
     count_reqs = 0
     count_served = 0
     count_serving = 0
@@ -65,12 +65,12 @@ def print_results(model, runtime):
     wait_viol_rate = 0.0
     arri_viol_rate = 0.0
     if not count_reqs == 0:
-        served_rate = 100.0 * count_served / count_reqs
-        serving_rate = 100.0 * count_serving / count_reqs
+        served_rate = round(100.0 * count_served / count_reqs, 2)
+        serving_rate = round(100.0 * count_serving / count_reqs, 2)
         count_service = count_served + count_serving + len(model.reqs_picking)
-        total_service_rate = 100 * count_service / count_reqs
-        wait_viol_rate = 100 * count_wait_viol / (count_served + count_serving)
-        arri_viol_rate = 100 * count_arri_viol / count_served
+        total_service_rate = round(100 * count_service / count_reqs, 2)
+        wait_viol_rate = round(100 * count_wait_viol / (count_served + count_serving), 2)
+        arri_viol_rate = round(100 * count_arri_viol / count_served, 2)
 
     # vehicle performance
     veh_service_dist = 0.0
@@ -98,15 +98,14 @@ def print_results(model, runtime):
 
     print('*' * 80)
     print('scenario: %s' % (DMD_STR))
-    print('simulation ends at %s, runtime time: %d s' % (datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'), runtime))
+    print('simulation ends at %s, runtime time: %s, average: %d' % (end_time, runtime, mean_runtime))
     print('system settings:')
     print('  - from %s to %s, with %d intervals'
           % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - demand value:%.02f, max waiting time: %d; max detour: %.1f' % (DMD_VOL, MAX_WAIT, MAX_DETOUR))
-    print('  - assignment mode: %s, interval: %.1f s, enable non-shared trip: %s' % (MODEE, INT_ASSIGN, NON_SHARE))
-    print('  - rebalancing method: %s, interval: %.1f s' % (MET_REBL, INT_REBL))
+    print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
+    print('  - assignment mode: %s, ebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('simulation results:')
     print('  - requests (%d):' % count_reqs)
@@ -132,23 +131,30 @@ def print_results(model, runtime):
     # write and save the result analysis
     f = open('output/results.csv', 'a')
     writer = csv.writer(f)
-    row = [DMD_STR, MET_ASSIGN, MET_REBL, T_STUDY, model.V, model.K, model.D,
-           served_rate, count_served, count_reqs, wait_time,
-           in_veh_time, detour_factor, veh_service_dist, veh_service_time, veh_service_time_percent,
-           veh_rebl_dist, veh_rebl_time, veh_rebl_time_percent, veh_load_by_dist, veh_load_by_time, None]
+    # writer.writerow(['scenario', 'demand starts', 'demand ends', 'demand number',
+    #                  'fleet size', 'capacity',  'max wait (s)', 'max wait (s)', 'method', 'rebalancing', 'interval (s)',
+    #                  'total service rate', 'served rate (finished)', 'serving rate (in-car)',
+    #                  'mean waiting', 'mean in-car delay', 'mean detour', 'mean car load (dist)', 'mean car load (time)',
+    #                  'simulation starts', 'simulation ends', 'run time', 'mean run time', 'remarks'])
+    row = [DMD_STR, DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), str(count_reqs)+' ('+str(DMD_VOL*100)+'%)',
+           model.V, str(model.K)+' ('+str(RIDESHARING_SIZE)+')', MAX_WAIT, MAX_DELAY, MODEE, MET_REBL, INT_ASSIGN,
+           str(total_service_rate)+'% ('+str(count_service)+')', str(served_rate)+'% (' + str(count_served)+')',
+           str(serving_rate) + '% (' + str(count_serving) + ')', round(wait_time, 2),
+           round(in_veh_delay, 2), round(detour_factor, 2), round(veh_load_by_dist, 2), round(veh_load_by_time, 2),
+           model.start_time, end_time, runtime, mean_runtime, None]
     writer.writerow(row)
     f.close()
 
-    # write and save data of all requests
-    f = open('output/requests.csv', 'w')
-    writer = csv.writer(f)
-    writer.writerow(['id', 'olng', 'olat', 'dlng', 'dlat', 'Ts', 'OnD', 'Tr', 'Cep', 'Tp', 'Td', 'WT', 'VT', 'D'])
-    for req in model.reqs:
-        if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
-            row = [req.id, req.olng, req.olat, req.dlng, req.dlat, req.Ts, req.Tr, req.Cep, req.Tp, req.Td,
-                   req.Tp - req.Cep if req.Tp >= 0 else -1, req.Td - req.Tp if req.Td >= 0 else -1, req.D]
-            writer.writerow(row)
-    f.close()
+    # # write and save data of all requests
+    # f = open('output/requests.csv', 'w')
+    # writer = csv.writer(f)
+    # writer.writerow(['id', 'olng', 'olat', 'dlng', 'dlat', 'Ts', 'OnD', 'Tr', 'Cep', 'Tp', 'Td', 'WT', 'VT', 'D'])
+    # for req in model.reqs:
+    #     if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
+    #         row = [req.id, req.olng, req.olat, req.dlng, req.dlat, req.Ts, req.Tr, req.Cep, req.Tp, req.Td,
+    #                req.Tp - req.Cep if req.Tp >= 0 else -1, req.Td - req.Tp if req.Td >= 0 else -1, req.D]
+    #         writer.writerow(row)
+    # f.close()
 
 
 # animation

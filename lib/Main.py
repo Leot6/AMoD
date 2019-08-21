@@ -3,12 +3,13 @@ main structure for the AMoD simulator
 """
 
 import time
+import datetime
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
-from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, NON_SHARE, MET_REBL, STN_LOC, REQ_DATA, \
+from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
     DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
 from lib.Request import Req
 from lib.VTtable import build_vt_table
@@ -39,6 +40,7 @@ class Model(object):
         reqs_picking: the list of requests being picked up
         reqs_unassigned: the list of requests unassigned in the planning pool
         rejs: the list of rejected requests
+        rid_assigned_last: the list of id of requests being picked up or on board
 
     """
 
@@ -66,30 +68,28 @@ class Model(object):
         self.reqs_unassigned = set()
         self.rejs = set()
         self.rid_assigned_last = set()
+        self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
         self.T = T
         if IS_DEBUG:
-            print('    -updating status of vehicles and requests...')
+            print('    -T = %d, updating status of vehicles and requests...' % self.T)
         a1 = time.time()
         self.upd_vehs_and_reqs_stat_to_time()
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
 
         if IS_STOCHASTIC:
-            _h = int((T-30)/3600)
-            h = int(T/3600)
             if IS_DEBUG:
-                print('    -updating traffics (h = %d) ...' % h)
+                print('    -T = %d, updating traffics ...' % self.T)
             a11 = time.time()
-            if T == 30 or _h != h:
-                upd_traffic_on_network(h)
+            upd_traffic_on_network()
             if IS_DEBUG:
                 print('        a11 running time:', round((time.time() - a11), 2))
 
         if IS_DEBUG:
-            print('    -loading new reqs ...')
+            print('    -T = %d, loading new reqs ...' % self.T)
         a2 = time.time()
         self.gen_reqs_to_time()
         if IS_DEBUG:
@@ -101,21 +101,20 @@ class Model(object):
             for veh in self.vehs:
                 if veh.idle:
                     noi += 1
-            print('        T = %.0f, reqs in queue: %d, reqs in pool: %d, idle vehs: %d / %d'
-                  % (self.T, len(self.queue), len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned), noi,
+            print('            reqs in queue: %d, reqs in pool: %d, idle vehs: %d / %d'
+                  % (len(self.queue), len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned), noi,
                      self.V))
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
+            reqs_new = self.queue
             if MODEE == 'VT':
                 reqs_old = []
-                reqs_new = self.queue
             else:  # 'VT_replan'
                 reqs_old = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id)
-                reqs_new = self.queue
 
             if IS_DEBUG:
-                print('    -building VT-table ...')
+                print('    -T = %d, building VT-table ...' % self.T)
             a3 = time.time()
             veh_trip_edges = build_vt_table(self.vehs, reqs_new, reqs_old, T)
             if IS_DEBUG:
@@ -137,7 +136,7 @@ class Model(object):
 
             if self.assign == 'ILP':
                 if IS_DEBUG:
-                    print('    -start ILP assign with %d edges...' % len(veh_trip_edges))
+                    print('    -T = %d, start ILP assign with %d edges...' % (self.T, len(veh_trip_edges)))
                 a4 = time.time()
                 R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + reqs_new,
                                                                              self.rid_assigned_last)
@@ -149,39 +148,21 @@ class Model(object):
             #     quit()
 
             if IS_DEBUG:
-                print('    -execute the assignments...')
+                print('    -T = %d, execute the assignments...' % self.T)
             a5 = time.time()
             self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
             if IS_DEBUG:
                 print('        a5 running time:', round((time.time() - a5), 2))
 
-            if NON_SHARE:
-                if IS_DEBUG:
-                    print('    -start assigning non-shared trips...')
-                a6 = time.time()
-                R_id_non_shared, V_id_non_shared, schedule_non_shared = find_non_shared_trips(self.vehs,
-                                                                                              self.reqs_unassigned)
-                self.exec_non_shared_assign(R_id_non_shared, V_id_non_shared, schedule_non_shared)
-                if IS_DEBUG:
-                    print('        a6 running time:', round((time.time() - a6), 2))
-                    # debug code starts
-                    noi = 0  # number of idle vehicles
-                    for veh in self.vehs:
-                        if veh.idle:
-                            noi += 1
-                    print('            idle vehs: %d / %d' % (noi, self.V))
-                    # debug code ends
-
         if np.isclose(T % INT_REBL, 0):
             if self.rebl == 'naive':
                 if IS_DEBUG:
-                    print('    -start rebalancing...')
-                a7 = time.time()
-                rebalancing_reqs = [self.reqs[rid] for rid in R_id_non_shared]
-                V_id_rebl, schedule_rebl = naive_rebalancing(self.vehs, rebalancing_reqs)
-                self.exec_rebalancing(V_id_rebl, schedule_rebl)
+                    print('    -T = %d, start rebalancing...' % self.T)
+                a6 = time.time()
+                R_id_rebl, V_id_rebl, schedule_rebl = find_non_shared_trips(self.vehs, self.reqs_unassigned)
+                self.exec_non_shared_assign(R_id_rebl, V_id_rebl, schedule_rebl)
                 if IS_DEBUG:
-                    print('        a7 running time:', round((time.time() - a7), 2))
+                    print('        a6 running time:', round((time.time() - a6), 2))
                     # debug code starts
                     noi = 0  # number of idle vehicles
                     for veh in self.vehs:
