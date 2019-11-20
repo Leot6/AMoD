@@ -38,15 +38,16 @@ DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
-VEH_CAPACITY = 2
+FLEET_SIZE = 20
+VEH_CAPACITY = 10
 # RIDESHARING_SIZE = 1
 RIDESHARING_SIZE = int(VEH_CAPACITY * 1.5)
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
 MAX_WAIT = 60 * 5
 MAX_DELAY = MAX_WAIT * 2
-MAX_DETOUR = 1.3
+MAX_DETOUR = -1
+# MAX_DETOUR = 1.3
 
 # intervals for vehicle-request assignment and rebalancing
 INT_ASSIGN = 30
@@ -113,3 +114,4 @@ Dlat = 40.8825
 # # length of edges of a cell
 # Elng = 0.012
 # Elat = 0.004
+

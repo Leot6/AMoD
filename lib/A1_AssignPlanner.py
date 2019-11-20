@@ -5,7 +5,7 @@ compute an assignment plan from edges in RTV
 import time
 import mosek
 import numpy as np
-from lib.Configure import CUTOFF_ILP, IS_DEBUG, MODEE
+from lib.S_Configure import CUTOFF_ILP, IS_DEBUG, MODEE
 
 
 def greedy_assign(veh_trip_edges):

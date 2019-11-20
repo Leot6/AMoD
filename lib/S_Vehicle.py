@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
-from lib.Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
+from lib.S_Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
+from lib.S_Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
 
 
 class Veh(object):
@@ -59,7 +59,7 @@ class Veh(object):
         self.tnid = self.nid
         self.K = K
         self.n = 0
-        self.schedule = []
+        self.assigned_schedules = []
         self.route = deque([])
         self.t = 0.0
         self.d = 0.0
@@ -268,7 +268,7 @@ class Veh(object):
                 leg.t += wait
 
             # latest pick-up time is reduced to the expected pick-up time (as Alonso-Mora's paper)
-            buffer = 20
+            buffer = 30
             if T + self.t + leg.t + buffer <= reqs[rid].Clp:
                 reqs[rid].Clp = T + self.t + leg.t + buffer
 
