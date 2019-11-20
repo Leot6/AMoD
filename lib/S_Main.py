@@ -9,14 +9,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
-from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
+from lib.S_Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
     DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
-from lib.Request import Req
-from lib.VTtable import build_vt_table
-from lib.AssignPlanner import ILP_assign
-from lib.Rebalancer import find_non_shared_trips, naive_rebalancing
-from lib.Route import upd_traffic_on_network
-from lib.Vehicle import Veh
+from lib.S_Request import Req
+from lib.S_Route import upd_traffic_on_network
+from lib.S_Vehicle import Veh
 
 
 class Model(object):
@@ -119,20 +116,6 @@ class Model(object):
             veh_trip_edges = build_vt_table(self.vehs, reqs_new, reqs_old, T)
             if IS_DEBUG:
                 print('        a3 running time:', round((time.time() - a3), 2))
-
-            # # debug
-            # if len(self.rid_assigned_last) != 0:
-            #     vehs = self.vehs
-            #     with open('vehs.pickle', 'wb') as f:
-            #         pickle.dump(vehs, f)
-            #     with open('veh_trip_edges.pickle', 'wb') as f:
-            #         pickle.dump(veh_trip_edges, f)
-            #     reqs_pool = reqs_old + reqs_new
-            #     with open('reqs_pool.pickle', 'wb') as f:
-            #         pickle.dump(reqs_pool, f)
-            #     rid_assigned_last = self.rid_assigned_last
-            #     with open('rid_assigned_last.pickle', 'wb') as f:
-            #         pickle.dump(rid_assigned_last, f)
 
             if self.assign == 'ILP':
                 if IS_DEBUG:
@@ -300,7 +283,7 @@ class Model(object):
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
 
-    # execute the assignment from Rebalancer and build route for rebalancing vehicles
+    # execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
     def exec_rebalancing(self, V_id_assigned, schedule_assigned):
         for vid, schedule in zip(V_id_assigned, schedule_assigned):
             assert self.vehs[vid].idle

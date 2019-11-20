@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
+from lib.S_Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
     RIDESHARING_SIZE, MET_REBL, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, \
     IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
@@ -105,7 +105,7 @@ def print_results(model, runtime, mean_runtime, end_time):
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
     print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
-    print('  - assignment mode: %s, ebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
+    print('  - assignment mode: %s, rebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('simulation results:')
     print('  - requests (%d):' % count_reqs)

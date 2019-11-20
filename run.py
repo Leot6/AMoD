@@ -8,10 +8,10 @@ import datetime
 import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from lib.Main import Model
-from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
+from lib.S_Main import Model
+from lib.S_Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
     RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, MET_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
-from lib.Analysis import anim, print_results
+from lib.S_Analysis import anim, print_results
 
 if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
     print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
-    print('  - assignment mode: %s, ebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
+    print('  - assignment mode: %s, rebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('*' * 80)
     print('')

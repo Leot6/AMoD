@@ -8,7 +8,7 @@ import numpy as np
 import networkx as nx
 from collections import deque
 from itertools import islice
-from lib.Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT
+from lib.S_Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT
 
 G = copy.deepcopy(NOD_NET)
 COEF_TRAVEL = 1.0

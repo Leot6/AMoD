@@ -8,9 +8,9 @@ import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from lib.Configure import RIDESHARING_SIZE, CUTOFF_RTV, MODEE
-from lib.Route import get_duration
-from lib.ScheduleFinder import compute_schedule, test_constraints_get_cost, compute_schedule_cost
+from lib.S_Configure import RIDESHARING_SIZE, CUTOFF_RTV, MODEE
+from lib.S_Route import get_duration
+from lib.A1_ScheduleFinder import compute_schedule, test_constraints_get_cost, compute_schedule_cost
 
 
 # build VT table for each veh(replan), respectively
@@ -27,7 +27,7 @@ def build_vt_table(vehs, reqs_new, reqs_old, T):
 
     # non-parallel
     veh_trip_edges = []
-    for veh in tqdm(vehs, desc='VT Table'):
+    for veh in tqdm(vehs, desc=MODEE + ' Table'):
         feasible_shared_trips_search(veh, reqs_new, rid_old, T)
         for VTtable_k in veh.VTtable:
             for (trip, best_schedule, cost, all_schedules) in VTtable_k:
@@ -57,7 +57,6 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
             else:  # 'VT_replan'
                 if leg.rid in veh.onboard_rid:
                     _schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-
     for req in reqs_new:
         # filter out the req which can not be served even when the veh is idle
         if get_duration(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
@@ -82,10 +81,12 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
         # add new trips
         l_all_trips_k_1 = len(veh.VTtable[k - 2])  # number of all trips of size k-1
         l_new_trips_k_1 = l_all_trips_k_1 - l_old_trips_k_1  # number of new trips of size k-1
+
+        # old version
         for i in range(1, l_new_trips_k_1 + 1):
-            trip1 = veh.VTtable[k - 2][-i][0]  # a new trip of size k-1
+            trip1 = veh.VTtable[k - 2][-i][0]  # a trip of size k-1
             for j in range(i + 1, l_all_trips_k_1 + 1):
-                trip2 = veh.VTtable[k - 2][-j][0]  # a trip of size k-1 different from trip1
+                trip2 = veh.VTtable[k - 2][-j][0]  # another trip of size k-1 (different from trip1)
                 trip_k = tuple(sorted(set(trip1).union(set(trip2)), key=lambda r: r.id))
                 if k > 2:
                     # check trip size is k
@@ -119,6 +120,39 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
                     veh.VTtable[k - 1].append((trip_k, best_schedule, min_cost, all_schedules))
                     # debug code
                     assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_old)
+
+        # # new version
+        # l_all_trips_1 = len(veh.VTtable[0])
+        # for i in range(l_all_trips_k_1):
+        #     trip1 = veh.VTtable[k - 2][i][0]  # a trip of size k-1
+        #     for j in range(l_all_trips_1):
+        #         trip2 = veh.VTtable[0][j][0]  # a trip of size 1
+        #         trip_k = tuple(sorted(set(trip1).union(set(trip2)), key=lambda r: r.id))
+        #         # check trip size is k
+        #         if len(trip_k) != k:
+        #             continue
+        #         # check trip is already computed
+        #         all_found_trip_k = [vt[0] for vt in veh.VTtable[k - 1]]
+        #         if trip_k in all_found_trip_k:
+        #             continue
+        #         # check all subtrips are feasible
+        #         subtrips_check = True
+        #         for req in trip_k:
+        #             one_subtrip_of_trip_k = tuple(sorted((set(trip_k) - set([req])), key=lambda r: r.id))
+        #             all_found_trip_k_1 = [vt[0] for vt in veh.VTtable[k - 2]]
+        #             if one_subtrip_of_trip_k not in all_found_trip_k_1:
+        #                 subtrips_check = False
+        #                 break
+        #         if not subtrips_check:
+        #             continue
+        #         all_schedules_of_trip1 = veh.VTtable[k - 2][i][3]
+        #         _trip = trip1  # subtrip of trip_k
+        #         _schedules = all_schedules_of_trip1  # all feasible schedules for trip1 of size k-1
+        #         best_schedule, min_cost, all_schedules = compute_schedule(veh, trip_k, _trip, _schedules)
+        #         if best_schedule:
+        #             veh.VTtable[k - 1].append((trip_k, best_schedule, min_cost, all_schedules))
+        #             # debug code
+        #             assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_old)
 
         if len(veh.VTtable[k - 1]) == 0:
             for k1 in range(k, RIDESHARING_SIZE):
@@ -215,7 +249,7 @@ def get_old_shared_trips(veh, rid_old, k):
     return old_VTtable_k
 
 
-# try to do the plan and
+# try to do the plan and rebalancing together, but seems make it worse, thus not used
 def non_shared_trips_search(veh, reqs_pool):
     non_shared_trips = []
     if len(veh.onboard_rid) == 0:

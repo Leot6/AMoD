@@ -3,8 +3,8 @@ definition of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
-from lib.Route import find_nearest_node, get_duration
+from lib.S_Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
+from lib.S_Route import find_nearest_node, get_duration
 
 
 class Req(object):
@@ -39,10 +39,12 @@ class Req(object):
         self.dnid = find_nearest_node(dlng, dlat)
         self.Ts = get_duration(self.onid, self.dnid)
         self.Cep = Tr
-        self.Clp = Tr + MAX_WAIT
-        self.Cld = Tr + self.Ts + MAX_DELAY
-        # self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
-        # self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
+        if MAX_DETOUR == -1:
+            self.Clp = Tr + MAX_WAIT
+            self.Cld = Tr + self.Ts + MAX_DELAY
+        else:
+            self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
+            self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
         self.Clp_backup = self.Clp
         self.Tp = -1.0
         self.Td = -1.0
