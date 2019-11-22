@@ -3,7 +3,7 @@ definition of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.S_Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
+from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
 from lib.S_Route import find_nearest_node, get_duration
 
 

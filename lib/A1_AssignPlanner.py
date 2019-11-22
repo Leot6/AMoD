@@ -5,43 +5,40 @@ compute an assignment plan from edges in RTV
 import time
 import mosek
 import numpy as np
-from lib.S_Configure import CUTOFF_ILP, IS_DEBUG, MODEE
+from lib.Configure import MODEE, CUTOFF_ILP, IS_DEBUG
 
 
 def greedy_assign(veh_trip_edges):
-    R_id_assigned = []
-    T_id_assigned = []
-    V_id_assigned = []
-    schedule_assigned = []
+    R_assigned = []
+    T_assigned = []
+    V_assigned = []
+    S_assigned = []
 
     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
     for (veh, trip, schedule, cost) in edges:
-        veh_id = veh.id
-        trip_id = tuple([r.id for r in trip])
-        if trip_id in T_id_assigned:
+        if trip in T_assigned:
             continue
-        if veh_id in V_id_assigned:
+        if veh in V_assigned:
             continue
-        if np.any([r_id in R_id_assigned for r_id in trip_id]):
+        if np.any([r in R_assigned for r in trip]):
             continue
-        R_id_assigned.extend([rid for rid in trip_id])
-        T_id_assigned.append(trip_id)
-        V_id_assigned.append(veh_id)
-        schedule_assigned.append(schedule)
+        R_assigned.extend(list(trip))
+        T_assigned.append(trip)
+        V_assigned.append(veh)
+        S_assigned.append(schedule)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
 
-    return R_id_assigned, V_id_assigned, schedule_assigned
+    return R_assigned, V_assigned, S_assigned
 
 
 def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
 
     # debug code
-    assert len(reqs_pool) == len(set(reqs_pool))
     ss = time.time()
 
-    R_id_assigned = []
-    V_id_assigned = []
-    schedule_assigned = []
+    R_assigned = []
+    V_assigned = []
+    S_assigned = []
 
     # debug
     V_T_assigned = []
@@ -158,9 +155,9 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
         # print("Optimal solution: %s" % assign_idx)
         for yes, (veh, trip, schedule, cost) in zip(assign_idx, veh_trip_edges):
             if round(yes) == 1:
-                R_id_assigned.extend([req.id for req in trip])
-                V_id_assigned.append(veh.id)
-                schedule_assigned.append(schedule)
+                R_assigned.extend(list(trip))
+                V_assigned.append(veh)
+                S_assigned.append(schedule)
                 # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh.id, cost))
 
                 # debug
@@ -169,6 +166,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
                 # debug
 
         # debug code starts
+        R_id_assigned = [req.id for req in R_assigned]
         assert len(R_id_assigned) == len(set(R_id_assigned))
 
         if MODEE == 'VT_replan':
@@ -180,5 +178,5 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
                 print('cost_a', cost_a)
             assert len(rid_assigned_last_not_assigned_this_time) == 0
 
-    return R_id_assigned, V_id_assigned, schedule_assigned
+    return R_assigned, V_assigned, S_assigned
 

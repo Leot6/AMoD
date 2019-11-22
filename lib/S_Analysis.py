@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
-from lib.S_Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
+from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
     RIDESHARING_SIZE, MET_REBL, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, \
     IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
@@ -69,7 +69,9 @@ def print_results(model, runtime, mean_runtime, end_time):
         serving_rate = round(100.0 * count_serving / count_reqs, 2)
         count_service = count_served + count_serving + len(model.reqs_picking)
         total_service_rate = round(100 * count_service / count_reqs, 2)
+    if not count_serving == 0:
         wait_viol_rate = round(100 * count_wait_viol / (count_served + count_serving), 2)
+    if not count_served == 0:
         arri_viol_rate = round(100 * count_arri_viol / count_served, 2)
 
     # vehicle performance

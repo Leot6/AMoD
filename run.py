@@ -9,7 +9,7 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.S_Main import Model
-from lib.S_Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
+from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
     RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, MET_REBL, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 from lib.S_Analysis import anim, print_results
 
