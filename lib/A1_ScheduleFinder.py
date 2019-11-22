@@ -5,7 +5,7 @@ compute all feasible schedules for given vehicle v and trip T.
 import copy
 import time
 import numpy as np
-from lib.S_Configure import COEF_WAIT, COEF_INVEH, IS_STOCHASTIC_CONSIDERED
+from lib.Configure import COEF_WAIT, COEF_INVEH, IS_STOCHASTIC_CONSIDERED
 from lib.S_Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx, get_edge_mean_dur, get_edge_std
 
 
@@ -126,13 +126,13 @@ def compute_schedule(veh, trip, _trip, _schedules):
             if viol == 3:
                 break
 
-    # debug code starts
-    if len(trip) > 6:
-        print('compute size', len(trip), 'trip, num of sche:', len(_schedules),
-              ', time:',  (time.time() - aa), ', min_cost:', min_cost)
-        if best_schedule:
-            print('                    sche len:', len(best_schedule), ', num of Pv:', len(veh.onboard_reqs))
-    # debug code ends
+    # # debug code starts
+    # if len(trip) > 6:
+    #     print('compute size', len(trip), 'trip, num of sche:', len(_schedules),
+    #           ', time:',  (time.time() - aa), ', min_cost:', min_cost)
+    #     if best_schedule:
+    #         print('                    sche len:', len(best_schedule), ', num of Pv:', len(veh.onboard_reqs))
+    # # debug code ends
 
     return best_schedule, min_cost, feasible_schedules
 

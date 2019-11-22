@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.S_Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
+from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
 from lib.S_Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
 
 

@@ -8,9 +8,9 @@ import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from lib.S_Configure import RIDESHARING_SIZE, CUTOFF_RTV, MODEE
-from lib.S_Route import get_duration
+from lib.Configure import RIDESHARING_SIZE, CUTOFF_VT, MODEE
 from lib.A1_ScheduleFinder import compute_schedule, test_constraints_get_cost, compute_schedule_cost
+from lib.S_Route import get_duration
 
 
 # build VT table for each veh(replan), respectively
@@ -210,7 +210,7 @@ def get_old_shared_trips(veh, rid_old, k):
 
                 # codes to fix bugs that caused by non-static travel times (starts)
                 # (the same schedule (which is feasible) might not be feasible after veh moves along that schedule,
-                #     if travel times are not static)
+                #     if travel times are not static) (also unshared trips can be ensured)
                 trip_id_ = {req.id for req in trip_}
                 trip_sche_ = [(rid, pod) for (rid, pod, tnid, ddl, pf_path) in schedule]
                 if trip_sche_ == veh_route:
@@ -249,16 +249,16 @@ def get_old_shared_trips(veh, rid_old, k):
     return old_VTtable_k
 
 
-# try to do the plan and rebalancing together, but seems make it worse, thus not used
-def non_shared_trips_search(veh, reqs_pool):
-    non_shared_trips = []
-    if len(veh.onboard_rid) == 0:
-        shared_reqs = [vt[0][0] for vt in veh.VTtable[0]]
-        non_shared_reqs = sorted(set(reqs_pool) - set(shared_reqs), key=lambda r: r.id)
-        assert len(non_shared_reqs) + len(shared_reqs) == len(reqs_pool)
-        for req in non_shared_reqs:
-            if veh.T + get_duration(veh.nid, req.onid) + veh.t_to_nid < req.Clp + 300:
-                schedule = [(req.id, 1, req.onid, req.Clp, None), (req.id, -1, req.dnid, req.Cld, None)]
-                cost = veh.T + get_duration(veh.nid, req.onid) + veh.t_to_nid - req.Clp
-            non_shared_trips.append((tuple([req]), copy.deepcopy(schedule), cost))
-    return non_shared_trips
+# # try to do the plan and rebalancing together, but seems make it worse, thus not used
+# def non_shared_trips_search(veh, reqs_pool):
+#     non_shared_trips = []
+#     if len(veh.onboard_rid) == 0:
+#         shared_reqs = [vt[0][0] for vt in veh.VTtable[0]]
+#         non_shared_reqs = sorted(set(reqs_pool) - set(shared_reqs), key=lambda r: r.id)
+#         assert len(non_shared_reqs) + len(shared_reqs) == len(reqs_pool)
+#         for req in non_shared_reqs:
+#             if veh.T + get_duration(veh.nid, req.onid) + veh.t_to_nid < req.Clp + 300:
+#                 schedule = [(req.id, 1, req.onid, req.Clp, None), (req.id, -1, req.dnid, req.Cld, None)]
+#                 cost = veh.T + get_duration(veh.nid, req.onid) + veh.t_to_nid - req.Clp
+#             non_shared_trips.append((tuple([req]), copy.deepcopy(schedule), cost))
+#     return non_shared_trips

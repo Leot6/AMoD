@@ -9,11 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
-from lib.S_Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
+from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
     DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
 from lib.S_Request import Req
 from lib.S_Route import upd_traffic_on_network
 from lib.S_Vehicle import Veh
+from lib.A1_FSP_Main import FSP
 
 
 class Model(object):
@@ -65,32 +66,34 @@ class Model(object):
         self.reqs_unassigned = set()
         self.rejs = set()
         self.rid_assigned_last = set()
+        self.dispatcher = FSP()
         self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
         self.T = T
+        # update status of vehicles and requests
         if IS_DEBUG:
             print('    -T = %d, updating status of vehicles and requests...' % self.T)
-        a1 = time.time()
+        s1 = time.time()
         self.upd_vehs_and_reqs_stat_to_time()
         if IS_DEBUG:
-            print('        a1 running time:', round((time.time() - a1), 2))
-
+            print('        s1 running time:', round((time.time() - s1), 2))
+        # update traffic
         if IS_STOCHASTIC:
             if IS_DEBUG:
                 print('    -T = %d, updating traffics ...' % self.T)
-            a11 = time.time()
+            s2 = time.time()
             upd_traffic_on_network()
             if IS_DEBUG:
-                print('        a11 running time:', round((time.time() - a11), 2))
-
+                print('        s2 running time:', round((time.time() - s2), 2))
+        # generate new reqs
         if IS_DEBUG:
             print('    -T = %d, loading new reqs ...' % self.T)
-        a2 = time.time()
+        s3 = time.time()
         self.gen_reqs_to_time()
         if IS_DEBUG:
-            print('        a2 running time:', round((time.time() - a2), 2))
+            print('        s3 running time:', round((time.time() - s3), 2))
 
         # debug code starts
         if IS_DEBUG:
@@ -104,56 +107,25 @@ class Model(object):
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
-            reqs_new = self.queue
-            if MODEE == 'VT':
-                reqs_old = []
-            else:  # 'VT_replan'
-                reqs_old = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id)
-
-            if IS_DEBUG:
-                print('    -T = %d, building VT-table ...' % self.T)
-            a3 = time.time()
-            veh_trip_edges = build_vt_table(self.vehs, reqs_new, reqs_old, T)
-            if IS_DEBUG:
-                print('        a3 running time:', round((time.time() - a3), 2))
-
-            if self.assign == 'ILP':
-                if IS_DEBUG:
-                    print('    -T = %d, start ILP assign with %d edges...' % (self.T, len(veh_trip_edges)))
-                a4 = time.time()
-                R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(veh_trip_edges, reqs_old + reqs_new,
-                                                                             self.rid_assigned_last)
-                if IS_DEBUG:
-                    print('        a4 running time:', round((time.time() - a4), 2))
-
-            # # debug
-            # if len(self.rid_assigned_last) != 0:
-            #     quit()
-
+            # compute the assignment
+            R_assigned, V_assigned, S_assigned = \
+                self.dispatcher.dispatch(self.vehs, self.queue, self.reqs_picking, self.reqs_unassigned, self.T)
+            # execute the assignment
             if IS_DEBUG:
                 print('    -T = %d, execute the assignments...' % self.T)
-            a5 = time.time()
-            self.exec_assign(R_id_assigned, V_id_assigned, schedule_assigned)
+            s4 = time.time()
+            self.exec_assign(R_assigned, V_assigned, S_assigned)
             if IS_DEBUG:
-                print('        a5 running time:', round((time.time() - a5), 2))
+                print('        s4 running time:', round((time.time() - s4), 2))
+                # debug code starts
+                noi = 0  # number of idle vehicles
+                for veh in self.vehs:
+                    if veh.idle:
+                        noi += 1
+                print('            idle vehs: %d / %d' % (noi, self.V))
+                # debug code ends
 
-        if np.isclose(T % INT_REBL, 0):
-            if self.rebl == 'naive':
-                if IS_DEBUG:
-                    print('    -T = %d, start rebalancing...' % self.T)
-                a6 = time.time()
-                R_id_rebl, V_id_rebl, schedule_rebl = find_non_shared_trips(self.vehs, self.reqs_unassigned)
-                self.exec_non_shared_assign(R_id_rebl, V_id_rebl, schedule_rebl)
-                if IS_DEBUG:
-                    print('        a6 running time:', round((time.time() - a6), 2))
-                    # debug code starts
-                    noi = 0  # number of idle vehicles
-                    for veh in self.vehs:
-                        if veh.idle:
-                            noi += 1
-                    print('            idle vehs: %d / %d' % (noi, self.V))
-                    # debug code ends
-
+        # reject long waited requests
         if len(self.reqs_unassigned) > 0:
             reqs_rejected = set()
             for req in self.reqs_unassigned:
@@ -204,52 +176,26 @@ class Model(object):
         assert self.N == len(self.reqs)
 
     # execute the assignment from AssignPlanner and build (update) route for assigned vehicles
-    def exec_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
-        if MODEE == 'VT':
-            for veh_id, schedule in zip(V_id_assigned, schedule_assigned):
-                self.vehs[veh_id].build_route(schedule, self.reqs, self.T)
-            if IS_STOCHASTIC:
-                for veh in self.vehs:
-                    schedule = []
-                    if veh.id not in V_id_assigned:
-                        if not veh.idle:
-                            for leg in veh.route:
-                                if leg.pod == 1 or leg.pod == -1:
-                                    schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                            veh.build_route(schedule, self.reqs, self.T)
-            R_assigned = {self.reqs[rid] for rid in R_id_assigned}
-            self.reqs_picking.update(R_assigned)
-            R_unassigned = set(self.queue) - R_assigned
-            self.reqs_unassigned.update(R_unassigned)
-            self.queue.clear()
-
-        if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
-            reqs_pool = list(self.reqs_picking) + list(self.reqs_unassigned) + self.queue
-            assert len(reqs_pool) == len(set(reqs_pool))
-            self.queue.clear()
-            self.reqs_picking.clear()
+    def exec_assign(self, R_assigned, V_assigned, S_assigned):
+        for veh, schedule in zip(V_assigned, S_assigned):
+            veh.build_route(schedule, self.reqs, self.T)
+        if IS_STOCHASTIC:
             for veh in self.vehs:
                 schedule = []
-                if veh.id in V_id_assigned:
-                    schedule = schedule_assigned[V_id_assigned.index(veh.id)]
-                    if not IS_STOCHASTIC:
-                        if schedule == [(leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path) for leg in veh.route]:
-                            # vehicles with the same trip
-                            continue
-                else:
-                    if not veh.idle:
-                        if not IS_STOCHASTIC:
-                            if 1 not in {leg.pod for leg in veh.route}:
-                                # vehicles neither assigned new requests nor having new request to pick up
-                                continue
-                        for leg in veh.route:
-                            if leg.rid in veh.onboard_rid:
-                                    schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                veh.build_route(schedule, self.reqs, self.T)
-            R_assigned = {self.reqs[rid] for rid in R_id_assigned}
-            self.reqs_picking.update(R_assigned)
-            self.reqs_unassigned = set(reqs_pool) - R_assigned
-            self.rid_assigned_last = set(R_id_assigned)
+                if not veh.idle and veh not in V_assigned:
+                    for leg in veh.route:
+                        if leg.pod == 1 or leg.pod == -1:
+                            schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
+                    veh.build_route(schedule, self.reqs, self.T)
+
+        reqs_pool = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id) + self.queue
+        debug = len(reqs_pool)
+        self.queue.clear()
+        assert debug == len(reqs_pool)
+        self.reqs_picking.update(set(R_assigned))
+        assert debug == len(reqs_pool)
+        self.reqs_unassigned = set(reqs_pool) - self.reqs_picking
+        assert debug == len(reqs_pool)
 
         # debug code starts
         reqs_on_vehs = []
@@ -261,35 +207,13 @@ class Model(object):
         assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
         # debug code ends
 
-    # execute the assignment from 'find_non_shared_trips' and build route for assigned vehicles
-    def exec_non_shared_assign(self, R_id_assigned, V_id_assigned, schedule_assigned):
-        for rid, vid, schedule in zip(R_id_assigned, V_id_assigned, schedule_assigned):
-            assert self.vehs[vid].idle
-            self.vehs[vid].build_route(schedule, self.reqs, self.T)
-            self.vehs[vid].VTtable[0] = [(tuple([self.reqs[rid]]), schedule, 0, [schedule])]
-        R_assigned = {self.reqs[rid] for rid in R_id_assigned}
-        self.reqs_picking.update(R_assigned)
-        self.reqs_unassigned.difference_update(R_assigned)
-        if MODEE == 'VT_replan' or MODEE == 'VT_replan_all':
-            self.rid_assigned_last.update(R_id_assigned)
-
-        # debug code starts
-        reqs_on_vehs = []
-        for veh in self.vehs:
-            trip = {leg.rid for leg in veh.route}
-            if -2 in trip:
-                trip.remove(-2)
-            reqs_on_vehs.extend(list(trip))
-        assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
-        # debug code ends
-
-    # execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
-    def exec_rebalancing(self, V_id_assigned, schedule_assigned):
-        for vid, schedule in zip(V_id_assigned, schedule_assigned):
-            assert self.vehs[vid].idle
-            assert self.vehs[vid].t_to_nid == 0
-            self.vehs[vid].build_route(schedule, self.reqs, self.T)
-            assert schedule[0][0] == -1
+    # # execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
+    # def exec_rebalancing(self, V_id_assigned, schedule_assigned):
+    #     for vid, schedule in zip(V_id_assigned, schedule_assigned):
+    #         assert self.vehs[vid].idle
+    #         assert self.vehs[vid].t_to_nid == 0
+    #         self.vehs[vid].build_route(schedule, self.reqs, self.T)
+    #         assert schedule[0][0] == -1
 
     # visualize
     def draw(self):
