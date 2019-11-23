@@ -44,7 +44,7 @@ class FSP(object):
         if IS_DEBUG:
             print('        a2 running time:', round((time.time() - a2), 2))
 
-        print('share', [r.id for r in R_assigned], [v.id for v in V_assigned])
+        # print('share', [r.id for r in R_assigned], [v.id for v in V_assigned])
 
         # assign unshared trips
         if IS_DEBUG:
@@ -59,7 +59,7 @@ class FSP(object):
         if IS_DEBUG:
             print('        a3 running time:', round((time.time() - a3), 2))
 
-        print('unshare', [r.id for r in R_unshared], [v.id for v in V_unshared])
+        # print('unshare', [r.id for r in R_unshared], [v.id for v in V_unshared])
 
         # add changed schedule in VT-replan
         if MODEE == 'VT_replan':

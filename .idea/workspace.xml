@@ -2,79 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5ee899f-d42d-4c4b-a527-9b398d4ed0fd" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/AMoD.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AMoD.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 2.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 3.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 4.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 5.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 5.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 6.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 6.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace 7.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 7.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/edges.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/edges.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/nodes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/nodes.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/nodes.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/nodes.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/path-table-sat.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/path-table-sat.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/path-table-week.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/path-table-week.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/stations-630.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/stations-630.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sat.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-sat.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sun.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-sun.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-table-empty.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-table-empty.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-week.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-week.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20130503.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20130503.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20150502.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20150502.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20160501.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20160501.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20160507.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20160507.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/NYC trip data statistics.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/NYC trip data statistics.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo.gif" beforeDir="false" afterPath="$PROJECT_DIR$/demo.gif" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/data.plist" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/data.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image1.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image2.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image8.ai" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image8.ai" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image9.ai" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image9.ai" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/RTV-graph.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/RTV-graph.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/RTV-graph.psd" beforeDir="false" afterPath="$PROJECT_DIR$/doc/RTV-graph.psd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Standard Deviations .png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Standard Deviations .png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/VT-table.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/VT-table.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_AssignPlanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_AssignPlanner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/A1_FSP_Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_FSP_Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_Rebalancer.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_Rebalancer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_VTtable.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_VTtable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Configure.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Configure.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configure.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/S_Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Request.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Route.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Route.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Vehicle.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Vehicle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/London- osm.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/London- osm.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/London-google.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/London-google.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan-dark-1.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-dark-1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan-dark.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-dark.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan-light 1.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-light 1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan-light.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-light.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan-osm.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-osm.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/Manhattan.osm.pbf" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan.osm.pbf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map-file/v5.21.0.tar.gz" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/v5.21.0.tar.gz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map.png" beforeDir="false" afterPath="$PROJECT_DIR$/map.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim-0001.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-0001.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim-100vehs-rebl.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-100vehs-rebl.mp4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim-2000vehs-rebl.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-2000vehs-rebl.mp4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim-2000vehs.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-2000vehs.mp4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim-6vehs-30reqs.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-6vehs-30reqs.mp4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/anim.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ref-code/Dispatcher_FIFO.py.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/Dispatcher_FIFO.py.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ref-code/mod-master.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/mod-master.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ref-code/nyc-taxi-analysis-master.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/nyc-taxi-analysis-master.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,17 +38,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/Configure.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="522">
-              <caret line="30" column="16" selection-start-line="30" selection-start-column="16" selection-end-line="30" selection-end-column="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="41" column="16" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
+            <state relative-caret-position="432">
+              <caret line="25" column="38" lean-forward="true" selection-start-line="24" selection-start-column="39" selection-end-line="25" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -124,49 +47,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="113">
-              <caret line="65" column="23" selection-start-line="65" selection-start-column="23" selection-end-line="65" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/A1_AssignPlanner.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="687">
-              <caret line="177" selection-start-line="177" selection-end-line="177" />
+            <state relative-caret-position="504">
+              <caret line="132" column="112" selection-start-line="132" selection-start-column="112" selection-end-line="132" selection-end-column="112" />
               <folding>
-                <element signature="e#54#65#0" expanded="true" />
+                <element signature="e#47#58#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/run.py">
+        <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="40" selection-start-line="40" selection-end-line="40" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/A1_Rebalancer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="32" column="60" selection-start-line="32" selection-start-column="60" selection-end-line="32" selection-end-column="60" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3744">
-              <caret line="208" column="50" selection-start-line="208" selection-start-column="50" selection-end-line="208" selection-end-column="50" />
+            <state relative-caret-position="264">
+              <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
               <folding>
-                <element signature="e#126#137#0" expanded="true" />
+                <element signature="e#87#98#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -175,8 +71,54 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/A1_FSP_Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="475">
-              <caret line="77" column="24" selection-start-line="77" selection-start-column="24" selection-end-line="77" selection-end-column="24" />
+            <state relative-caret-position="602">
+              <caret line="62" lean-forward="true" selection-start-line="62" selection-end-line="62" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="354">
+              <caret line="23" column="38" lean-forward="true" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="38" />
+              <folding>
+                <element signature="e#72#83#0" expanded="true" />
+                <element signature="e#1811#1836#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="269">
+              <caret line="218" column="18" selection-start-line="218" selection-start-column="18" selection-end-line="218" selection-end-column="18" />
+              <folding>
+                <element signature="e#52#63#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="89">
+              <caret line="66" column="64" lean-forward="true" selection-start-line="66" selection-start-column="41" selection-end-line="66" selection-end-column="64" />
+              <folding>
+                <element signature="e#126#137#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="312">
+              <caret line="41" column="16" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -192,10 +134,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>same_req</find>
-      <find>.Clp</find>
-      <find>time.time</find>
-      <find>time</find>
       <find>RIDESHARING_SIZE</find>
       <find>model.</find>
       <find>rid_assigned_last</find>
@@ -222,6 +160,10 @@
       <find>replan</find>
       <find>MET_REBL</find>
       <find>exec_non_shared_assign</find>
+      <find>viol</find>
+      <find>schedule.append</find>
+      <find>self.c</find>
+      <find>test_constraints_get_cost</find>
     </findStrings>
     <replaceStrings>
       <replace>point_list</replace>
@@ -290,16 +232,18 @@
         <option value="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" />
         <option value="$PROJECT_DIR$/lib/A1_VTtable.py" />
         <option value="$PROJECT_DIR$/lib/A1_Rebalancer.py" />
-        <option value="$PROJECT_DIR$/lib/S_Main.py" />
         <option value="$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py" />
-        <option value="$PROJECT_DIR$/lib/Configure.py" />
+        <option value="$PROJECT_DIR$/lib/A2_HI.py" />
+        <option value="$PROJECT_DIR$/lib/S_Main.py" />
         <option value="$PROJECT_DIR$/lib/A1_FSP_Main.py" />
+        <option value="$PROJECT_DIR$/lib/Configure.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="y" value="23" />
     <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="height" value="1007" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -529,10 +473,11 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="872673000" />
+    <option name="totallyTimeSpent" value="877699000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17305644" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -562,7 +507,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Downloads/lo1.py" />
     <entry file="file://$USER_HOME$/Downloads/lo2.py" />
     <entry file="file://$USER_HOME$/Downloads/solutionquality.py" />
     <entry file="file://$USER_HOME$/Downloads/solvelinear.py" />
@@ -691,16 +635,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="123" column="28" lean-forward="true" selection-start-line="123" selection-start-column="28" selection-end-line="123" selection-end-column="28" />
-          <folding>
-            <element signature="e#72#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="130">
@@ -715,44 +649,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1305">
-          <caret line="212" column="30" selection-start-line="212" selection-start-column="30" selection-end-line="212" selection-end-column="30" />
-          <folding>
-            <element signature="e#52#63#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3744">
-          <caret line="208" column="50" selection-start-line="208" selection-start-column="50" selection-end-line="208" selection-end-column="50" />
-          <folding>
-            <element signature="e#126#137#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="40" selection-start-line="40" selection-end-line="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="155" column="28" lean-forward="true" selection-start-line="155" selection-start-column="28" selection-end-line="155" selection-end-column="28" />
+        <state relative-caret-position="286">
+          <caret line="152" column="53" selection-start-line="152" selection-start-column="53" selection-end-line="152" selection-end-column="53" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/A1_Rebalancer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="32" column="60" selection-start-line="32" selection-start-column="60" selection-end-line="32" selection-end-column="60" />
+        <state relative-caret-position="-13">
+          <caret line="11" column="36" lean-forward="true" selection-start-line="11" selection-start-column="36" selection-end-line="11" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-254">
+          <caret line="40" selection-start-line="40" selection-end-line="40" />
         </state>
       </provider>
     </entry>
@@ -766,31 +680,75 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
+    <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="113">
-          <caret line="65" column="23" selection-start-line="65" selection-start-column="23" selection-end-line="65" selection-end-column="23" />
+        <state relative-caret-position="269">
+          <caret line="218" column="18" selection-start-line="218" selection-start-column="18" selection-end-line="218" selection-end-column="18" />
+          <folding>
+            <element signature="e#52#63#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
+        <state relative-caret-position="312">
           <caret line="41" column="16" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="89">
+          <caret line="66" column="64" lean-forward="true" selection-start-line="66" selection-start-column="41" selection-end-line="66" selection-end-column="64" />
+          <folding>
+            <element signature="e#126#137#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+          <folding>
+            <element signature="e#87#98#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="354">
+          <caret line="23" column="38" lean-forward="true" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="38" />
+          <folding>
+            <element signature="e#72#83#0" expanded="true" />
+            <element signature="e#1811#1836#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="132" column="112" selection-start-line="132" selection-start-column="112" selection-end-line="132" selection-end-column="112" />
+          <folding>
+            <element signature="e#47#58#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/A1_FSP_Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="77" column="24" selection-start-line="77" selection-start-column="24" selection-end-line="77" selection-end-column="24" />
+        <state relative-caret-position="602">
+          <caret line="62" lean-forward="true" selection-start-line="62" selection-end-line="62" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/Configure.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="30" column="16" selection-start-line="30" selection-start-column="16" selection-end-line="30" selection-end-column="16" />
+        <state relative-caret-position="432">
+          <caret line="25" column="38" lean-forward="true" selection-start-line="24" selection-start-column="39" selection-end-line="25" selection-end-column="38" />
         </state>
       </provider>
     </entry>
