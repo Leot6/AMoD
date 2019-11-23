@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d5ee899f-d42d-4c4b-a527-9b398d4ed0fd" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/A1_FSP_Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_FSP_Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Configure.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configure.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/S_Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results.csv" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/AMoD$Trip_Filter.coverage" NAME="Trip_Filter Coverage Results" MODIFIED="1552042711597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/AMoD$Configure.coverage" NAME="Configure Coverage Results" MODIFIED="1574334569007" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/lib" />
+    <SUITE FILE_PATH="coverage/AMoD$run.coverage" NAME="run Coverage Results" MODIFIED="1574356431985" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="432">
+              <caret line="25" column="38" lean-forward="true" selection-start-line="24" selection-start-column="39" selection-end-line="25" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="504">
+              <caret line="132" column="112" selection-start-line="132" selection-start-column="112" selection-end-line="132" selection-end-column="112" />
+              <folding>
+                <element signature="e#47#58#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+              <folding>
+                <element signature="e#87#98#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A1_FSP_Main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="602">
+              <caret line="62" lean-forward="true" selection-start-line="62" selection-end-line="62" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="354">
+              <caret line="23" column="38" lean-forward="true" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="38" />
+              <folding>
+                <element signature="e#72#83#0" expanded="true" />
+                <element signature="e#1811#1836#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="269">
+              <caret line="218" column="18" selection-start-line="218" selection-start-column="18" selection-end-line="218" selection-end-column="18" />
+              <folding>
+                <element signature="e#52#63#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="89">
+              <caret line="66" column="64" lean-forward="true" selection-start-line="66" selection-start-column="41" selection-end-line="66" selection-end-column="64" />
+              <folding>
+                <element signature="e#126#137#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="312">
+              <caret line="41" column="16" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>RIDESHARING_SIZE</find>
+      <find>model.</find>
+      <find>rid_assigned_last</find>
+      <find>self.assign</find>
+      <find>pd</find>
+      <find>self.rid_assigned_last</find>
+      <find>G</find>
+      <find>G,</find>
+      <find>COEF_WAIT</find>
+      <find>NOD_NET</find>
+      <find>CUTOFF_RTV</find>
+      <find>parse</find>
+      <find>COEF_INVEH</find>
+      <find>CUTOFF_</find>
+      <find>get_duration</find>
+      <find>get_edge_std</find>
+      <find>compute size</find>
+      <find>assign</find>
+      <find>_id_</find>
+      <find>schedule_</find>
+      <find>non_s</find>
+      <find>copy.</find>
+      <find>self.queue</find>
+      <find>replan</find>
+      <find>MET_REBL</find>
+      <find>exec_non_shared_assign</find>
+      <find>viol</find>
+      <find>schedule.append</find>
+      <find>self.c</find>
+      <find>test_constraints_get_cost</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>point_list</replace>
+      <replace>lng</replace>
+      <replace>vlat1</replace>
+      <replace>&quot;&quot;&quot;</replace>
+      <replace>assigned</replace>
+      <replace>veh_</replace>
+      <replace>'</replace>
+      <replace>model</replace>
+      <replace>reqs</replace>
+      <replace>old</replace>
+      <replace>onboard_rid</replace>
+      <replace>u</replace>
+      <replace>v</replace>
+      <replace>scje</replace>
+      <replace>sche_</replace>
+      <replace>sche</replace>
+      <replace>NOD_NET</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/lib/Dispatcher_FIFO.py" />
+        <option value="$PROJECT_DIR$/lib/OsrmEngine.py" />
+        <option value="$PROJECT_DIR$/lib/Demand.py" />
+        <option value="$PROJECT_DIR$/lib/Dispatcher_RTV.py" />
+        <option value="$PROJECT_DIR$/data/Trip_Filter.py" />
+        <option value="$PROJECT_DIR$/data/nyc-graph/compute_travel_time.py" />
+        <option value="$PROJECT_DIR$/data/Manhattan-graph/GenerateManhattanGraph.py" />
+        <option value="$PROJECT_DIR$/data/Manhattan-graph/load_nyc_graph.py" />
+        <option value="$PROJECT_DIR$/lib/VTtableGenerator.py" />
+        <option value="$PROJECT_DIR$/lib/RTVgenerator.py" />
+        <option value="$PROJECT_DIR$/lib/VTtableReplan0.py" />
+        <option value="$PROJECT_DIR$/lib/VTtableReplan.py" />
+        <option value="$PROJECT_DIR$/lib/k_shortest_paths.py" />
+        <option value="$PROJECT_DIR$/lib/Vehicle_osrm.py" />
+        <option value="$PROJECT_DIR$/../AMoD copy/lib/Configure.py" />
+        <option value="$PROJECT_DIR$/../AMoD 2/lib/Configure.py" />
+        <option value="$PROJECT_DIR$/lib/AssignPlannerCSB.py" />
+        <option value="$PROJECT_DIR$/lib/Rebalancer.py" />
+        <option value="$PROJECT_DIR$/lib/Route.py" />
+        <option value="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" />
+        <option value="$PROJECT_DIR$/data/SerializeData.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/data/TripFilter.py" />
+        <option value="$PROJECT_DIR$/lib/Main.py" />
+        <option value="$PROJECT_DIR$/lib/Analysis.py" />
+        <option value="$PROJECT_DIR$/lib/Request.py" />
+        <option value="$PROJECT_DIR$/lib/VTtable.py" />
+        <option value="$PROJECT_DIR$/lib/Vehicle.py" />
+        <option value="$PROJECT_DIR$/temp.py" />
+        <option value="$PROJECT_DIR$/lib/ScheduleFinder.py" />
+        <option value="$PROJECT_DIR$/lib/AssignPlanner.py" />
+        <option value="$PROJECT_DIR$/lib/S_Configure.py" />
+        <option value="$PROJECT_DIR$/run.py" />
+        <option value="$PROJECT_DIR$/lib/S_Request.py" />
+        <option value="$PROJECT_DIR$/lib/S_Route.py" />
+        <option value="$PROJECT_DIR$/lib/S_Vehicle.py" />
+        <option value="$PROJECT_DIR$/lib/S_Analysis.py" />
+        <option value="$PROJECT_DIR$/lib/A1_AssignPlanner.py" />
+        <option value="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" />
+        <option value="$PROJECT_DIR$/lib/A1_VTtable.py" />
+        <option value="$PROJECT_DIR$/lib/A1_Rebalancer.py" />
+        <option value="$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py" />
+        <option value="$PROJECT_DIR$/lib/A2_HI.py" />
+        <option value="$PROJECT_DIR$/lib/S_Main.py" />
+        <option value="$PROJECT_DIR$/lib/A1_FSP_Main.py" />
+        <option value="$PROJECT_DIR$/lib/Configure.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="y" value="23" />
+    <option name="width" value="1920" />
+    <option name="height" value="1007" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="AMoD" type="b2602c69:ProjectViewProjectNode" />
+              <item name="AMoD" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="AMoD" type="b2602c69:ProjectViewProjectNode" />
+              <item name="AMoD" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.run">
+    <configuration name="Configure" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="AMoD" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/lib" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/lib/Configure.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Trip_Filter" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="AMoD" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/Trip_Filter.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="AMoD" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.Configure" />
+      <item itemvalue="Python.Trip_Filter" />
+      <item itemvalue="Python.run" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.run" />
+        <item itemvalue="Python.Configure" />
+        <item itemvalue="Python.Trip_Filter" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d5ee899f-d42d-4c4b-a527-9b398d4ed0fd" name="Default Changelist" comment="" />
+      <created>1551367149662</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1551367149662</updated>
+      <workItem from="1551367151025" duration="2889000" />
+      <workItem from="1551370639045" duration="1084000" />
+      <workItem from="1551371852180" duration="139000" />
+      <workItem from="1551896992999" duration="414000" />
+      <workItem from="1551959536400" duration="24209000" />
+      <workItem from="1552010085356" duration="4221000" />
+      <workItem from="1552041681486" duration="645000" />
+      <workItem from="1552042789472" duration="1713000" />
+      <workItem from="1552392072386" duration="194000" />
+      <workItem from="1552392710412" duration="162000" />
+      <workItem from="1552411400683" duration="1386000" />
+      <workItem from="1552416881373" duration="2541000" />
+      <workItem from="1552573472295" duration="2341000" />
+      <workItem from="1554207411493" duration="91000" />
+      <workItem from="1554231050455" duration="8724000" />
+      <workItem from="1554745059524" duration="138000" />
+      <workItem from="1554824959274" duration="4318000" />
+      <workItem from="1554896896937" duration="188000" />
+      <workItem from="1554919883738" duration="9341000" />
+      <workItem from="1555422373025" duration="9228000" />
+      <workItem from="1556119072147" duration="15367000" />
+      <workItem from="1556195423644" duration="2798000" />
+      <workItem from="1557705644502" duration="5000" />
+      <workItem from="1557769552383" duration="4388000" />
+      <workItem from="1557932986075" duration="6521000" />
+      <workItem from="1558100718221" duration="2346000" />
+      <workItem from="1558306748946" duration="1613000" />
+      <workItem from="1558371333651" duration="3838000" />
+      <workItem from="1558386610934" duration="2088000" />
+      <workItem from="1558456008495" duration="1455000" />
+      <workItem from="1559056927907" duration="48000" />
+      <workItem from="1559568216030" duration="1939000" />
+      <workItem from="1559745526816" duration="191000" />
+      <workItem from="1559745821328" duration="485000" />
+      <workItem from="1560028265498" duration="473000" />
+      <workItem from="1560097497530" duration="1520000" />
+      <workItem from="1560445838614" duration="473000" />
+      <workItem from="1561133584213" duration="1800000" />
+      <workItem from="1561300918741" duration="13730000" />
+      <workItem from="1561646440155" duration="8396000" />
+      <workItem from="1561989741511" duration="4452000" />
+      <workItem from="1561999701269" duration="1215000" />
+      <workItem from="1562077105554" duration="20438000" />
+      <workItem from="1562171159608" duration="11000" />
+      <workItem from="1562866013502" duration="9854000" />
+      <workItem from="1563388130394" duration="6794000" />
+      <workItem from="1563831577534" duration="6264000" />
+      <workItem from="1563889856416" duration="2193000" />
+      <workItem from="1564162255335" duration="1971000" />
+      <workItem from="1564241643620" duration="7736000" />
+      <workItem from="1564274406534" duration="1484000" />
+      <workItem from="1564362719007" duration="15985000" />
+      <workItem from="1564491654131" duration="141000" />
+      <workItem from="1564594315472" duration="2677000" />
+      <workItem from="1564611983772" duration="35353000" />
+      <workItem from="1565015647992" duration="419000" />
+      <workItem from="1565049030761" duration="1181000" />
+      <workItem from="1565195598281" duration="3910000" />
+      <workItem from="1565200392724" duration="555000" />
+      <workItem from="1565201696693" duration="7476000" />
+      <workItem from="1565360187079" duration="1407000" />
+      <workItem from="1565403394904" duration="639000" />
+      <workItem from="1565440352625" duration="19210000" />
+      <workItem from="1565664819267" duration="2649000" />
+      <workItem from="1565825699431" duration="375000" />
+      <workItem from="1566407446314" duration="182000" />
+      <workItem from="1566835729395" duration="1635000" />
+      <workItem from="1568203842275" duration="7038000" />
+      <workItem from="1568631519875" duration="2169000" />
+      <workItem from="1568882304057" duration="1431000" />
+      <workItem from="1569053095245" duration="205000" />
+      <workItem from="1569053466415" duration="79000" />
+      <workItem from="1569053567829" duration="5507000" />
+      <workItem from="1569295996466" duration="7587000" />
+      <workItem from="1570076295908" duration="391000" />
+      <workItem from="1570784329922" duration="2813000" />
+      <workItem from="1571142455164" duration="9504000" />
+      <workItem from="1572523706810" duration="2482000" />
+      <workItem from="1574046748146" duration="6076000" />
+      <workItem from="1574248979508" duration="1187000" />
+      <workItem from="1574252519670" duration="919000" />
+      <workItem from="1574265321100" duration="4040000" />
+      <workItem from="1574351966149" duration="5509000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="877699000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17305644" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32970297" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32739726" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32970297" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.25742576" />
+      <window_info anchor="bottom" id="Python Console" order="12" show_stripe_button="false" weight="0.32970297" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" auto_hide="true" id="SciView" order="3" show_stripe_button="false" sideWeight="0.49926144" type="FLOATING" weight="0.32960597" />
+      <window_info anchor="right" id="Database" order="4" weight="0.32956383" />
+      <window_info anchor="right" x="0" y="0" width="430" height="880" id="Documentation" order="5" sideWeight="0.50073856" side_tool="true" weight="0.32960597" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$USER_HOME$/Downloads/lo2.py" />
+    <entry file="file://$USER_HOME$/Downloads/solutionquality.py" />
+    <entry file="file://$USER_HOME$/Downloads/solvelinear.py" />
+    <entry file="file://$USER_HOME$/Downloads/solvebasis.py" />
+    <entry file="file://$PROJECT_DIR$/lib/RTVgenerator.py" />
+    <entry file="file://$PROJECT_DIR$/lib/VTtableGenerator.py" />
+    <entry file="file://$PROJECT_DIR$/lib/VTtableReplan0.py" />
+    <entry file="file://$USER_HOME$/Downloads/nyc-taxi-analysis-master/scripts/load_nyc_graph.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="121">
+          <caret line="30" column="23" lean-forward="true" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
+          <folding>
+            <element signature="e#1#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/VTtableReplan.py" />
+    <entry file="file://$PROJECT_DIR$/data/NYC trip data statistics.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/k_shortest_paths.py" />
+    <entry file="file://$PROJECT_DIR$/data/shortest-path-table.csv" />
+    <entry file="file://$PROJECT_DIR$/lib/Vehicle_osrm.py" />
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/Configure.py" />
+    <entry file="file://$PROJECT_DIR$/lib/VTtable_backup.py" />
+    <entry file="file://$PROJECT_DIR$/../AMoD 2/lib/Configure.py" />
+    <entry file="file://$PROJECT_DIR$/lib/AssignPlannerCSB.py" />
+    <entry file="file://$USER_HOME$/anaconda3/pkgs/scipy-1.2.1-py37h1410ff5_0/lib/python3.7/site-packages/scipy/signal/fir_filter_design.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-19908">
+          <folding>
+            <element signature="e#63#127#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Route.py" />
+    <entry file="file://$PROJECT_DIR$/data/SerializeData.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="522">
+          <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
+          <folding>
+            <element signature="e#70#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="32" column="44" selection-start-line="32" selection-start-column="40" selection-end-line="32" selection-end-column="44" />
+          <folding>
+            <element signature="e#62#73#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/TripFilter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="14" column="15" selection-start-line="14" selection-start-column="15" selection-end-line="14" selection-end-column="15" />
+          <folding>
+            <element signature="e#64#75#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Analysis.py" />
+    <entry file="file://$PROJECT_DIR$/lib/Request.py" />
+    <entry file="file://$PROJECT_DIR$/lib/Vehicle.py" />
+    <entry file="file://$PROJECT_DIR$/temp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3132">
+          <caret line="187" column="58" selection-start-line="187" selection-end-line="188" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/ScheduleFinder.py" />
+    <entry file="file://$PROJECT_DIR$/lib/VTtable.py" />
+    <entry file="file://$PROJECT_DIR$/lib/Rebalancer.py" />
+    <entry file="file://$PROJECT_DIR$/lib/AssignPlanner.py" />
+    <entry file="file://$PROJECT_DIR$/lib/Main.py" />
+    <entry file="file://$PROJECT_DIR$/lib/A1_Main.py" />
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="271">
+          <caret line="20" column="59" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="59" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Configure.py" />
+    <entry file="file://$PROJECT_DIR$/lib/S_Analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="19" lean-forward="true" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
+          <folding>
+            <element signature="e#42#52#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Request.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="22" column="41" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="41" />
+          <folding>
+            <element signature="e#52#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Route.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+          <folding>
+            <element signature="e#50#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="130">
+          <caret line="1134" selection-start-line="1134" selection-end-line="1134" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="152" column="53" selection-start-line="152" selection-start-column="53" selection-end-line="152" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_Rebalancer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-13">
+          <caret line="11" column="36" lean-forward="true" selection-start-line="11" selection-start-column="36" selection-end-line="11" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-254">
+          <caret line="40" selection-start-line="40" selection-end-line="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_AssignPlanner.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="687">
+          <caret line="177" selection-start-line="177" selection-end-line="177" />
+          <folding>
+            <element signature="e#54#65#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="269">
+          <caret line="218" column="18" selection-start-line="218" selection-start-column="18" selection-end-line="218" selection-end-column="18" />
+          <folding>
+            <element signature="e#52#63#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="41" column="16" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="89">
+          <caret line="66" column="64" lean-forward="true" selection-start-line="66" selection-start-column="41" selection-end-line="66" selection-end-column="64" />
+          <folding>
+            <element signature="e#126#137#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+          <folding>
+            <element signature="e#87#98#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="354">
+          <caret line="23" column="38" lean-forward="true" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="38" />
+          <folding>
+            <element signature="e#72#83#0" expanded="true" />
+            <element signature="e#1811#1836#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="132" column="112" selection-start-line="132" selection-start-column="112" selection-end-line="132" selection-end-column="112" />
+          <folding>
+            <element signature="e#47#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_FSP_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="602">
+          <caret line="62" lean-forward="true" selection-start-line="62" selection-end-line="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="25" column="38" lean-forward="true" selection-start-line="24" selection-start-column="39" selection-end-line="25" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

@@ -26,6 +26,9 @@ DMD_VOL = 1
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
 
+# DISPATCHER = 'HI'
+DISPATCHER = 'FSP'
+
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 20
 T_STUDY = 60 * 130
@@ -49,8 +52,8 @@ INT_REBL = INT_ASSIGN * 1
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
-# IS_DEBUG = False
-IS_DEBUG = True
+IS_DEBUG = False
+# IS_DEBUG = True
 
 # travel time mode
 # IS_STOCHASTIC = True

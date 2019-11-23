@@ -10,11 +10,12 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
 from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
-    DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC
+    DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC, DISPATCHER
 from lib.S_Request import Req
 from lib.S_Route import upd_traffic_on_network
 from lib.S_Vehicle import Veh
 from lib.A1_FSP_Main import FSP
+from lib.A2_HI import HI
 
 
 class Model(object):
@@ -66,7 +67,10 @@ class Model(object):
         self.reqs_unassigned = set()
         self.rejs = set()
         self.rid_assigned_last = set()
-        self.dispatcher = FSP()
+        if DISPATCHER == 'FSP':
+            self.dispatcher = FSP()
+        elif DISPATCHER == 'HI':
+            self.dispatcher = HI()
         self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
@@ -107,23 +111,26 @@ class Model(object):
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
-            # compute the assignment
-            R_assigned, V_assigned, S_assigned = \
-                self.dispatcher.dispatch(self.vehs, self.queue, self.reqs_picking, self.reqs_unassigned, self.T)
-            # execute the assignment
-            if IS_DEBUG:
-                print('    -T = %d, execute the assignments...' % self.T)
-            s4 = time.time()
-            self.exec_assign(R_assigned, V_assigned, S_assigned)
-            if IS_DEBUG:
-                print('        s4 running time:', round((time.time() - s4), 2))
-                # debug code starts
-                noi = 0  # number of idle vehicles
-                for veh in self.vehs:
-                    if veh.idle:
-                        noi += 1
-                print('            idle vehs: %d / %d' % (noi, self.V))
-                # debug code ends
+            if DISPATCHER == 'FSP':
+                # compute the assignment
+                R_assigned, V_assigned, S_assigned = \
+                    self.dispatcher.dispatch(self.vehs, self.queue, self.reqs_picking, self.reqs_unassigned, self.T)
+                # execute the assignment
+                if IS_DEBUG:
+                    print('    -T = %d, execute the assignments...' % self.T)
+                s4 = time.time()
+                self.exec_assign(R_assigned, V_assigned, S_assigned)
+                if IS_DEBUG:
+                    print('        s4 running time:', round((time.time() - s4), 2))
+                    # debug code starts
+                    noi = 0  # number of idle vehicles
+                    for veh in self.vehs:
+                        if veh.idle:
+                            noi += 1
+                    print('            idle vehs: %d / %d' % (noi, self.V))
+                    # debug code ends
+            elif DISPATCHER == 'HI':
+                self.dispatcher.dispatch(self.vehs, self.queue, self.reqs, self.reqs_picking, self.rejs, self.T)
 
         # reject long waited requests
         if len(self.reqs_unassigned) > 0:
