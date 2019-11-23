@@ -111,26 +111,25 @@ class Model(object):
         # debug code ends
 
         if np.isclose(T % INT_ASSIGN, 0):
-            if DISPATCHER == 'FSP':
-                # compute the assignment
-                R_assigned, V_assigned, S_assigned = \
-                    self.dispatcher.dispatch(self.vehs, self.queue, self.reqs_picking, self.reqs_unassigned, self.T)
-                # execute the assignment
+            # compute the assignment
+            V_assigned = self.dispatcher.dispatch(self)
+
+            # update traffic on routes of vehicles
+            if IS_STOCHASTIC:
                 if IS_DEBUG:
-                    print('    -T = %d, execute the assignments...' % self.T)
+                    print('    -T = %d, update traffic on routes of vehicles...' % self.T)
                 s4 = time.time()
-                self.exec_assign(R_assigned, V_assigned, S_assigned)
-                if IS_DEBUG:
-                    print('        s4 running time:', round((time.time() - s4), 2))
-                    # debug code starts
-                    noi = 0  # number of idle vehicles
-                    for veh in self.vehs:
-                        if veh.idle:
-                            noi += 1
-                    print('            idle vehs: %d / %d' % (noi, self.V))
-                    # debug code ends
-            elif DISPATCHER == 'HI':
-                self.dispatcher.dispatch(self.vehs, self.queue, self.reqs, self.reqs_picking, self.rejs, self.T)
+                self.upd_traffic_on_route_of_vehs(V_assigned)
+                print('        s4 running time:', round((time.time() - s4), 2))
+
+            # debug code starts
+            if IS_DEBUG:
+                noi = 0  # number of idle vehicles
+                for veh in self.vehs:
+                    if veh.idle:
+                        noi += 1
+                print('            idle vehs: %d / %d' % (noi, self.V))
+            # debug code ends
 
         # reject long waited requests
         if len(self.reqs_unassigned) > 0:
@@ -182,37 +181,14 @@ class Model(object):
             assert req.Ts > 1
         assert self.N == len(self.reqs)
 
-    # execute the assignment from AssignPlanner and build (update) route for assigned vehicles
-    def exec_assign(self, R_assigned, V_assigned, S_assigned):
-        for veh, schedule in zip(V_assigned, S_assigned):
-            veh.build_route(schedule, self.reqs, self.T)
-        if IS_STOCHASTIC:
-            for veh in self.vehs:
-                schedule = []
-                if not veh.idle and veh not in V_assigned:
-                    for leg in veh.route:
-                        if leg.pod == 1 or leg.pod == -1:
-                            schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                    veh.build_route(schedule, self.reqs, self.T)
-
-        reqs_pool = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id) + self.queue
-        debug = len(reqs_pool)
-        self.queue.clear()
-        assert debug == len(reqs_pool)
-        self.reqs_picking.update(set(R_assigned))
-        assert debug == len(reqs_pool)
-        self.reqs_unassigned = set(reqs_pool) - self.reqs_picking
-        assert debug == len(reqs_pool)
-
-        # debug code starts
-        reqs_on_vehs = []
+    def upd_traffic_on_route_of_vehs(self, V_assigned):
         for veh in self.vehs:
-            trip = {leg.rid for leg in veh.route}
-            if -2 in trip:
-                trip.remove(-2)
-            reqs_on_vehs.extend(list(trip))
-        assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
-        # debug code ends
+            schedule = []
+            if not veh.idle and veh not in V_assigned:
+                for leg in veh.route:
+                    if leg.pod == 1 or leg.pod == -1:
+                        schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
+                veh.build_route(schedule, self.reqs, self.T)
 
     # # execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
     # def exec_rebalancing(self, V_id_assigned, schedule_assigned):
