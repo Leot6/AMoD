@@ -2,8 +2,6 @@
 heuristic insertion: insert requests to vehicles in first-in-first-out manner
 """
 
-import time
-import copy
 import numpy as np
 
 from lib.A1_ScheduleFinder import compute_schedule
@@ -11,22 +9,34 @@ from lib.A1_ScheduleFinder import compute_schedule
 
 class HI(object):
     """
-        HI is heuristic insertion dispatch algorithm
-        Attributes:
-            rid_assigned_last: the list of id of requests assigned in last dispatching period
-        """
+    HI is heuristic insertion dispatch algorithm
+    Used Parameters:
+        AMoD.vehs
+        AMoD.reqs
+        AMoD.queue
+        AMoD.reqs_picking
+        AMoD.rejs
+        AMoD.T
+    """
 
     def __init__(self):
         self.rid_assigned_last = set()
 
-    def dispatch(self, vehs, queue, reqs, reqs_picking, rejs, T):
-        l = len(queue)
+    def dispatch(self, amod):
+        V_assigned = []
+        l = len(amod.queue)
         for i in range(l):
-            req = queue.pop()
-            if not self.insert_heuristics(vehs, req, reqs, reqs_picking, T):
-                rejs.add(req)
+            req = amod.queue.pop()
+            best_veh, best_schedule = self.insert_heuristic(amod.vehs, req)
+            if best_veh:
+                best_veh.build_route(best_schedule, amod.reqs, amod.T)
+                V_assigned.append(best_veh)
+                amod.reqs_picking.add(req)
+            else:
+                amod.rejs.add(req)
+        return V_assigned
 
-    def insert_heuristics(self, vehs, req, reqs, reqs_picking, T):
+    def insert_heuristic(self, vehs, req):
         best_veh = None
         best_schedule = None
         min_cost = np.inf
@@ -41,12 +51,5 @@ class HI(object):
                 best_veh = veh
                 best_schedule = new_schedule
                 min_cost = cost
-        if best_veh:
-            best_veh.build_route(best_schedule, reqs, T)
-            reqs_picking.add(req)
-            return True
-        else:
-            return False
 
-
-
+        return best_veh, best_schedule

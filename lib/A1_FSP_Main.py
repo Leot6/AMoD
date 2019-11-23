@@ -13,26 +13,40 @@ from lib.A1_Rebalancer import find_unshared_trips
 
 class FSP(object):
     """
-        FSP is feasible schedule pool dispatch algorithm
-        Attributes:
-            rid_assigned_last: the list of id of requests assigned in last dispatching period
-        """
+    FSP is feasible schedule pool dispatch algorithm
+    Attributes:
+        rid_assigned_last: the list of id of requests assigned in last dispatching period
+    Used Parameters:
+        AMoD.vehs
+        AMoD.reqs
+        AMoD.queue
+        AMoD.reqs_picking
+        AMoD.reqs_unassigned
+        AMoD.T
+    """
 
     def __init__(self):
         self.rid_assigned_last = set()
 
-    def dispatch(self, vehs, queue, reqs_picking, reqs_unassigned, T):
+    def dispatch(self, amod):
+        vehs = amod.vehs
+        reqs = amod.reqs
+        queue = amod.queue
+        reqs_picking = amod.reqs_picking
+        reqs_unassigned = amod.reqs_unassigned
+        T = amod.T
+
         reqs_new = queue
         if MODEE == 'VT':
-            reqs_old = []
+            reqs_prev = []
         else:  # 'VT_replan'
-            reqs_old = sorted(reqs_picking.union(reqs_unassigned), key=lambda r: r.id)
+            reqs_prev = sorted(reqs_picking.union(reqs_unassigned), key=lambda r: r.id)
 
         # build VT-table
         if IS_DEBUG:
             print('    -T = %d, building VT-table ...' % T)
         a1 = time.time()
-        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_old, T)
+        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T)
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
 
@@ -40,7 +54,7 @@ class FSP(object):
         if IS_DEBUG:
             print('    -T = %d, start ILP assign with %d edges...' % (T, len(veh_trip_edges)))
         a2 = time.time()
-        R_assigned, V_assigned, S_assigned = ILP_assign(veh_trip_edges, reqs_old + reqs_new, self.rid_assigned_last)
+        R_assigned, V_assigned, S_assigned = ILP_assign(veh_trip_edges, reqs_prev + reqs_new, self.rid_assigned_last)
         if IS_DEBUG:
             print('        a2 running time:', round((time.time() - a2), 2))
 
@@ -84,4 +98,27 @@ class FSP(object):
         assert len(V_assigned) == len(set(V_assigned))
         assert len(V_assigned) == len(S_assigned)
 
-        return R_assigned, V_assigned, S_assigned
+        # execute the assignment and build (update) route for assigned vehicles
+        for veh, schedule in zip(V_assigned, S_assigned):
+            veh.build_route(schedule, reqs, T)
+
+        # debug code (check each req is not assigned to multiple vehs)
+        reqs_on_vehs = []
+        for veh in amod.vehs:
+            trip = {leg.rid for leg in veh.route}
+            if -2 in trip:
+                trip.remove(-2)
+            reqs_on_vehs.extend(list(trip))
+        assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
+
+        # update reqs clustering status
+        reqs_pool = sorted(reqs_picking.union(reqs_unassigned), key=lambda r: r.id) + queue
+        debug = len(reqs_pool)
+        amod.queue.clear()
+        assert debug == len(reqs_pool)
+        amod.reqs_picking.update(set(R_assigned))
+        assert debug == len(reqs_pool)
+        amod.reqs_unassigned = set(reqs_pool) - reqs_picking
+        assert debug == len(reqs_pool)
+
+        return V_assigned

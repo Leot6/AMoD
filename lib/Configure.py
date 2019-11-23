@@ -89,8 +89,8 @@ Dlat = 40.8825
 # ************************************************************************************** #
 # # parameters for A1_FSP # #
 # ride-sharing logic mode
-# MODEE = 'VT'
-MODEE = 'VT_replan'
+MODEE = 'VT'
+# MODEE = 'VT_replan'
 
 # ridesharing size in computation
 RIDESHARING_SIZE = int(VEH_CAPACITY * 1.5)
