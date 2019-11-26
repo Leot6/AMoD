@@ -21,7 +21,7 @@ with open('./data/NYC_NET_WEEK.pickle', 'rb') as f:
     NOD_NET = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1
+DMD_VOL = 0.2
 # DMD_SST = parse('2013-05-03 00:00:00')
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
@@ -31,12 +31,12 @@ DISPATCHER = 'FSP'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 20
-T_STUDY = 60 * 130
+T_STUDY = 60 * 200
 T_COOL_DOWN = 60 * 0
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 200
+FLEET_SIZE = 500
 VEH_CAPACITY = 4
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
@@ -52,8 +52,8 @@ INT_REBL = INT_ASSIGN * 1
 # if true, activate the animation / analysis
 IS_ANIMATION = False
 IS_ANALYSIS = True
-IS_DEBUG = False
-# IS_DEBUG = True
+# IS_DEBUG = False
+IS_DEBUG = True
 
 # travel time mode
 # IS_STOCHASTIC = True
@@ -89,8 +89,8 @@ Dlat = 40.8825
 # ************************************************************************************** #
 # # parameters for A1_FSP # #
 # ride-sharing logic mode
-MODEE = 'VT'
-# MODEE = 'VT_replan'
+# MODEE = 'VT'
+MODEE = 'VT_replan'
 
 # ridesharing size in computation
 RIDESHARING_SIZE = int(VEH_CAPACITY * 1.5)
