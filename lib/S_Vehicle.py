@@ -267,7 +267,7 @@ class Veh(object):
                 leg.steps[-1].t += wait
                 leg.t += wait
 
-            # latest pick-up time is reduced to the expected pick-up time (as Alonso-Mora's paper)
+            # latest pick-up time is reduced to the expected pick-up time
             buffer = 30
             if T + self.t + leg.t + buffer <= reqs[rid].Clp:
                 reqs[rid].Clp = T + self.t + leg.t + buffer

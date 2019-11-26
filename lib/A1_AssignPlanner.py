@@ -9,42 +9,36 @@ from lib.Configure import MODEE, CUTOFF_ILP, IS_DEBUG
 
 
 def greedy_assign(veh_trip_edges):
-    R_assigned = []
-    T_assigned = []
-    V_assigned = []
+    R_id_assigned = []
+    T_id_assigned = []
+    V_id_assigned = []
     S_assigned = []
 
     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
     for (veh, trip, schedule, cost) in edges:
-        if trip in T_assigned:
+        veh_id = veh.id
+        trip_id = tuple([r.id for r in trip])
+        if trip_id in T_id_assigned:
             continue
-        if veh in V_assigned:
+        if veh_id in V_id_assigned:
             continue
-        if np.any([r in R_assigned for r in trip]):
+        if np.any([r_id in R_id_assigned for r_id in trip_id]):
             continue
-        R_assigned.extend(list(trip))
-        T_assigned.append(trip)
-        V_assigned.append(veh)
+        R_id_assigned.extend([rid for rid in trip_id])
+        T_id_assigned.append(trip_id)
+        V_id_assigned.append(veh_id)
         S_assigned.append(schedule)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
 
-    return R_assigned, V_assigned, S_assigned
+    return R_id_assigned, V_id_assigned, S_assigned
 
 
-def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
-
-    # debug code
-    ss = time.time()
-
-    R_assigned = []
-    V_assigned = []
+def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
+    rid_picking = [r.id for r in reqs_picking]
+    assert len(reqs_pool) == len(set(reqs_pool))
+    R_id_assigned = []
+    V_id_assigned = []
     S_assigned = []
-
-    # debug
-    V_T_assigned = []
-
-    # debug
-    cost_a = 0
 
     numedges = len(veh_trip_edges)
     if numedges > 0:
@@ -85,7 +79,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
         # Objective coefficients
         c = [round(cost) for (veh, trip, schedule, cost) in veh_trip_edges]
         for rid in R_id:
-            if rid in rid_assigned_last:
+            if rid in rid_picking:
                 c.append(cost_ignore_high)
             else:
                 c.append(cost_ignore_normal)
@@ -155,28 +149,22 @@ def ILP_assign(veh_trip_edges, reqs_pool, rid_assigned_last):
         # print("Optimal solution: %s" % assign_idx)
         for yes, (veh, trip, schedule, cost) in zip(assign_idx, veh_trip_edges):
             if round(yes) == 1:
-                R_assigned.extend(list(trip))
-                V_assigned.append(veh)
+                R_id_assigned.extend([req.id for req in trip])
+                V_id_assigned.append(veh.id)
                 S_assigned.append(schedule)
                 # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh.id, cost))
 
-                # debug
-                cost_a += round(cost)
-                V_T_assigned.append((veh.id, {req.id for req in trip}))
-                # debug
-
-        # debug code starts
-        R_id_assigned = [req.id for req in R_assigned]
         assert len(R_id_assigned) == len(set(R_id_assigned))
-
         if MODEE == 'VT_replan':
-            rid_assigned_last_not_assigned_this_time = \
-                rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
-            # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
-            if len(rid_assigned_last_not_assigned_this_time) != 0:
-                print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
-                print('cost_a', cost_a)
-            assert len(rid_assigned_last_not_assigned_this_time) == 0
+            assert set(rid_picking) <= set(R_id_assigned)
 
-    return R_assigned, V_assigned, S_assigned
+            # rid_assigned_last_not_assigned_this_time = \
+            #     rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
+            # # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
+            # if len(rid_assigned_last_not_assigned_this_time) != 0:
+            #     print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
+            #     print('cost_a', cost_a)
+            # assert len(rid_assigned_last_not_assigned_this_time) == 0
+
+    return R_id_assigned, V_id_assigned, S_assigned
 

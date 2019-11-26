@@ -14,12 +14,12 @@ from lib.S_Route import get_duration
 
 
 # build VT table for each veh(replan), respectively
-def build_vt_table(vehs, reqs_new, reqs_old, T):
-    rid_old = {req.id for req in reqs_old}
+def build_vt_table(vehs, reqs_new, reqs_prev, T):
+    rid_prev = {req.id for req in reqs_prev}
 
     # # parallel (not working properly)
     # veh_trip_edges = []
-    # trip_list_all = Parallel(n_jobs=-1)(delayed(feasible_trips_search)(veh, reqs_new, reqs_old, T) for veh in vehs)
+    # trip_list_all = Parallel(n_jobs=-1)(delayed(feasible_trips_search)(veh, reqs_new, reqs_prev, T) for veh in vehs)
     # for veh, (trip_list, schedule_list, cost_list) in zip(vehs, trip_list_all):
     #     for trips, schedules, costs in zip(trip_list, schedule_list, cost_list):
     #         for trip, schedule, cost in zip(trips, schedules, costs):
@@ -28,7 +28,7 @@ def build_vt_table(vehs, reqs_new, reqs_old, T):
     # non-parallel
     veh_trip_edges = []
     for veh in tqdm(vehs, desc=MODEE + ' Table'):
-        feasible_shared_trips_search(veh, reqs_new, rid_old, T)
+        feasible_shared_trips_search(veh, reqs_new, rid_prev, T)
         for VTtable_k in veh.VTtable:
             for (trip, best_schedule, cost, all_schedules) in VTtable_k:
                 veh_trip_edges.append((veh, trip, best_schedule, cost))
@@ -38,14 +38,14 @@ def build_vt_table(vehs, reqs_new, reqs_old, T):
 
 # search all feasible trips for a single vehicle, incrementally from the trip size of one
 # a time consuming step
-def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
+def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
     # trips of size 1
     # add old trips (size 1)
     if MODEE == 'VT':
         veh.VTtable[0].clear()
     else:
-        veh.VTtable[0] = get_old_shared_trips(veh, rid_old, k=1)
-    l_old_trips_k = len(veh.VTtable[0])  # number of old trips of size 1
+        veh.VTtable[0] = get_prev_shared_trips(veh, rid_prev, k=1)
+    l_prev_trips_k = len(veh.VTtable[0])  # number of old trips of size 1
 
     # add new trips (size 1)
     _schedule = []
@@ -74,13 +74,13 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
         if MODEE == 'VT':
             veh.VTtable[k - 1].clear()
         else:
-            veh.VTtable[k - 1] = get_old_shared_trips(veh, rid_old, k)
-        l_old_trips_k_1 = l_old_trips_k  # number of old trips of size k-1
-        l_old_trips_k = len(veh.VTtable[k - 1])  # number of old trips of size k
+            veh.VTtable[k - 1] = get_prev_shared_trips(veh, rid_prev, k)
+        l_prev_trips_k_1 = l_prev_trips_k  # number of old trips of size k-1
+        l_prev_trips_k = len(veh.VTtable[k - 1])  # number of old trips of size k
 
         # add new trips
         l_all_trips_k_1 = len(veh.VTtable[k - 2])  # number of all trips of size k-1
-        l_new_trips_k_1 = l_all_trips_k_1 - l_old_trips_k_1  # number of new trips of size k-1
+        l_new_trips_k_1 = l_all_trips_k_1 - l_prev_trips_k_1  # number of new trips of size k-1
 
         # old version
         for i in range(1, l_new_trips_k_1 + 1):
@@ -119,7 +119,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
                 if best_schedule:
                     veh.VTtable[k - 1].append((trip_k, best_schedule, min_cost, all_schedules))
                     # debug code
-                    assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_old)
+                    assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_prev)
 
         # # new version
         # l_all_trips_1 = len(veh.VTtable[0])
@@ -152,7 +152,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
         #         if best_schedule:
         #             veh.VTtable[k - 1].append((trip_k, best_schedule, min_cost, all_schedules))
         #             # debug code
-        #             assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_old)
+        #             assert {req.id for req in trip_k} < {req.id for req in set(reqs_new)}.union(rid_prev)
 
         if len(veh.VTtable[k - 1]) == 0:
             for k1 in range(k, RIDESHARING_SIZE):
@@ -161,7 +161,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_old, T):
 
 
 # find out which trips from last interval can be still considered feasible size k trips in current interval
-def get_old_shared_trips(veh, rid_old, k):
+def get_prev_shared_trips(veh, rid_prev, k):
     old_VTtable_k = []
 
     new_pick_rid = set(veh.new_pick_rid)
@@ -177,17 +177,17 @@ def get_old_shared_trips(veh, rid_old, k):
 
     if l_new_pick == 0:
         trip_id_sub = set()
-        trip_id_sup = rid_old
+        trip_id_sup = rid_prev
     else:
         trip_id_sub = new_pick_rid
-        trip_id_sup = rid_old.union(new_pick_rid)
-        assert len(trip_id_sup) - len(rid_old) == l_new_pick
+        trip_id_sup = rid_prev.union(new_pick_rid)
+        assert len(trip_id_sup) - len(rid_prev) == l_new_pick
 
     veh_route = [(leg.rid, leg.pod) for leg in veh.route]
     veh_rid_enroute = {leg.rid for leg in veh.route}
     for (trip, best_schedule, cost, all_schedules) in veh.VTtable[k - 1]:
         trip_id = {req.id for req in trip}
-        if trip_id_sub < trip_id < trip_id_sup:
+        if trip_id_sub < trip_id <= trip_id_sup:
             best_schedule = None
             min_cost = np.inf
             feasible_schedules = []
@@ -243,7 +243,7 @@ def get_old_shared_trips(veh, rid_old, k):
                         min_cost = c
             if len(feasible_schedules) > 0:
                 old_VTtable_k.append((trip_, best_schedule, min_cost, feasible_schedules))
-                assert {req.id for req in trip_} < rid_old
+                assert {req.id for req in trip_} <= rid_prev
 
     assert len([vt[0] for vt in old_VTtable_k]) == len(set([vt[0] for vt in old_VTtable_k]))
     return old_VTtable_k

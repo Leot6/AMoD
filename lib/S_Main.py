@@ -39,7 +39,7 @@ class Model(object):
         reqs_picking: the list of requests being picked up
         reqs_unassigned: the list of requests unassigned in the planning pool
         rejs: the list of rejected requests
-        rid_assigned_last: the list of id of requests being picked up or on board
+        dispatcher: the algorithm used to do the dispatching
 
     """
 
@@ -66,7 +66,6 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = set()
-        self.rid_assigned_last = set()
         if DISPATCHER == 'FSP':
             self.dispatcher = FSP()
         elif DISPATCHER == 'HI':
@@ -77,12 +76,8 @@ class Model(object):
     def dispatch_at_time(self, T):
         self.T = T
         # update status of vehicles and requests
-        if IS_DEBUG:
-            print('    -T = %d, updating status of vehicles and requests...' % self.T)
-        s1 = time.time()
         self.upd_vehs_and_reqs_stat_to_time()
-        if IS_DEBUG:
-            print('        s1 running time:', round((time.time() - s1), 2))
+
         # update traffic
         if IS_STOCHASTIC:
             if IS_DEBUG:
@@ -91,13 +86,9 @@ class Model(object):
             upd_traffic_on_network()
             if IS_DEBUG:
                 print('        s2 running time:', round((time.time() - s2), 2))
+
         # generate new reqs
-        if IS_DEBUG:
-            print('    -T = %d, loading new reqs ...' % self.T)
-        s3 = time.time()
         self.gen_reqs_to_time()
-        if IS_DEBUG:
-            print('        s3 running time:', round((time.time() - s3), 2))
 
         # debug code starts
         if IS_DEBUG:
@@ -112,15 +103,11 @@ class Model(object):
 
         if np.isclose(T % INT_ASSIGN, 0):
             # compute the assignment
-            V_assigned = self.dispatcher.dispatch(self)
+            V_id_assigned = self.dispatcher.dispatch(self)
 
             # update traffic on routes of vehicles
             if IS_STOCHASTIC:
-                if IS_DEBUG:
-                    print('    -T = %d, update traffic on routes of vehicles...' % self.T)
-                s4 = time.time()
-                self.upd_traffic_on_route_of_vehs(V_assigned)
-                print('        s4 running time:', round((time.time() - s4), 2))
+                self.upd_traffic_on_route_of_vehs(V_id_assigned)
 
             # debug code starts
             if IS_DEBUG:
@@ -143,6 +130,9 @@ class Model(object):
 
     # update vehs and reqs status to their current positions at time T
     def upd_vehs_and_reqs_stat_to_time(self):
+        if IS_DEBUG:
+            print('    -T = %d, updating status of vehicles and requests...' % self.T)
+            s1 = time.time()
         for veh in self.vehs:
             veh.new_pick_rid.clear()
             veh.new_drop_rid.clear()
@@ -164,9 +154,14 @@ class Model(object):
                     self.reqs_serving.remove(self.reqs[rid])
                     self.reqs_served.add(self.reqs[rid])
             assert len(veh.onboard_rid) == len(veh.onboard_reqs)
+        if IS_DEBUG:
+            print('        s1 running time:', round((time.time() - s1), 2))
 
     # generate requests up to time T, loading from reqs data file
     def gen_reqs_to_time(self):
+        if IS_DEBUG:
+            print('    -T = %d, loading new reqs ...' % self.T)
+            s3 = time.time()
         req_idx = self.req_init_idx + int(self.N / self.D)
         while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds <= self.T:
             req = Req(self.N, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds,
@@ -180,23 +175,22 @@ class Model(object):
             # check the travel time of a trip is not zero
             assert req.Ts > 1
         assert self.N == len(self.reqs)
+        if IS_DEBUG:
+            print('        s3 running time:', round((time.time() - s3), 2))
 
-    def upd_traffic_on_route_of_vehs(self, V_assigned):
+    def upd_traffic_on_route_of_vehs(self, V_id_assigned):
+        if IS_DEBUG:
+            print('    -T = %d, update traffic on routes of vehicles...' % self.T)
+            s4 = time.time()
         for veh in self.vehs:
             schedule = []
-            if not veh.idle and veh not in V_assigned:
+            if not veh.idle and veh.id not in V_id_assigned:
                 for leg in veh.route:
                     if leg.pod == 1 or leg.pod == -1:
                         schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
                 veh.build_route(schedule, self.reqs, self.T)
-
-    # # execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
-    # def exec_rebalancing(self, V_id_assigned, schedule_assigned):
-    #     for vid, schedule in zip(V_id_assigned, schedule_assigned):
-    #         assert self.vehs[vid].idle
-    #         assert self.vehs[vid].t_to_nid == 0
-    #         self.vehs[vid].build_route(schedule, self.reqs, self.T)
-    #         assert schedule[0][0] == -1
+        if IS_DEBUG:
+            print('        s4 running time:', round((time.time() - s4), 2))
 
     # visualize
     def draw(self):

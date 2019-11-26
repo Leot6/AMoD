@@ -19,24 +19,22 @@ class HI(object):
         AMoD.T
     """
 
-    def __init__(self):
-        self.rid_assigned_last = set()
-
     def dispatch(self, amod):
-        V_assigned = []
+        V_id_assigned = []
         l = len(amod.queue)
         for i in range(l):
             req = amod.queue.pop()
             best_veh, best_schedule = self.insert_heuristic(amod.vehs, req)
             if best_veh:
                 best_veh.build_route(best_schedule, amod.reqs, amod.T)
-                V_assigned.append(best_veh)
                 amod.reqs_picking.add(req)
+                V_id_assigned.append(best_veh.id)
             else:
                 amod.rejs.add(req)
-        return V_assigned
+        return V_id_assigned
 
-    def insert_heuristic(self, vehs, req):
+    @staticmethod
+    def insert_heuristic(vehs, req):
         best_veh = None
         best_schedule = None
         min_cost = np.inf
