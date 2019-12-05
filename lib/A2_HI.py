@@ -3,8 +3,10 @@ heuristic insertion: insert requests to vehicles in first-in-first-out manner
 """
 
 import numpy as np
+from tqdm import tqdm
 
 from lib.A1_ScheduleFinder import compute_schedule
+from lib.S_Route import get_duration
 
 
 class HI(object):
@@ -22,7 +24,7 @@ class HI(object):
     def dispatch(self, amod):
         V_id_assigned = []
         l = len(amod.queue)
-        for i in range(l):
+        for i in tqdm(range(l), desc='HI'):
             req = amod.queue.pop()
             best_veh, best_schedule = self.insert_heuristic(amod.vehs, req)
             if best_veh:
@@ -38,9 +40,10 @@ class HI(object):
         best_veh = None
         best_schedule = None
         min_cost = np.inf
-        for veh in vehs:
+        for veh in tqdm(vehs, desc='Candidates'):
+            dt = get_duration(veh.nid, req.onid)
             schedule = []
-            if not veh.idle:
+            if not veh.idle and dt < 100000:
                 for leg in veh.route:
                     if leg.pod == 1 or leg.pod == -1:
                         schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))

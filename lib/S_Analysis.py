@@ -131,18 +131,21 @@ def print_results(model, runtime, mean_runtime, end_time):
     print('*' * 80)
 
     # write and save the result analysis
-    f = open('output/results.csv', 'a')
+    f = open('output/results1.csv', 'a')
     writer = csv.writer(f)
     # writer.writerow(['scenario', 'demand starts', 'demand ends', 'demand number',
-    #                  'fleet size', 'capacity',  'max wait (s)', 'max wait (s)', 'method', 'rebalancing', 'interval (s)',
+    #                  'fleet size', 'capacity',  'max wait (s)', 'max wait (s)', 'method', 'interval (s)',
     #                  'total service rate', 'served rate (finished)', 'serving rate (in-car)',
-    #                  'mean waiting', 'mean in-car delay', 'mean detour', 'mean car load (dist)', 'mean car load (time)',
+    #                  'mean waiting', 'mean in-car delay', 'wt viol rate', 'tw viol', 'td viol rate', 'td viol',
+    #                  'mean detour', 'mean car load (dist)', 'mean car load (time)',
     #                  'simulation starts', 'simulation ends', 'run time', 'mean run time', 'remarks'])
     row = [DMD_STR, DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), str(count_reqs)+' ('+str(DMD_VOL*100)+'%)',
-           model.V, str(model.K)+' ('+str(RIDESHARING_SIZE)+')', MAX_WAIT, MAX_DELAY, MODEE, MET_REBL, INT_ASSIGN,
+           model.V, str(model.K)+' ('+str(RIDESHARING_SIZE)+')', MAX_WAIT, MAX_DELAY, MODEE, INT_ASSIGN,
            str(total_service_rate)+'% ('+str(count_service)+')', str(served_rate)+'% (' + str(count_served)+')',
-           str(serving_rate) + '% (' + str(count_serving) + ')', round(wait_time, 2),
-           round(in_veh_delay, 2), round(detour_factor, 2), round(veh_load_by_dist, 2), round(veh_load_by_time, 2),
+           str(serving_rate) + '% (' + str(count_serving) + ')', round(wait_time, 2), round(in_veh_delay, 2),
+           str(wait_viol_rate) + '% (' + str(count_wait_viol) + '/' + str(count_served + count_serving) + ')',
+           round(wait_viol_time, 2), str(arri_viol_rate) + '% (' + str(count_arri_viol) + '/' + str(count_served) + ')',
+           round(arri_viol_time, 2), round(detour_factor, 2), round(veh_load_by_dist, 2), round(veh_load_by_time, 2),
            model.start_time, end_time, runtime, mean_runtime, None]
     writer.writerow(row)
     f.close()

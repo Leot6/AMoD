@@ -1,5 +1,5 @@
 """
-batch assignment: computing the feaible schedule pool and then assign them together
+batch assignment: computing the optimal schedule pool and then assign them together
 """
 
 import time
@@ -11,9 +11,9 @@ from lib.A1_AssignPlanner import ILP_assign, greedy_assign
 from lib.S_Route import get_duration
 
 
-class FSP(object):
+class OSP(object):
     """
-    FSP is feasible schedule pool dispatch algorithm
+    OSP is optimal schedule pool dispatch algorithm
     Used Parameters:
         AMoD.vehs
         AMoD.reqs
@@ -68,11 +68,8 @@ class FSP(object):
         amod.reqs_unassigned = set(queue).union(reqs_unassigned) - R_assigned
         amod.queue.clear()
 
-        reqss = list(amod.reqs_picking) + list(amod.reqs_serving) + list(amod.reqs_served) + \
-                list(amod.reqs_unassigned) + list(amod.rejs)
-        assert set(reqss) == set(amod.reqs)
-
-        # debug
+        assert set(list(amod.reqs_picking) + list(amod.reqs_serving) + list(amod.reqs_served) +
+                   list(amod.reqs_unassigned) + list(amod.rejs)) == set(amod.reqs)
         assert len(R_assigned) == len(set(R_assigned))
 
         # debug code (check each req is not assigned to multiple vehs)
