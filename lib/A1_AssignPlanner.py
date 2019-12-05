@@ -158,13 +158,5 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
         if MODEE == 'VT_replan':
             assert set(rid_picking) <= set(R_id_assigned)
 
-            # rid_assigned_last_not_assigned_this_time = \
-            #     rid_assigned_last - set(R_id_assigned) - (rid_assigned_last-set(R_id))
-            # # print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
-            # if len(rid_assigned_last_not_assigned_this_time) != 0:
-            #     print('rid_assigned_last_not_assigned_this_time', rid_assigned_last_not_assigned_this_time)
-            #     print('cost_a', cost_a)
-            # assert len(rid_assigned_last_not_assigned_this_time) == 0
-
     return R_id_assigned, V_id_assigned, S_assigned
 

@@ -11,7 +11,7 @@ from lib.S_Route import get_duration, get_path_from_SPtable, k_shortest_paths_nx
 
 # (schedules of trip T of size k are computed based on schedules of its subtrip of size k-1)
 def compute_schedule(veh, trip, _trip, _schedules):
-    #test
+    # test
     aa = time.time()
 
     feasible_schedules = []
@@ -36,7 +36,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
     for schedule in _schedules:
         l = len(schedule)
         # if the direct pick-up of req is longer than the time constraint of any req already in the schedule,
-        # then it cannot be picked-up before that req. (seems not save time as expected)
+        # then it cannot be picked-up before that req. (seems not saving time as expected)
         dt = get_duration(veh.nid, req.onid) + veh.t_to_nid
         for i in reversed(range(l)):
             if veh.T + dt > schedule[i][3]:
@@ -49,18 +49,24 @@ def compute_schedule(veh, trip, _trip, _schedules):
                 ealist_drop_off_point = i + 2
                 break
 
-        # # new added code starts
-        # # for repeat computation caused by same pick/drop node
-        # # (seems no effect, and will reduce the service rate a little, around 0.1%)
-        # idx_same_pick = -1
-        # idx_same_drop = -1
-        # # get the index of same origin/destination in the schedule
-        # if len(same_pick) > 0 or len(same_drop) > 0:
-        #     for idx, (rid, pod, tnid, ddl, pf_path) in zip(range(len(schedule)), schedule):
-        #         if req.onid == tnid:
-        #             idx_same_pick = idx if req.Clp <= ddl else idx + 1
-        #         if req.dnid == tnid:
-        #             idx_same_drop = idx + 1 if req.Cld <= ddl else idx + 2
+        # new added code starts
+        # for repeat computation caused by same pick/drop node
+        # (seems no effect, and will reduce the service rate a little, around 0.1%)
+        idx_same_pick = -1
+        idx_same_drop = -1
+        # get the index of same origin/destination in the schedule
+        if len(same_pick) > 0 or len(same_drop) > 0:
+            for idx, (rid, pod, tnid, ddl, pf_path) in zip(range(len(schedule)), schedule):
+                if req.onid == tnid:
+                    idx_same_pick = idx if req.Clp <= ddl else idx + 1
+                    if pod == -1:
+                        idx_same_pick = idx + 1
+                elif req.dnid == tnid:
+                    idx_same_drop = idx + 1 if req.Cld <= ddl else idx + 2
+                    if pod == 1:
+                        idx_same_drop = idx + 1
+                        break
+
         # # same origin and destination
         # if idx_same_pick != -1 and idx_same_drop != -1:
         #     idx_p = idx_same_pick
@@ -69,7 +75,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #                                                            best_schedule, min_cost, feasible_schedules)
         #     continue
         # # same origin only
-        # elif idx_same_pick != -1 and idx_same_drop == -1:
+        # if idx_same_pick != -1 and idx_same_drop == -1:
         #     idx_p = idx_same_pick
         #     # insert the req's drop-off point
         #     for idx_d in range(idx_p + 1, l + 2):
@@ -81,7 +87,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #             break
         #     continue
         # # same destination only
-        # elif idx_same_pick == -1 and idx_same_drop != -1:
+        # if idx_same_pick == -1 and idx_same_drop != -1:
         #     idx_d = idx_same_drop
         #     # insert the req's pick-up point
         #     for idx_p in range(idx_d):
@@ -93,7 +99,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #             break
         #     continue
         # # none is same
-        # elif idx_same_pick == -1 and idx_same_drop == -1:
+        # if idx_same_pick == -1 and idx_same_drop == -1:
         #     # insert the req's pick-up point
         #     for i in range(l + 1):
         #         if i < ealist_pick_up_point:
@@ -103,7 +109,7 @@ def compute_schedule(veh, trip, _trip, _schedules):
         #             if j < ealist_drop_off_point:
         #                 continue
         #             best_schedule, min_cost, viol = insert_req_to_schedule(veh, trip, schedule, req, i, j,
-        #                                                                    best_schedule, min_cost, feasible_schedules)
+        #                                                                   best_schedule, min_cost, feasible_schedules)
         #             if viol > 0:
         #                 break
         #         if viol == 3:
@@ -126,13 +132,22 @@ def compute_schedule(veh, trip, _trip, _schedules):
             if viol == 3:
                 break
 
-    # # debug code starts
-    # if len(trip) > 6:
-    #     print('compute size', len(trip), 'trip, num of sche:', len(_schedules),
-    #           ', time:',  (time.time() - aa), ', min_cost:', min_cost)
-    #     if best_schedule:
-    #         print('                    sche len:', len(best_schedule), ', num of Pv:', len(veh.onboard_reqs))
-    # # debug code ends
+    # debug code starts
+    ctt = time.time() - aa
+
+    if ctt > 2:
+        print()
+        print()
+        print('veh', veh.id, ', trip', [r.id for r in trip], ', trip size', len(trip), ', time:', ctt)
+        print('num of subsche:', len(_schedules))
+        # for sche in _schedules:
+        #     print('sub-schedule', [(leg[0], leg[1], leg[2], leg[3]) for leg in sche])
+        if best_schedule:
+            print('best_schedule', ' sche len:', len(best_schedule), ', num of sche:', len(feasible_schedules), ', min_cost:', min_cost)
+        # if len(feasible_schedules) > len(_schedules):
+        #     for sche in feasible_schedules:
+        #         print('new-schedule', [(leg[0], leg[1], leg[2], leg[3]) for leg in sche])
+    # debug code ends
 
     return best_schedule, min_cost, feasible_schedules
 

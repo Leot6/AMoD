@@ -14,7 +14,7 @@ from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REB
 from lib.S_Request import Req
 from lib.S_Route import upd_traffic_on_network
 from lib.S_Vehicle import Veh
-from lib.A1_FSP_Main import FSP
+from lib.A1_OSP_Main import OSP
 from lib.A2_HI import HI
 
 
@@ -66,8 +66,8 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = set()
-        if DISPATCHER == 'FSP':
-            self.dispatcher = FSP()
+        if DISPATCHER == 'OSP':
+            self.dispatcher = OSP()
         elif DISPATCHER == 'HI':
             self.dispatcher = HI()
         self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
