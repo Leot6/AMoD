@@ -21,7 +21,7 @@ with open('./data/NYC_NET_WEEK.pickle', 'rb') as f:
     NOD_NET = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 0.1
+DMD_VOL = 1
 # DMD_SST = parse('2013-05-03 00:00:00')
 DMD_SST = parse('2015-05-02 00:00:00')
 DMD_STR = 'Manhattan'
@@ -31,12 +31,12 @@ DISPATCHER = 'OSP'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 20
-T_STUDY = 60 * 14
-T_COOL_DOWN = 60 * 0
+T_STUDY = 60 * 1400
+T_COOL_DOWN = 60 * 20
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 100
+FLEET_SIZE = 2000
 VEH_CAPACITY = 4
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
@@ -89,13 +89,12 @@ Dlat = 40.8825
 # ************************************************************************************** #
 # # parameters for A1_FSP # #
 # ride-sharing logic mode
-# MODEE = 'HI'
-# MODEE = 'VT'
-MODEE = 'VT_replan'
+MODEE = 'VT'
+# MODEE = 'VT_replan'
 
 # ridesharing size in computation
-RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
-# RIDESHARING_SIZE = 1
+# RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
+RIDESHARING_SIZE = 1
 
 # methods for vehicle-request assignment and rebalancing
 MET_ASSIGN = 'ILP'
@@ -111,3 +110,6 @@ COEF_WAIT = 1.0
 COEF_INVEH = 1.0
 
 # ************************************************************************************** #
+
+if DISPATCHER == 'HI':
+    MODEE = 'HI'

@@ -28,7 +28,7 @@ def load_Manhattan_graph():
     nodes = pd.read_csv('nodes.csv')
     aa = time.time()
     # set the mean travel time of all day (24 hours) as the travel time
-    travel_time_edges = pd.read_csv('time-week.csv', index_col=0)
+    travel_time_edges = pd.read_csv('time-on-sun.csv', index_col=0)
     mean_travel_times = travel_time_edges.mean(1)
     std_travel_times = travel_time_edges.std(1)
     G = nx.DiGraph()
@@ -48,7 +48,7 @@ def load_Manhattan_graph():
     print('...running time : %.05f seconds' % (time.time() - aa))
 
     # store_map_as_pickle_file
-    with open('NYC_NET.pickle', 'wb') as f:
+    with open('NYC_NET_new.pickle', 'wb') as f:
         pickle.dump(G, f)
     return G
 
@@ -65,7 +65,7 @@ def compute_shortest_time_table(len_paths, nodes=None):
                 shortest_time_table.iloc[o - 1, d - 1] = duration
             except nx.NetworkXNoPath:
                 print('no path between', o, d)
-    shortest_time_table.to_csv('time-table.csv')
+    shortest_time_table.to_csv('time-table-new.csv')
     return shortest_time_table
 
 
@@ -85,7 +85,7 @@ def compute_shortest_path_table(len_paths, nodes=None):
                     shortest_path_table.iloc[o - 1, d - 1] = pre_node
             except nx.NetworkXNoPath:
                 print('no path between', o, d)
-    shortest_path_table.to_csv('path-table.csv')
+    shortest_path_table.to_csv('path-table-new.csv')
     return shortest_path_table
 
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # compute all pairs shortest paths and durations
     time1 = time.time()
     print('start computing all shortest paths ...')
-    with open('NYC_NET.pickle', 'rb') as f:
+    with open('NYC_NET_new.pickle', 'rb') as f:
         G = pickle.load(f)
     len_path = dict(nx.all_pairs_dijkstra(G, cutoff=None, weight='dur'))
     print('all_pairs_dijkstra running time : %.05f seconds' % (time.time() - time1))

@@ -114,6 +114,9 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
                     _trip = trip2
                     _schedules = all_schedules_of_trip2
 
+                # _trip = trip1  # subtrip of trip_k
+                # _schedules = [veh.VTtable[k - 2][-i][1]]  # all feasible schedules for trip1 of size k-1
+
                 best_schedule, min_cost, all_schedules = compute_schedule(veh, trip_k, _trip, _schedules)
                 if best_schedule:
                     veh.VTtable[k - 1].append((trip_k, best_schedule, min_cost, all_schedules))

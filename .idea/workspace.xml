@@ -18,40 +18,30 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace 7.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace 7.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/edges.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/edges.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/nodes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/nodes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/nodes.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/nodes.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/path-table-sat.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/path-table-sat.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/path-table-week.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/path-table-week.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/stations-630.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/stations-630.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sat.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-sat.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sun.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-sun.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sat.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-sun.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-table-empty.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-table-empty.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-week.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-graph/time-week.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20130503.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20130503.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Manhattan-graph/time-week.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20150502.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20150502.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20160501.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20160501.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/Manhattan-taxi-20160507.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/Manhattan-taxi-20160507.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/NYC trip data statistics.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/NYC trip data statistics.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/SerializeData.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/SerializeData.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/demo.gif" beforeDir="false" afterPath="$PROJECT_DIR$/demo.gif" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/data.plist" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/data.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image1.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image2.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image8.ai" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image8.ai" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image9.ai" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Batch Assignment.graffle/image9.ai" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/doc/RTV-graph.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/RTV-graph.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/doc/RTV-graph.psd" beforeDir="false" afterPath="$PROJECT_DIR$/doc/RTV-graph.psd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Standard Deviations .png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Standard Deviations .png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/doc/VT-table.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/VT-table.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_AssignPlanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_AssignPlanner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_FSP_Main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/A1_VTtable.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A1_VTtable.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/A2_HI.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/A2_HI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/Configure.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configure.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/S_Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/S_Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/S_Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manual record results.numbers" beforeDir="false" afterPath="$PROJECT_DIR$/manual record results.numbers" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manual record results.numbers" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/map-file/London- osm.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/London- osm.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/map-file/London-google.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/London-google.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/map-file/Manhattan-dark-1.png" beforeDir="false" afterPath="$PROJECT_DIR$/map-file/Manhattan-dark-1.png" afterDir="false" />
@@ -68,8 +58,8 @@
       <change beforePath="$PROJECT_DIR$/output/anim-2000vehs.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-2000vehs.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/anim-6vehs-30reqs.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim-6vehs-30reqs.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/anim.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/output/anim.mp4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/results-Leot’s MacBook Pro.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/output/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/results1.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output/results1.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ref-code/Dispatcher_FIFO.py.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/Dispatcher_FIFO.py.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ref-code/mod-master.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/mod-master.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ref-code/nyc-taxi-analysis-master.zip" beforeDir="false" afterPath="$PROJECT_DIR$/ref-code/nyc-taxi-analysis-master.zip" afterDir="false" />
@@ -104,8 +94,32 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/Configure.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="275">
-              <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
+            <state>
+              <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="818">
+              <caret line="97" selection-start-line="97" selection-end-line="97" />
+              <folding>
+                <element signature="e#62#73#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/S_Request.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="738">
+              <caret line="43" column="47" selection-start-line="43" selection-start-column="47" selection-end-line="43" selection-end-column="47" />
+              <folding>
+                <element signature="e#52#83#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -113,8 +127,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="359">
-              <caret line="149" column="20" lean-forward="true" selection-start-line="149" selection-start-column="20" selection-end-line="149" selection-end-column="47" />
+            <state relative-caret-position="573">
+              <caret line="64" column="33" selection-start-line="64" selection-start-column="33" selection-end-line="64" selection-end-column="33" />
               <folding>
                 <element signature="e#47#58#0" expanded="true" />
               </folding>
@@ -123,34 +137,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/S_Route.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
-              <folding>
-                <element signature="e#50#61#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/A1_AssignPlanner.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="139" column="58" lean-forward="true" selection-start-line="139" selection-start-column="58" selection-end-line="139" selection-end-column="58" />
-              <folding>
-                <element signature="e#54#65#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="117" column="31" lean-forward="true" selection-start-line="51" selection-start-column="7" selection-end-line="117" selection-end-column="31" />
+            <state relative-caret-position="414">
+              <caret line="23" column="42" lean-forward="true" selection-start-line="23" selection-start-column="42" selection-end-line="23" selection-end-column="42" />
               <folding>
                 <element signature="e#72#83#0" expanded="true" />
               </folding>
@@ -159,22 +149,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+        <entry file="file://$PROJECT_DIR$/lib/S_Analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="48">
-              <caret line="184" column="57" lean-forward="true" selection-start-line="184" selection-start-column="57" selection-end-line="184" selection-end-column="57" />
+            <state relative-caret-position="239">
+              <caret line="164" column="26" lean-forward="true" selection-start-line="164" selection-start-column="26" selection-end-line="164" selection-end-column="26" />
               <folding>
-                <element signature="e#126#137#0" expanded="true" />
+                <element signature="e#42#52#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
+        <entry file="file://$PROJECT_DIR$/lib/A1_OSP_Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="11" column="18" lean-forward="true" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="18" />
+            <state relative-caret-position="421">
+              <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -190,7 +180,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>exec_non_shared_assign</find>
       <find>viol</find>
       <find>schedule.append</find>
       <find>self.c</find>
@@ -220,6 +209,7 @@
       <find>all_schedules</find>
       <find>feasible_schedules</find>
       <find>-2</find>
+      <find>count_serving_all</find>
     </findStrings>
     <replaceStrings>
       <replace>point_list</replace>
@@ -268,8 +258,6 @@
         <option value="$PROJECT_DIR$/lib/AssignPlannerCSB.py" />
         <option value="$PROJECT_DIR$/lib/Rebalancer.py" />
         <option value="$PROJECT_DIR$/lib/Route.py" />
-        <option value="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" />
-        <option value="$PROJECT_DIR$/data/SerializeData.py" />
         <option value="$PROJECT_DIR$/data/TripFilter.py" />
         <option value="$PROJECT_DIR$/lib/Main.py" />
         <option value="$PROJECT_DIR$/lib/Analysis.py" />
@@ -289,17 +277,19 @@
         <option value="$PROJECT_DIR$/lib/S_Vehicle.py" />
         <option value="$PROJECT_DIR$/../AMoD copy/lib/A1_AssignPlanner.py" />
         <option value="$PROJECT_DIR$/../AMoD copy/lib/S_Main.py" />
-        <option value="$PROJECT_DIR$/lib/A2_HI.py" />
         <option value="$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py" />
-        <option value="$PROJECT_DIR$/lib/S_Analysis.py" />
         <option value="$PROJECT_DIR$/lib/A1_AssignPlanner.py" />
-        <option value="$PROJECT_DIR$/lib/A1_VTtable.py" />
         <option value="$PROJECT_DIR$/lib/A1_FSP_Main.py" />
         <option value="$PROJECT_DIR$/lib/S_Main.py" />
         <option value="$PROJECT_DIR$/lib/A1_OSP_Main.py" />
         <option value="$PROJECT_DIR$/lib/A1_ScheduleFinder.py" />
-        <option value="$PROJECT_DIR$/lib/Configure.py" />
         <option value="$USER_HOME$/Dropbox/Apps/Overleaf/IJCAI 2020/plot_figure.py" />
+        <option value="$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py" />
+        <option value="$PROJECT_DIR$/lib/A2_HI.py" />
+        <option value="$PROJECT_DIR$/data/SerializeData.py" />
+        <option value="$PROJECT_DIR$/lib/A1_VTtable.py" />
+        <option value="$PROJECT_DIR$/lib/S_Analysis.py" />
+        <option value="$PROJECT_DIR$/lib/Configure.py" />
       </list>
     </option>
   </component>
@@ -312,6 +302,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -328,7 +319,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -533,17 +523,19 @@
       <workItem from="1574351966149" duration="5509000" />
       <workItem from="1574598824859" duration="969000" />
       <workItem from="1574920037857" duration="41504000" />
+      <workItem from="1575553649812" duration="210000" />
+      <workItem from="1575616971152" duration="10991000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="956406000" />
+    <option name="totallyTimeSpent" value="967607000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17528272" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17944622" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -557,7 +549,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.10958904" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.10891089" />
       <window_info anchor="bottom" id="Python Console" order="12" show_stripe_button="false" weight="0.32970297" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -599,26 +591,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/Route.py" />
-    <entry file="file://$PROJECT_DIR$/data/SerializeData.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
-          <folding>
-            <element signature="e#70#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="32" column="44" selection-start-line="32" selection-start-column="40" selection-end-line="32" selection-end-column="44" />
-          <folding>
-            <element signature="e#62#73#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/TripFilter.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
@@ -653,16 +625,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_VTtable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="245">
-          <caret line="171" column="40" lean-forward="true" selection-start-line="171" selection-start-column="40" selection-end-line="171" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_ScheduleFinder.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_VTtable.py" />
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_ScheduleFinder.py" />
     <entry file="file://$PROJECT_DIR$/lib/A1_Rebalancer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="594">
@@ -673,20 +637,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1483">
-          <caret line="126" lean-forward="true" selection-start-line="126" selection-end-line="126" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_AssignPlanner.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="644">
-          <caret line="158" column="57" selection-start-line="158" selection-start-column="57" selection-end-line="158" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Main.py" />
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/A1_AssignPlanner.py" />
     <entry file="file://$USER_HOME$/Desktop/AMoD/lib/A1_FSP_Main.py" />
     <entry file="file://$PROJECT_DIR$/run.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -718,115 +670,15 @@
     <entry file="file://$PROJECT_DIR$/demo.gif">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="11" column="18" lean-forward="true" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="44" column="25" lean-forward="true" selection-start-line="44" selection-start-column="25" selection-end-line="44" selection-end-column="25" />
-          <folding>
-            <element signature="e#87#105#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../AMoD copy/lib/S_Configure.py" />
     <entry file="file://$PROJECT_DIR$/lib/A1_FSP_Main.py" />
-    <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="184" column="57" lean-forward="true" selection-start-line="184" selection-start-column="57" selection-end-line="184" selection-end-column="57" />
-          <folding>
-            <element signature="e#126#137#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Desktop/lib/A1_OSP_Main.py" />
-    <entry file="file://$PROJECT_DIR$/lib/A1_OSP_Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="25" column="29" lean-forward="true" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/A1_AssignPlanner.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="139" column="58" lean-forward="true" selection-start-line="139" selection-start-column="58" selection-end-line="139" selection-end-column="58" />
-          <folding>
-            <element signature="e#54#65#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="117" column="31" lean-forward="true" selection-start-line="51" selection-start-column="7" selection-end-line="117" selection-end-column="31" />
-          <folding>
-            <element signature="e#72#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="275">
-          <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/S_Vehicle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4068">
           <caret line="226" column="49" lean-forward="true" selection-start-line="226" selection-start-column="49" selection-end-line="226" selection-end-column="49" />
           <folding>
             <element signature="e#52#63#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Route.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-          <folding>
-            <element signature="e#50#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Request.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="774">
-          <caret line="43" column="47" lean-forward="true" selection-start-line="43" selection-start-column="47" selection-end-line="43" selection-end-column="47" />
-          <folding>
-            <element signature="e#52#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="359">
-          <caret line="149" column="20" lean-forward="true" selection-start-line="149" selection-start-column="20" selection-end-line="149" selection-end-column="47" />
-          <folding>
-            <element signature="e#47#58#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/S_Analysis.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2100">
-          <caret line="131" lean-forward="true" selection-start-line="131" selection-end-line="131" />
-          <folding>
-            <element signature="e#42#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -839,6 +691,120 @@
             <element signature="e#0#31#0" expanded="true" />
             <marker date="1575526034827" expanded="true" signature="3048:3618" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Route.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+          <folding>
+            <element signature="e#50#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_AssignPlanner.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2448">
+          <caret line="139" column="58" selection-start-line="139" selection-start-column="58" selection-end-line="139" selection-end-column="58" />
+          <folding>
+            <element signature="e#54#65#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Request.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="738">
+          <caret line="43" column="47" selection-start-line="43" selection-start-column="47" selection-end-line="43" selection-end-column="47" />
+          <folding>
+            <element signature="e#52#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="573">
+          <caret line="64" column="33" selection-start-line="64" selection-start-column="33" selection-end-line="64" selection-end-column="33" />
+          <folding>
+            <element signature="e#47#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/Manhattan-graph/ComputeTravelTimeTable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="818">
+          <caret line="97" selection-start-line="97" selection-end-line="97" />
+          <folding>
+            <element signature="e#62#73#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/SerializeData.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="24" column="43" lean-forward="true" selection-start-line="24" selection-start-column="43" selection-end-line="24" selection-end-column="43" />
+          <folding>
+            <element signature="e#70#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_VTtable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="138">
+          <caret line="89" column="25" lean-forward="true" selection-start-line="89" selection-start-column="25" selection-end-line="89" selection-end-column="25" />
+          <folding>
+            <element signature="e#126#137#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A2_HI.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="547">
+          <caret line="54" selection-start-line="54" selection-end-line="62" selection-end-column="109" />
+          <folding>
+            <element signature="e#87#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/S_Analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="239">
+          <caret line="164" column="26" lean-forward="true" selection-start-line="164" selection-start-column="26" selection-end-line="164" selection-end-column="26" />
+          <folding>
+            <element signature="e#42#52#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_OSP_Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="421">
+          <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/A1_ScheduleFinder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="42" lean-forward="true" selection-start-line="23" selection-start-column="42" selection-end-line="23" selection-end-column="42" />
+          <folding>
+            <element signature="e#72#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Configure.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
         </state>
       </provider>
     </entry>
