@@ -40,10 +40,9 @@ class HI(object):
         best_veh = None
         best_schedule = None
         min_cost = np.inf
-        for veh in tqdm(vehs, desc='Candidates'):
-            dt = get_duration(veh.nid, req.onid)
+        for veh in tqdm(vehs, desc='Candidates_RideSharing'):
             schedule = []
-            if not veh.idle and dt < 100000:
+            if not veh.idle:
                 for leg in veh.route:
                     if leg.pod == 1 or leg.pod == -1:
                         schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
@@ -52,5 +51,15 @@ class HI(object):
                 best_veh = veh
                 best_schedule = new_schedule
                 min_cost = cost
+
+        if not best_veh:
+            for veh in tqdm(vehs, desc='Candidates_NonSharing'):
+                if veh.idle:
+                    dt = get_duration(veh.nid, req.onid)
+                    if dt < min_cost:
+                        best_veh = veh
+                        min_cost = dt
+            if best_veh:
+                best_schedule = [(req.id, 1, req.onid, req.Clp, None), (req.id, -1, req.dnid, req.Cld, None)]
 
         return best_veh, best_schedule
