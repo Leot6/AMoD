@@ -1,6 +1,6 @@
 # Prerequisites
 *.d
-
+.idea/
 # Compiled Object files
 *.slo
 *.lo
@@ -31,16 +31,6 @@
 *.out
 *.app
 *.pickle
-data/Manhattan-graph/time-table-osrm.csv
-data/Manhattan-graph/time-table-sat.csv
-data/travel-time-table-osrm.csv
-data/travel-time-table.csv
 temp.py
 test.py
-data/NOD_SPT.csv
-data/shortest-path-table.csv
-data/Manhattan-graph/time-table-week.csv
-data/Manhattan-graph/time-on-sat.csv
-data/Manhattan-graph/time-on-sun.csv
-data/Manhattan-graph/time-on-week.csv
-data/Manhattan-graph/time-table-sun.csv
+data/

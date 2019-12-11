@@ -10,7 +10,7 @@ import matplotlib.image as mpimg
 from matplotlib import animation
 
 from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
-    RIDESHARING_SIZE, MET_REBL, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, \
+    RIDESHARING_SIZE, MET_REBL, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, MODEE, TRAVEL_TIME,\
     IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
 
@@ -18,89 +18,120 @@ from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_S
 def print_results(model, runtime, mean_runtime, end_time):
     count_reqs = 0
     count_rejs = 0
-    count_served_good = 0
-    count_serving_good = 0
-    count_served_bad = 0
-    count_serving_bad = 0
-    count_wait_viol = 0
-    count_arri_viol = 0
-    wait_time = 0.0
-    in_veh_time = 0.0
-    in_veh_delay = 0.0
-    detour_factor = 0.0
-    wait_viol_time = 0.0
-    arri_viol_time = 0.0
+    count_served_1 = 0  # both waiting time (wt) and travel delay (td) constraints have been satisfied
+    count_serving_1 = 0
+    wait_time_1 = 0.0
+    in_veh_time_1 = 0.0
+    in_veh_delay_1 = 0.0
+    detour_factor_1 = 0.0
+    count_served_2 = 0  # only travel delay constraint has been satisfied
+    count_serving_2 = 0
+    wait_time_2 = 0.0
+    in_veh_time_2 = 0.0
+    in_veh_delay_2 = 0.0
+    detour_factor_2 = 0.0
+    count_served_3 = 0  # both waiting time and travel delay constraints have been violated
+    count_serving_3 = 0
+    wait_time_3 = 0.0
+    in_veh_time_3 = 0.0
+    in_veh_delay_3 = 0.0
+    detour_factor_3 = 0.0
 
     # analyze requests whose earliest pickup time is within the period of study
     for req in model.reqs:
         if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
             count_reqs += 1
             if not np.isclose(req.Tp, -1.0):
-                if np.isclose(req.Td, -1.0):
-                    if req.Tp <= req.Clp_backup + MAX_WAIT:
-                        count_serving_good += 1
-                        wait_time += req.Tp - req.Cep
-                    else:
-                        count_serving_bad += 1
-                    if req.Tp > req.Clp_backup:
-                        count_wait_viol += 1
-                        wait_viol_time += req.Tp - req.Clp_backup
-                else:
+                if np.isclose(req.Td, -1.0):  # reqs that are currently on board
+                    if req.Tp <= req.Clp_backup:  # satisfy wt
+                        count_serving_1 += 1
+                        wait_time_1 += req.Tp - req.Cep
+                    elif req.Tp <= req.Clp_backup + (MAX_DELAY - MAX_WAIT):  # violate wt but expected to satisfy td
+                        count_serving_2 += 1
+                        wait_time_2 += req.Tp - req.Cep
+                    else:  # violate wt and will violate td
+                        count_serving_3 += 1
+                        wait_time_3 += req.Tp - req.Cep
+                else:  # reqs that have been served
                     if req.Td <= req.Cld:
-                        count_served_good += 1
-                        wait_time += req.Tp - req.Cep
-                        in_veh_time += req.Td - req.Tp
-                        in_veh_delay += req.Td - req.Tp - req.Ts
-                        detour_factor += req.D
-                    else:
-                        count_served_bad += 1
-                    if req.Tp > req.Clp_backup:
-                        count_wait_viol += 1
-                        wait_viol_time += req.Tp - req.Clp_backup
-                    if req.Td > req.Cld:
-                        count_arri_viol += 1
-                        arri_viol_time += req.Td - req.Cld
-                        assert req.Tp > req.Clp_backup
-
+                        if req.Tp <= req.Clp_backup:  # satisfy both wt and td
+                            count_served_1 += 1
+                            wait_time_1 += req.Tp - req.Cep
+                            in_veh_time_1 += req.Td - req.Tp
+                            in_veh_delay_1 += req.Td - req.Tp - req.Ts
+                            detour_factor_1 += req.D
+                        else:  # violate wt but satisfy td
+                            count_served_2 += 1
+                            wait_time_2 += req.Tp - req.Cep
+                            in_veh_time_2 += req.Td - req.Tp
+                            in_veh_delay_2 += req.Td - req.Tp - req.Ts
+                            detour_factor_2 += req.D
+                    else:  # violate both wt and td
+                        count_served_3 += 1
+                        wait_time_3 += req.Tp - req.Cep
+                        in_veh_time_3 += req.Td - req.Tp
+                        in_veh_delay_3 += req.Td - req.Tp - req.Ts
+                        detour_factor_3 += req.D
+                        if req.Tp <= req.Clp_backup:
+                            print()
+                            print('SWVD: req', req.id, ', close wt', req.Clp_backup - req.Tp,
+                                  ', viol td', req.Cld - req.Td)
+                            print()
+                        # assert req.Tp > req.Clp_backup
             else:
                 count_rejs += 1
-    count_served_all = count_served_good + count_served_bad
-    count_serving_all = count_serving_good + count_serving_bad
-    count_picked_all = count_served_all + count_serving_all
-    count_picked_good = count_served_good + count_serving_good
-    count_picked_bad = count_served_bad + count_serving_bad
+    count_service_1 = count_served_1 + count_serving_1
+    count_service_2 = count_served_2 + count_serving_2
+    count_service_3 = count_served_3 + count_serving_3
+    assert count_rejs + count_service_1 + count_service_2 + count_service_3 == count_reqs
 
-    assert count_rejs + count_served_all + count_serving_all == count_reqs
-    if not count_served_good == 0:
-        wait_time /= (count_served_good + count_serving_good)
-        in_veh_time /= count_served_good
-        in_veh_delay /= count_served_good
-        detour_factor /= count_served_good
-    if not count_wait_viol == 0:
-        wait_viol_time /= count_wait_viol
-    if not count_arri_viol == 0:
-        arri_viol_time /= count_arri_viol
+    if not count_served_1 == 0:
+        wait_time_1 /= (count_served_1 + count_serving_1)
+        in_veh_time_1 /= count_served_1
+        in_veh_delay_1 /= count_served_1
+        detour_factor_1 /= count_served_1
+    if not count_served_2 == 0:
+        wait_time_2 /= (count_served_2 + count_serving_2)
+        in_veh_time_2 /= count_served_2
+        in_veh_delay_2 /= count_served_2
+        detour_factor_2 /= count_served_2
+    if not count_served_3 == 0:
+        wait_time_3 /= (count_served_3 + count_serving_3)
+        in_veh_time_3 /= count_served_3
+        in_veh_delay_3 /= count_served_3
+        detour_factor_3 /= count_served_3
 
     # service rate
-    served_rate_good = 0.0
-    serving_rate_good = 0.0
-    service_rate_good = 0.0
-    served_rate_bad = 0.0
-    serving_rate_bad = 0.0
-    service_rate_bad = 0.0
-    wait_viol_rate = 0.0
-    arri_viol_rate = 0.0
+    served_rate_1 = 0.0
+    serving_rate_1 = 0.0
+    service_rate_1 = 0.0
+    served_rate_2 = 0.0
+    serving_rate_2 = 0.0
+    service_rate_2 = 0.0
+    served_rate_3 = 0.0
+    serving_rate_3 = 0.0
+    service_rate_3 = 0.0
     if not count_reqs == 0:
-        service_rate_good = round(100.0 * count_picked_good / count_reqs, 2)
-        served_rate_good = round(100.0 * count_served_good / count_reqs, 2)
-        serving_rate_good = round(100.0 * count_serving_good / count_reqs, 2)
-        service_rate_bad = round(100.0 * count_picked_bad / count_reqs, 2)
-        served_rate_bad = round(100.0 * count_served_bad / count_reqs, 2)
-        serving_rate_bad = round(100.0 * count_serving_bad / count_reqs, 2)
-    if not count_serving_all == 0:
-        wait_viol_rate = round(100 * count_wait_viol / count_picked_all, 2)
-    if not count_served_all == 0:
-        arri_viol_rate = round(100 * count_arri_viol / count_served_all, 2)
+        served_rate_1 = round(100.0 * count_served_1 / count_reqs, 2)
+        serving_rate_1 = round(100.0 * count_serving_1 / count_reqs, 2)
+        service_rate_1 = round(100.0 * count_service_1 / count_reqs, 2)
+        served_rate_2 = round(100.0 * count_served_2 / count_reqs, 2)
+        serving_rate_2 = round(100.0 * count_serving_2 / count_reqs, 2)
+        service_rate_2 = round(100.0 * count_service_2 / count_reqs, 2)
+        served_rate_3 = round(100.0 * count_served_3 / count_reqs, 2)
+        serving_rate_3 = round(100.0 * count_serving_3 / count_reqs, 2)
+        service_rate_3 = round(100.0 * count_service_3 / count_reqs, 2)
+
+    service_rate_0 = service_rate_1 + service_rate_2 + service_rate_3
+    count_service_0 = count_service_1 + count_service_2 + count_service_3
+    served_rate_0 = served_rate_1 + served_rate_2 + served_rate_3
+    count_served_0 = count_served_1 + count_served_2 + count_served_3
+    serving_rate_0 = serving_rate_1 + serving_rate_2 + serving_rate_3
+    count_serving_0 = count_serving_1 + count_serving_2 + count_serving_3
+    wait_time_0 = (wait_time_1 * count_service_1 + wait_time_2 * count_service_2 +
+                   wait_time_3 * count_service_3) / count_service_0
+    in_veh_delay_0 = (in_veh_delay_1 * count_served_1 + in_veh_delay_2 * count_served_2 +
+                      in_veh_delay_3 * count_served_3) / count_served_0
 
     # vehicle performance
     veh_service_dist = 0.0
@@ -131,24 +162,27 @@ def print_results(model, runtime, mean_runtime, end_time):
     print('simulation ends at %s, runtime time: %s, average: %d' % (end_time, runtime, mean_runtime))
     print('system settings:')
     print('  - from %s to %s, with %d intervals'
-          % (DMD_SST, DMD_SST+datetime.timedelta(seconds=model.T), model.T/INT_ASSIGN))
+          % (DMD_SST, DMD_SST + datetime.timedelta(seconds=model.T), model.T / INT_ASSIGN))
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
     print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
-    print('  - assignment mode: %s, rebalancing method: %s, interval: %.1f s' % (MODEE, MET_REBL, INT_ASSIGN))
+    print('  - assignment mode: %s, travel time: %s, interval: %.1f s' % (MODEE, TRAVEL_TIME, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('simulation results:')
     print('  - requests (%d):' % count_reqs)
-    print('    + good served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%%'
-          % (served_rate_good, count_served_good, serving_rate_good, count_serving_good, service_rate_good))
-    print('    + bad served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%%'
-          % (served_rate_bad, count_served_bad, serving_rate_bad, count_serving_bad, service_rate_bad))
-    print('    + waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time, in_veh_delay))
-    print('    + in-vehicle travel time: %.2f s, detour factor: %.2f' % (in_veh_time, detour_factor))
-    print('    + waiting time violation rate: %.2f%% (%d/%d), average exceeding: %.2f s'
-          % (wait_viol_rate, count_wait_viol, count_picked_all, wait_viol_time))
-    print('    + travel delay violation rate: %.2f%% (%d/%d), average exceeding: %.2f s'
-          % (arri_viol_rate, count_arri_viol, count_served_all, arri_viol_time))
+    print('    + FALL: served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%% (%d)'
+          % (served_rate_0, count_served_0, serving_rate_0, count_serving_0, service_rate_0, count_service_0))
+    print('    +     : waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time_0, in_veh_delay_0))
+    print('    + SWSD: served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%% (%d)'
+          % (served_rate_1, count_served_1, serving_rate_1, count_serving_1, service_rate_1, count_service_1))
+    print('    +     : waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time_1, in_veh_delay_1))
+    print('    + VWSD: served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%% (%d)'
+          % (served_rate_2, count_served_2, serving_rate_2, count_serving_2, service_rate_2, count_service_2))
+    print('    +     : waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time_2, in_veh_delay_2))
+    print('    + VWVD: served rate: %.2f%% (%d), serving rate: %.2f%% (%d), service rate: %.2f%% (%d)'
+          % (served_rate_3, count_served_3, serving_rate_3, count_serving_3, service_rate_3, count_service_3))
+    print('    +     : waiting time: %.2f s, in-vehicle travel delay: %.2f s' % (wait_time_3, in_veh_delay_3))
+    # print('    + in-vehicle travel time: %.2f s, detour factor: %.2f' % (in_veh_time, detour_factor))
     print('  - vehicles:')
     print('    + vehicle average load: %.2f (distance weighted), %.2f (time weighted)'
           % (veh_load_by_dist, veh_load_by_time))
@@ -164,26 +198,29 @@ def print_results(model, runtime, mean_runtime, end_time):
     f = open('output/results.csv', 'a')
     writer = csv.writer(f)
     # writer.writerow(['scenario', 'demand starts', 'demand ends', 'demand number',
-    #                  'fleet size', 'capacity',  'max wait (s)', 'max wait (s)', 'method', 'interval (s)',
-    #                  'service rate', 'service num', 'served rate', 'served num', 'serving rate', 'serving num',
-    #                  'mean waiting', 'mean in-car delay', 'wt viol rate', 'tw viol', 'td viol rate', 'td viol',
-    #                  'mean detour', 'mean car load (dist)', 'mean car load (time)',
-    #                  'simulation starts', 'simulation ends', 'run time', 'mean run time', 'remarks'])
-    row = [DMD_STR, DMD_SST, DMD_SST + datetime.timedelta(seconds=model.T),
-           str(count_reqs) + ' (' + str(DMD_VOL * 100) + '%)',
+    #     #                  'fleet size', 'capacity',  'max wait (s)', 'max wait (s)', 'method', 'interval (s)',
+    #     #                  'service type', 'total service rate', 'served rate (finished)', 'serving rate (in-car)',
+    #     #                  'mean wt', 'mean ivd', 'mean detour', 'mean ivt'])
+    DMD_EST = DMD_SST + datetime.timedelta(seconds=model.T)
+    row = [DMD_STR, DMD_SST, DMD_EST, str(count_reqs) + ' (' + str(DMD_VOL * 100) + '%)',
            model.V, str(model.K) + ' (' + str(RIDESHARING_SIZE) + ')', MAX_WAIT, MAX_DELAY, MODEE, INT_ASSIGN,
-           '(' + str(service_rate_good) + '+' + str(service_rate_bad) + ')%',
-           str(count_picked_good) + '+' + str(count_picked_bad),
-           '(' + str(served_rate_good) + '+' + str(served_rate_bad) + ')%',
-           str(count_served_good) + '+' + str(count_served_bad),
-           '(' + str(serving_rate_good) + '+' + str(serving_rate_bad) + ')%',
-           str(count_serving_good) + '+' + str(count_serving_bad),
-           round(wait_time, 2), round(in_veh_delay, 2),
-           str(wait_viol_rate) + '% (' + str(count_wait_viol) + '/' + str(count_picked_all) + ')',
-           round(wait_viol_time, 2),
-           str(arri_viol_rate) + '% (' + str(count_arri_viol) + '/' + str(count_served_all) + ')',
-           round(arri_viol_time, 2), round(detour_factor, 2), round(veh_load_by_dist, 2), round(veh_load_by_time, 2),
-           model.start_time, end_time, runtime, mean_runtime, None]
+           'SWST:', str(service_rate_1) + '% (' + str(count_service_1) + ')',
+           str(served_rate_1) + '% (' + str(count_served_1) + ')',
+           str(serving_rate_1) + '% (' + str(count_serving_1) + ')',
+           round(wait_time_1, 2), round(in_veh_delay_1, 2), round(detour_factor_1, 2), round(in_veh_time_1, 2)]
+    writer.writerow(row)
+    row = [None, model.start_time, end_time, runtime, 'runtime:', mean_runtime,
+           'load (d):', round(veh_load_by_dist, 2), 'load (t):', round(veh_load_by_time, 2),
+           'VWST:', str(service_rate_2) + '% (' + str(count_service_2) + ')',
+           str(served_rate_2) + '% (' + str(count_served_2) + ')',
+           str(serving_rate_2) + '% (' + str(count_serving_2) + ')',
+           round(wait_time_2, 2), round(in_veh_delay_2, 2), round(detour_factor_2, 2), round(in_veh_time_2, 2)]
+    writer.writerow(row)
+    row = [None, None, None, None, None, None, None, None, None, None,
+           'VWVT:', str(service_rate_3) + '% (' + str(count_service_3) + ')',
+           str(served_rate_3) + '% (' + str(count_served_3) + ')',
+           str(serving_rate_3) + '% (' + str(count_serving_3) + ')',
+           round(wait_time_3, 2), round(in_veh_delay_3, 2), round(detour_factor_3, 2), round(in_veh_time_3, 2)]
     writer.writerow(row)
     f.close()
 
@@ -298,9 +335,9 @@ def anim(frames):
         size = 7
         if v.id == 1:
             color = '#6DDCFD'
-        elif v.id == int(FLEET_SIZE*2/10):
+        elif v.id == int(FLEET_SIZE * 2 / 10):
             color = '#A89BFA'
-        elif v.id == int(FLEET_SIZE*3/10):
+        elif v.id == int(FLEET_SIZE * 3 / 10):
             color = '#1EFA35'
         # elif v.id == int(FLEET_SIZE*4/10):
         #     color = '#FF5733'

@@ -7,23 +7,24 @@ from dateutil.parser import parse
 # ************************************************************************************** #
 # # parameters for S # #
 # taxi requests data, station loctions, graph nodes and travel time table
-with open('./data/NYC_REQ_DATA_2015.pickle', 'rb') as f:
+DATE = '20130510'
+TRAVEL_TIME = 'SAT'
+with open('./data/NYC_REQ_DATA_' + DATE + '.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
 with open('./data/NYC_STN_LOC.pickle', 'rb') as f:
     STN_LOC = pickle.load(f)
 with open('./data/NYC_NOD_LOC.pickle', 'rb') as f:
     NOD_LOC = pickle.load(f)
-with open('./data/NYC_TTT_WEEK.pickle', 'rb') as f:
+with open('./data/NYC_TTT_' + TRAVEL_TIME + '.pickle', 'rb') as f:
     NOD_TTT = pickle.load(f)
-with open('./data/NYC_SPT_WEEK.pickle', 'rb') as f:
+with open('./data/NYC_SPT_' + TRAVEL_TIME + '.pickle', 'rb') as f:
     NOD_SPT = pickle.load(f)
-with open('./data/NYC_NET_WEEK.pickle', 'rb') as f:
+with open('./data/NYC_NET_' + TRAVEL_TIME + '.pickle', 'rb') as f:
     NOD_NET = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1
-# DMD_SST = parse('2013-05-03 00:00:00')
-DMD_SST = parse('2015-05-02 00:00:00')
+DMD_SST = parse(DATE + ' 00:00:00')
 DMD_STR = 'Manhattan'
 
 # DISPATCHER = 'HI'
@@ -32,7 +33,7 @@ DISPATCHER = 'OSP'
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 20
 T_STUDY = 60 * 1400
-T_COOL_DOWN = 60 * 20
+T_COOL_DOWN = 60 * 19
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
