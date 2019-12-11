@@ -27,7 +27,7 @@ def build_vt_table(vehs, reqs_new, reqs_prev, T):
 
     # non-parallel
     veh_trip_edges = []
-    for veh in tqdm(vehs, desc=MODEE + ' Table'):
+    for veh in vehs:  # tqdm(vehs, desc=MODEE + ' Table'):
         feasible_shared_trips_search(veh, reqs_new, rid_prev, T)
         for VTtable_k in veh.VTtable:
             for (trip, best_schedule, cost, all_schedules) in VTtable_k:
@@ -57,7 +57,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
             else:  # 'VT_replan'
                 if leg.rid in veh.onboard_rid:
                     _schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-    for req in tqdm(reqs_new, desc='size 1 trip'):
+    for req in reqs_new:  # tqdm(reqs_new, desc='size 1 trip'):
         # filter out the req which can not be served even when the veh is idle
         if get_duration(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
             continue
@@ -82,7 +82,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
         l_all_trips_k_1 = len(veh.VTtable[k - 2])  # number of all trips of size k-1
         l_new_trips_k_1 = l_all_trips_k_1 - l_prev_trips_k_1  # number of new trips of size k-1
 
-        for i in tqdm(range(1, l_new_trips_k_1 + 1), desc='size '+str(k)+' trip'):
+        for i in range(1, l_new_trips_k_1 + 1):  # tqdm(range(1, l_new_trips_k_1 + 1), desc='size '+str(k)+' trip'):
             trip1 = veh.VTtable[k - 2][-i][0]  # a trip of size k-1
             for j in range(i + 1, l_all_trips_k_1 + 1):
                 trip2 = veh.VTtable[k - 2][-j][0]  # another trip of size k-1 (different from trip1)

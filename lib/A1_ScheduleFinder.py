@@ -272,7 +272,7 @@ def compute_schedule_cost(veh, trip, schedule):
                     break
         nid = tnid
     # cost = c_delay
-    cost = c_wait + c_delay
+    cost = c_wait * COEF_WAIT + c_delay
     # cost = c_wait
     return cost
 
