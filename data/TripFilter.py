@@ -116,11 +116,13 @@ if __name__ == '__main__':
     # print(df.head(2))
     # print(df.columns.values)  # get the label for pickup time in csv file
 
-    # # find out the number of trips in a everyday
-    # year = '2013'
-    # month = '05'
-    # day = '09'
-    # date = year + '-' + month + '-' + day
+    # the selected day
+    year = '2013'
+    month = '05'
+    day = '07'
+    date = year + '-' + month + '-' + day
+
+    # # find out the number of trips on everyday in the selected month
     # for i in range(1, 31):
     #     if i < 10:
     #         day = '0' + str(i)
@@ -130,43 +132,47 @@ if __name__ == '__main__':
     #     df1 = df.loc[lambda x: x[pickup_time].str.startswith(date)]
     #     print('number of trips on selected day (%s): %d' % (date, df1.shape[0]))
 
+    # proposed saving file name
+    nyc_taxi_file_on_selected_day = 'NYC-taxi-' + year + month + day + '.csv'
+    Manhattan_taxi_file_on_selected_day = 'Manhattan-taxi-' + year + month + day + '.csv'
+
     # # filter out trips in one day
     # df1 = df.loc[lambda x: x[pickup_time].str.startswith(date)]
     # df1[pickup_time] = pd.to_datetime(df1[pickup_time])
     # df1.sort_values(pickup_time, inplace=True)
-    # df1.to_csv('yellow-taxi-20150509.csv', index=False)
-    #
-    # df1 = pd.read_csv('yellow-taxi-20150509.csv')
     # print('number of trips on selected day (%s): %d' % (date, df1.shape[0]))
+    # df1.to_csv(nyc_taxi_file_on_selected_day, index=False)
+    #
     # # filter out useful parameters: time, lng & lat, passenger number...
+    # df1 = pd.read_csv(nyc_taxi_file_on_selected_day)
     # df2 = df1.loc[:, [pickup_time, passenger_count, olng, olat, dlng, dlat, trip_dist, dropoff_time]]
     # print(df2.head(2))  # check the format
     # # roughly filter out the trips in a square area
     # df3 = df2[(df2[olng] > -74.0300) & (df2[olng] < -73.9030)
-    #          & (df2[olat] > 40.6950) & (df2[olat] < 40.8825)
-    #          & (df2[dlng] > -74.0300) & (df2[dlng] < -73.9030)
-    #          & (df2[dlat] > 40.6950) & (df2[dlat] < 40.8825)]
+    #           & (df2[olat] > 40.6950) & (df2[olat] < 40.8825)
+    #           & (df2[dlng] > -74.0300) & (df2[dlng] < -73.9030)
+    #           & (df2[dlat] > 40.6950) & (df2[dlat] < 40.8825)]
     # print('number of trips after rough filter:', df3.shape[0])
     # # filter out the trips starting within Manhattan
     # df4 = df3[df3.apply(lambda x: IsPtInPoly(x[olng], x[olat]), axis=1)]
     # # filter out the trips ending in Manhattan
     # df5 = df4[df4.apply(lambda x: IsPtInPoly(x[dlng], x[dlat]), axis=1)]
     # print('number of trips in Manhattan:', df5.shape[0])
-    # df5.to_csv('Manhattan-yellow-taxi-20150509.csv', index=False)
-
+    # df5.to_csv(Manhattan_taxi_file_on_selected_day, index=False)
+    #
     # # filter out the trips longer than 2 min
-    # df6 = pd.read_csv('Manhattan-yellow-taxi-20150509.csv')
+    # df6 = pd.read_csv(Manhattan_taxi_file_on_selected_day)
     # print('number of trips on selected day (%s): %d' % (date, df6.shape[0]))
-    # # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
-    # df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
+    # df6 = df6[df6.apply(lambda x: LongerThan2Min(x[olng], x[olat], x[dlng], x[dlat]), axis=1)]
+    # # df6 = df6[df6.apply(lambda x: LongerThan2Min(x['olng'], x['olat'], x['dlng'], x['dlat']), axis=1)]
     # print('number of trips longer than 2 min :', df6.shape[0])
-    # df6.to_csv('Manhattan-taxi-20160507-1.csv', index=False)
-
+    # df6.to_csv(Manhattan_taxi_file_on_selected_day, index=False)
+    #
     # # rename the column index
-    # df7 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
+    # df7 = pd.read_csv(Manhattan_taxi_file_on_selected_day)
     # df7 = df7.loc[:, [pickup_time, passenger_count, olng, olat, dlng, dlat, trip_dist, dropoff_time]]
     # df7.columns = ['ptime', 'npass', 'olng', 'olat', 'dlng', 'dlat', 'dist', 'dtime']
-    # df7.to_csv('Manhattan-green-taxi-20150502-1.csv', index=False)
+    # df7.to_csv(Manhattan_taxi_file_on_selected_day, index=False)
 
     # # merge green taxi and yellow taxi together
     # df8 = pd.read_csv('Manhattan-green-taxi-20150502.csv')
@@ -194,8 +200,19 @@ if __name__ == '__main__':
     # print('number of all taxi trips:', df13.shape[0])
     # df13.to_csv('Manhattan-taxi-20130507.csv', index=False)
 
-    df11 = pd.read_csv('Manhattan-taxi-20130503.csv')
-    print('number of all taxi trips in 20160501:', df11.shape[0])
+    # df11 = pd.read_csv(Manhattan_taxi_file_on_selected_day)
+    # print('number of trips on selected day (%s): %d' % (date, df11.shape[0]))
+
+    for i in range(3, 12):
+        if i < 10:
+            day = '0' + str(i)
+        else:
+            day = '' + str(i)
+        date = year + '-' + month + '-' + day
+        Manhattan_taxi_file_on_selected_day = 'Manhattan-taxi-' + year + month + day + '.csv'
+
+        df11 = pd.read_csv(Manhattan_taxi_file_on_selected_day)
+        print('number of trips on selected day (%s): %d' % (date, df11.shape[0]))
 
     runtime = time.time() - stime
     print('...running time : %.05f seconds' % runtime)

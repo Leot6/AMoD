@@ -127,6 +127,12 @@ def compute_schedule(veh, trip, _trip, _schedules):
                     continue
                 best_schedule, min_cost, viol = insert_req_to_schedule(veh, trip, schedule, req, i, j,
                                                                        best_schedule, min_cost, feasible_schedules)
+
+                # # always return the first found feasible schedule (will speed up the computation)
+                # if best_schedule:
+                #     assert len(feasible_schedules) == 1
+                #     return best_schedule, min_cost, feasible_schedules
+
                 if viol > 0:
                     break
             if viol == 3:
@@ -254,10 +260,10 @@ def compute_schedule_cost(veh, trip, schedule):
     for (rid, pod, tnid, ddl, pf_path) in schedule:
         dt = get_duration(nid, tnid)
         t += dt
-        # c_inveh += n * dt * COEF_INVEH
+        # c_inveh += n * dt
         n += pod
         assert n <= veh.K
-        c_wait += t * COEF_WAIT if pod == 1 else 0
+        c_wait += t if pod == 1 else 0
         if pod == -1:
             for req in reqs_in_schedule:
                 if rid == req.id:
