@@ -7,8 +7,12 @@ from dateutil.parser import parse
 # ************************************************************************************** #
 # # parameters for S # #
 # taxi requests data, station loctions, graph nodes and travel time table
-DATE = '20130510'
-TRAVEL_TIME = 'SAT'
+DATE = '20130511'
+TRAVEL_TIME = 'WEEK'
+if DATE == '20130505':
+    TRAVEL_TIME = 'SUN'
+elif DATE == '20130511':
+    TRAVEL_TIME = 'SAT'
 with open('./data/NYC_REQ_DATA_' + DATE + '.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
 with open('./data/NYC_STN_LOC.pickle', 'rb') as f:
@@ -23,22 +27,24 @@ with open('./data/NYC_NET_' + TRAVEL_TIME + '.pickle', 'rb') as f:
     NOD_NET = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1
+DMD_VOL = 0.1
 DMD_SST = parse(DATE + ' 00:00:00')
 DMD_STR = 'Manhattan'
 
-# DISPATCHER = 'HI'
-DISPATCHER = 'OSP'
+# DISPATCHER = 'GI'
+# DISPATCHER = 'OSP'
+DISPATCHER = 'OSP-SR'
+# DISPATCHER = 'OSP-RO'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 20
-T_STUDY = 60 * 1400
+T_WARM_UP = 60 * 10
+T_STUDY = 60 * 60
 T_COOL_DOWN = 60 * 19
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 2000
-VEH_CAPACITY = 4
+FLEET_SIZE = 200
+VEH_CAPACITY = 6
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
 MAX_WAIT = 60 * 5
@@ -88,22 +94,21 @@ Dlat = 40.8825
 # Dlat = 51.52
 
 # ************************************************************************************** #
-# # parameters for A1_FSP # #
+# # parameters for A1_OSP # #
 # ride-sharing logic mode
-# MODEE = 'VT'
-MODEE = 'VT_replan'
 
 # ridesharing size in computation
 RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
-# RIDESHARING_SIZE = 1
+if DISPATCHER == 'OSP-SR':
+    RIDESHARING_SIZE = 1
 
 # methods for vehicle-request assignment and rebalancing
 MET_ASSIGN = 'ILP'
 MET_REBL = 'naive'
 
 # running time threshold for VTtable building(each single vehicle) and ILP solver
-CUTOFF_VT = 600
-CUTOFF_ILP = 100
+CUTOFF_VT = 0.3 * 10000
+CUTOFF_ILP = 1200
 
 
 # coefficients for wait time, in-vehicle travel time in the cost function
@@ -111,6 +116,8 @@ COEF_WAIT = 1.0
 COEF_INVEH = 1.0
 
 # ************************************************************************************** #
-
-if DISPATCHER == 'HI':
-    MODEE = 'HI'
+# # parameters for A2_GI # #
+# ride-sharing logic mode
+if DISPATCHER == 'GI':
+    INT_ASSIGN = 1
+    RIDESHARING_SIZE = 0

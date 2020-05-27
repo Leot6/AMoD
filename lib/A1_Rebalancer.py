@@ -18,7 +18,7 @@ def naive_rebalancing(vehs, reqs_unassigned):
     for veh in vehs:
         if veh.idle:
             for req in reqs_unassigned:
-                schedule = [(-1, 0, req.onid, np.inf, None)]
+                schedule = [(-1, 0, req.onid, np.inf)]
                 dt = get_duration(veh.nid, req.onid)
                 rebl_veh_req.append((veh, tuple([req]), copy.deepcopy(schedule), dt))
     R_id_rebl, V_id_rebl, schedule_rebl = greedy_assign(rebl_veh_req)

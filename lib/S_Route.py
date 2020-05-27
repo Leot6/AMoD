@@ -9,9 +9,9 @@ import networkx as nx
 from collections import deque
 from itertools import islice
 from lib.Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT
+from numba import jit
 
 G = copy.deepcopy(NOD_NET)
-COEF_TRAVEL = 1.0
 
 
 class Step(object):
@@ -42,22 +42,22 @@ class Leg(object):
         rid: request id (if rebalancing then -1)
         pod: pickup (+1) or dropoff (-1), rebalancing (0)
         tnid: target (end of leg) node id in network
+        ept: earliest possible arrival time
         ddl: latest arriving time
         t: total duration
         d: total distance
         steps: a list of steps
-        pf_path: preferred path rather than the shortest path
     """
 
-    def __init__(self, rid, pod, tnid, ddl, t=0.0, d=0.0, steps=[], pf_path=None):
+    def __init__(self, rid, pod, tnid, ept, ddl, t=0.0, d=0.0, steps=[]):
         self.rid = rid
         self.pod = pod
         self.tnid = tnid
+        self.ept = ept
         self.ddl = ddl
         self.t = t
         self.d = d
         self.steps = deque(steps)
-        self.pf_path = pf_path
 
     def __str__(self):
         return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
@@ -72,20 +72,20 @@ class ScheTask(object):  # not used, cause using class will consume more time th
         pod: pickup (+1) or dropoff (-1), rebalancing (0)
         tnid: target (end of task) node id in network
         ddl: latest arriving time
-        pf_path: preferred path rather than the shortest path
     """
 
-    def __init__(self, rid, pod, tnid, ddl, pf_path=None):
+    def __init__(self, rid, pod, tnid, ept, ddl):
         self.rid = rid
         self.pod = pod
         self.tnid = tnid
+        self.ept = ept
         self.ddl = ddl
-        self.pf_path = pf_path
 
 
 # get the duration of the best route from origin to destination
+# @jit
 def get_duration(onid, dnid):
-    duration = NOD_TTT[onid - 1, dnid - 1] * COEF_TRAVEL
+    duration = NOD_TTT[onid - 1, dnid - 1]
     if duration != -1:
         return duration
     else:
@@ -93,12 +93,9 @@ def get_duration(onid, dnid):
 
 
 # get the best route from origin to destination
-def get_routing(onid, dnid, pf_path=None):
-    if pf_path:
-        path = pf_path
-    else:
-        path = get_path_from_SPtable(onid, dnid)
-        # length, path = nx.bidirectional_dijkstra(G, onid, dnid)
+def get_routing(onid, dnid):
+    path = get_path_from_SPtable(onid, dnid)
+    # length, path = nx.bidirectional_dijkstra(G, onid, dnid)
     duration, distance, steps = build_route_from_path(path)
     # print('SPT', path, duration, distance)
     return duration, distance, steps
@@ -172,12 +169,12 @@ def get_haversine_distance(olng, olat, dlng, dlat):
 
 # return the mean travel time of edge (u, v)
 def get_edge_mean_dur(u, v):
-    return NOD_NET.get_edge_data(u, v, default={'dur': None})['dur'] * COEF_TRAVEL
+    return NOD_NET.get_edge_data(u, v, default={'dur': None})['dur']
 
 
 # return the mean travel time of edge (u, v)
 def get_edge_real_dur(u, v):
-    return G.get_edge_data(u, v, default={'dur': None})['dur'] * COEF_TRAVEL
+    return G.get_edge_data(u, v, default={'dur': None})['dur']
 
 
 # return the standard deviation of travel time of edge (u, v)

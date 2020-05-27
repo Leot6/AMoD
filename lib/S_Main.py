@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
 from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
-    DMD_SST, INT_ASSIGN, INT_REBL, MODEE, IS_DEBUG, IS_STOCHASTIC, DISPATCHER
+    DMD_SST, INT_ASSIGN, DISPATCHER, IS_DEBUG, IS_STOCHASTIC, RIDESHARING_SIZE
 from lib.S_Request import Req
 from lib.S_Route import upd_traffic_on_network
 from lib.S_Vehicle import Veh
 from lib.A1_OSP_Main import OSP
-from lib.A2_HI import HI
+from lib.A2_GI import GI
 
 
 class Model(object):
@@ -66,11 +66,16 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = set()
-        if DISPATCHER == 'OSP':
+        if DISPATCHER == 'OSP' or DISPATCHER == 'OSP-SR' or DISPATCHER == 'OSP-RO':
             self.dispatcher = OSP()
-        elif DISPATCHER == 'HI':
-            self.dispatcher = HI()
+        elif DISPATCHER == 'GI':
+            self.dispatcher = GI()
         self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
+
+        # n_s_c: # the number of possible schedules algorithm considers
+        # n_s_c: # the number of different size trips algorithm considers
+        self.mean_n_s_c = [0] * RIDESHARING_SIZE
+        self.n_t_c = [0] * RIDESHARING_SIZE
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
@@ -145,6 +150,9 @@ class Model(object):
                     self.reqs[rid].Tp = t
                     self.reqs_picking.remove(self.reqs[rid])
                     self.reqs_serving.add(self.reqs[rid])
+
+                    # print('veh', veh.id, 'picked', rid)
+
                 elif pod == -1:
                     veh.new_drop_rid.append(rid)
                     veh.onboard_rid.remove(rid)
@@ -153,6 +161,9 @@ class Model(object):
                     self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
                     self.reqs_serving.remove(self.reqs[rid])
                     self.reqs_served.add(self.reqs[rid])
+
+                    # print('veh', veh.id, 'dropped', rid)
+
             assert len(veh.onboard_rid) == len(veh.onboard_reqs)
         if IS_DEBUG:
             print('        s1 running time:', round((time.time() - s1), 2))
@@ -173,7 +184,9 @@ class Model(object):
             req_idx = self.req_init_idx + int(self.N / self.D)
             self.queue.append(self.reqs[-1])
             # check the travel time of a trip is not zero
-            assert req.Ts > 1
+            # if not req.Ts > 120:
+            #     print('req.Ts > 120', req.Ts)
+            assert req.Ts > 30
         assert self.N == len(self.reqs)
         if IS_DEBUG:
             print('        s3 running time:', round((time.time() - s3), 2))
@@ -187,7 +200,7 @@ class Model(object):
             if not veh.idle and veh.id not in V_id_assigned:
                 for leg in veh.route:
                     if leg.pod == 1 or leg.pod == -1:
-                        schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
+                        schedule.append((leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl))
                 veh.build_route(schedule, self.reqs, self.T)
         if IS_DEBUG:
             print('        s4 running time:', round((time.time() - s4), 2))

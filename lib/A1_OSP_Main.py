@@ -5,7 +5,7 @@ batch assignment: computing the optimal schedule pool and then assign them toget
 import time
 import copy
 
-from lib.Configure import MODEE, IS_DEBUG
+from lib.Configure import DISPATCHER, IS_DEBUG
 from lib.A1_VTtable import build_vt_table
 from lib.A1_AssignPlanner import ILP_assign, greedy_assign
 from lib.S_Route import get_duration
@@ -30,37 +30,48 @@ class OSP(object):
         reqs_picking = amod.reqs_picking
         reqs_unassigned = amod.reqs_unassigned
         T = amod.T
+        K = amod.K
 
         reqs_new = queue
-        if MODEE == 'VT':
-            reqs_prev = []
-        else:  # 'VT_replan'
+        if DISPATCHER == 'OSP-RO':
             reqs_prev = sorted(reqs_picking.union(reqs_unassigned), key=lambda r: r.id)
+        else:
+            reqs_prev = []
 
         # find the shared assignment
-        R_id_shared, V_id_shared, S_shared = self.find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T)
+        R_id_shared, V_id_shared, S_shared = self.find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K,
+                                                                    amod.mean_n_s_c, amod.n_t_c)
         # execute the assignment and build (update) route for assigned vehicles
-        for vid, schedule in zip(V_id_shared, S_shared):
-            vehs[vid].build_route(schedule, reqs, T)
+        for vid, sche in zip(V_id_shared, S_shared):
+            vehs[vid].build_route(sche, reqs, T)
 
         # print('share', R_id_shared, V_id_shared)
 
-        # add changed schedule in VT-replan
+        # add changed sche in VT-replan
         vehs_unassigned = sorted(set(vehs) - set([vehs[vid] for vid in V_id_shared]), key=lambda v: v.id)
-        V_id_remove_r, S_remove_r = self.find_chenged_trips(vehs_unassigned, V_id_shared, R_id_shared, T)
+        V_id_remove_r, S_remove_r = self.find_changed_trips(vehs_unassigned, V_id_shared, R_id_shared, T)
         # execute the assignment and build (update) route for assigned vehicles
-        for vid, schedule in zip(V_id_remove_r, S_remove_r):
-            vehs[vid].build_route(schedule, reqs, T)
+        for vid, sche in zip(V_id_remove_r, S_remove_r):
+            vehs[vid].build_route(sche, reqs, T)
 
         # assign unshared trips
-        reqs_unassigned_in_rs = set(queue).union(reqs_unassigned) - {reqs[rid] for rid in R_id_shared}
-        R_id_unshared, V_id_unshared, S_unshared = self.find_unshared_trips(vehs, reqs_unassigned_in_rs, T)
-        # execute the assignment and build (update) route for assigned vehicles
-        for rid, vid, schedule in zip(R_id_unshared, V_id_unshared, S_unshared):
-            vehs[vid].build_route(schedule, reqs, T)
-            vehs[vid].VTtable[0] = [(tuple([reqs[rid]]), schedule, 0, [schedule])]
+        if amod.rebl == 'naive':
+            reqs_unassigned_in_rs = set(queue).union(reqs_unassigned) - {reqs[rid] for rid in R_id_shared}
+            R_id_unshared, V_id_unshared, S_unshared = self.find_unshared_trips(vehs, reqs_unassigned_in_rs, T)
+            # execute the assignment and build (update) route for assigned vehicles
+            for rid, vid, sche in zip(R_id_unshared, V_id_unshared, S_unshared):
+                vehs[vid].build_route(sche, reqs, T)
+                vehs[vid].VTtable[0].append((tuple([reqs[rid]]), sche, 0, [sche]))
+        else:
+            R_id_unshared = []
+            V_id_unshared = []
 
         # print('unshare', R_id_unshared, V_id_unshared)
+
+        # veh_sample = amod.vehs[42]
+        # print('veh_sample', veh_sample.nid, [veh_sample.lng, veh_sample.lat])
+        # print('veh_sample', veh_sample.VTtable[0])
+        # print('veh_sample', veh_sample.VTtable[1])
 
         # update reqs clustering status
         R_assigned = {reqs[rid] for rid in (R_id_shared + R_id_unshared)}
@@ -73,23 +84,21 @@ class OSP(object):
         assert len(R_assigned) == len(set(R_assigned))
 
         # debug code (check each req is not assigned to multiple vehs)
-        reqs_on_vehs = []
+        R_id_enroute = []
         for veh in vehs:
-            trip = {leg.rid for leg in veh.route} - {-2}
-            # if -2 in trip:
-            #     trip.remove(-2)
-            reqs_on_vehs.extend(list(trip))
-        assert len(reqs_on_vehs) == len(set(reqs_on_vehs))
+            T_id = {leg.rid for leg in veh.route} - {-2}
+            R_id_enroute.extend(list(T_id))
+        assert len(R_id_enroute) == len(set(R_id_enroute))
 
         return V_id_shared + V_id_remove_r + V_id_unshared
 
     @staticmethod
-    def find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T):
+    def find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K, mean_n_s_c, n_t_c):
         # build VT-table
         if IS_DEBUG:
             print('    -T = %d, building VT-table ...' % T)
             a1 = time.time()
-        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T)
+        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T, K, mean_n_s_c, n_t_c)
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
 
@@ -100,29 +109,44 @@ class OSP(object):
         R_id_assigned, V_id_assigned, S_assigned = ILP_assign(veh_trip_edges, reqs_prev + reqs_new, reqs_picking)
         if IS_DEBUG:
             print('        a2 running time:', round((time.time() - a2), 2))
+
+        # R_id_in_sche = set()
+        # for sche in S_assigned:
+        #     for (rid, pod, tnid, ept, ddl) in sche:
+        #         if pod == 1:
+        #             R_id_in_sche.add(rid)
+        # print('R_id_assigned', sorted(R_id_assigned))
+        # print('R_id_in_sche', R_id_in_sche)
+        # assert set(R_id_assigned) == R_id_in_sche
+        # print('R_id_assigned', sorted(R_id_assigned))
+        # print('R_id_in_sche', R_id_in_sche)
+
         return R_id_assigned, V_id_assigned, S_assigned
 
     @staticmethod
     # find vehicles with schedule changed
-    def find_chenged_trips(vehs, V_id_shared, R_id_shared, T):
+    def find_changed_trips(vehs, V_id_shared, R_id_shared, T):
         if IS_DEBUG:
             print('    -T = %d, find vehicles with removed requests ...' % T)
             a3 = time.time()
         V_id_remove_r = []
         S_remove_r = []
-        if MODEE == 'VT_replan':
+        if DISPATCHER == 'OSP-RO':
             for veh in vehs:
                 if not veh.idle and veh.id not in V_id_shared and 1 in {leg.pod for leg in veh.route}:
-                    schedule = []
+                    sche = []
                     for leg in veh.route:
                         if leg.rid in veh.onboard_rid:
-                            schedule.append((leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path))
-                    if schedule != [(leg.rid, leg.pod, leg.tnid, leg.ddl, leg.pf_path) for leg in veh.route]:
-                        rid_changed_assign = set([leg.rid for leg in veh.route]) - set([s[0] for s in schedule]) - {-2}
+                            sche.append((leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl))
+                    veh_route = [(leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl) for leg in veh.route]
+                    if len(veh_route) > 0 and veh_route[0] == (-2, 0):
+                        veh_route.remove(veh_route[0])
+                    if sche != veh_route:
+                        rid_changed_assign = {leg.rid for leg in veh.route} - {s[0] for s in sche} - {-2}
                         # print('R_id_shared', R_id_shared)
-                        assert rid_changed_assign <= set(R_id_shared)
+                        # assert rid_changed_assign <= set(R_id_shared)
                         V_id_remove_r.append(veh.id)
-                        S_remove_r.append(copy.deepcopy(schedule))
+                        S_remove_r.append(copy.deepcopy(sche))
         if IS_DEBUG:
             print('        a3 running time:', round((time.time() - a3), 2))
         return V_id_remove_r, S_remove_r
@@ -137,16 +161,16 @@ class OSP(object):
         for veh in vehs:
             if veh.idle:
                 for req in reqs_unassigned:
-                    schedule = [(req.id, 1, req.onid, req.Clp, None), (req.id, -1, req.dnid, req.Cld, None)]
+                    sche = [(req.id, 1, req.onid, req.Tr, req.Clp), (req.id, -1, req.dnid, req.Tr + req.Ts, req.Cld)]
                     dt = get_duration(veh.nid, req.onid)
-                    idle_veh_req.append((veh, tuple([req]), copy.deepcopy(schedule), dt))
+                    idle_veh_req.append((veh, tuple([req]), copy.deepcopy(sche), dt))
 
         R_id_assigned, V_id_assigned, S_assigned = greedy_assign(idle_veh_req)
-        # R_id_assigned, V_id_assigned, schedule_assigned = ILP_assign(idle_veh_req, reqs_unassigned, set())
+        # R_id_assigned, V_id_assigned, S_assigned = ILP_assign(idle_veh_req, reqs_unassigned, set())
 
         assert len(R_id_assigned) == len(V_id_assigned)
-        for rid, schedule in zip(R_id_assigned, S_assigned):
-            assert rid == schedule[0][0]
+        for rid, sche in zip(R_id_assigned, S_assigned):
+            assert rid == sche[0][0]
 
         if IS_DEBUG:
             print('        a4 running time:', round((time.time() - a4), 2))
