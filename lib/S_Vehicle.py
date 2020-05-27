@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, COEF_WAIT, COEF_INVEH, RIDESHARING_SIZE
+from lib.Configure import T_WARM_UP, T_STUDY, RIDESHARING_SIZE
 from lib.S_Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
 
 
@@ -59,7 +59,7 @@ class Veh(object):
         self.tnid = self.nid
         self.K = K
         self.n = 0
-        self.assigned_schedules = []
+        self.assigned_sches = []
         self.route = deque([])
         self.t = 0.0
         self.d = 0.0
@@ -207,10 +207,10 @@ class Veh(object):
         self.lng = lng
         self.lat = lat
 
-    # build the route of the vehicle based on a series of schedule tasks (rid, pod, tnid, ddl, pf_path)
+    # build the route of the vehicle based on a series of schedule tasks (rid, pod, tnid, ept, ddl)
     # update t, d, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
-    def build_route(self, schedule, reqs=None, T=None):
+    def build_route(self, sche, reqs=None, T=None):
         self.clear_route()
         if self.step_to_nid:
             assert self.lng == self.step_to_nid.geo[0][0]
@@ -220,11 +220,12 @@ class Veh(object):
             tnid = self.step_to_nid.nid[1]
             tlng = self.step_to_nid.geo[1][0]
             tlat = self.step_to_nid.geo[1][1]
+            ept = self.T + self.step_to_nid.t
             ddl = self.T + self.step_to_nid.t
             duration = self.step_to_nid.t
             distance = self.step_to_nid.d
             steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [tnid, tnid], [[tlng, tlat], [tlng, tlat]])]
-            leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
+            leg = Leg(rid, pod, tnid, ept, ddl, duration, distance, steps)
             # the last step of a leg is always of length 2,
             # consisting of 2 identical points as a flag of the end of the leg
             assert len(leg.steps[-1].geo) == 2
@@ -233,8 +234,8 @@ class Veh(object):
             self.tnid = leg.steps[-1].nid[1]
             self.d += leg.d
             self.t += leg.t
-        for (rid, pod, tnid, ddl, pf_path) in schedule:
-            self.add_leg(rid, pod, tnid, ddl, pf_path, reqs, T)
+        for (rid, pod, tnid, ept, ddl) in sche:
+            self.add_leg(rid, pod, tnid, ept, ddl, reqs, T)
 
         if len(self.route) != 0:
             if self.route[0].rid == -1:
@@ -250,11 +251,11 @@ class Veh(object):
                     n += leg.pod
                 assert n == 0
 
-    # add a leg based on (rid, pod, tnid, ddl, pf_path)
-    def add_leg(self, rid, pod, tnid, ddl, pf_path, reqs, T):
-        duration, distance, segments = get_routing(self.tnid, tnid, pf_path)
+    # add a leg based on (rid, pod, tnid, ept, ddl)
+    def add_leg(self, rid, pod, tnid, ept, ddl, reqs, T):
+        duration, distance, segments = get_routing(self.tnid, tnid)
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
-        leg = Leg(rid, pod, tnid, ddl, duration, distance, steps, pf_path)
+        leg = Leg(rid, pod, tnid, ept, ddl, duration, distance, steps)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         # (this check is due to using OSRM, might not necessary now)

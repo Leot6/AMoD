@@ -9,8 +9,8 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from lib.S_Main import Model
-from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, MODEE, DMD_VOL, DMD_STR, \
-    RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, MET_REBL, TRAVEL_TIME, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
+from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, DISPATCHER, DMD_VOL, \
+    DMD_STR, RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, TRAVEL_TIME, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED, COEF_WAIT
 from lib.S_Analysis import anim, print_results
 
 if __name__ == '__main__':
@@ -27,7 +27,8 @@ if __name__ == '__main__':
     print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
           % (model.V, model.K, RIDESHARING_SIZE))
     print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
-    print('  - assignment mode: %s, travel time: %s, interval: %.1f s' % (MODEE, TRAVEL_TIME, INT_ASSIGN))
+    print('  - assignment mode: %s, travel time: %s, coef_wait: %.1f, interval: %.1f s'
+          % (DISPATCHER, TRAVEL_TIME, COEF_WAIT, INT_ASSIGN))
     print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
     print('*' * 80)
     print('')

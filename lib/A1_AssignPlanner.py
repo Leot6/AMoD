@@ -5,7 +5,7 @@ compute an assignment plan from edges in RTV
 import time
 import mosek
 import numpy as np
-from lib.Configure import MODEE, CUTOFF_ILP, IS_DEBUG
+from lib.Configure import DISPATCHER, CUTOFF_ILP, IS_DEBUG
 
 
 def greedy_assign(veh_trip_edges):
@@ -15,7 +15,7 @@ def greedy_assign(veh_trip_edges):
     S_assigned = []
 
     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
-    for (veh, trip, schedule, cost) in edges:
+    for (veh, trip, sche, cost) in edges:
         veh_id = veh.id
         trip_id = tuple([r.id for r in trip])
         if trip_id in T_id_assigned:
@@ -27,13 +27,15 @@ def greedy_assign(veh_trip_edges):
         R_id_assigned.extend([rid for rid in trip_id])
         T_id_assigned.append(trip_id)
         V_id_assigned.append(veh_id)
-        S_assigned.append(schedule)
+        S_assigned.append(sche)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
 
     return R_id_assigned, V_id_assigned, S_assigned
 
 
 def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
+    aa = time.time()
+
     rid_picking = [r.id for r in reqs_picking]
     assert len(reqs_pool) == len(set(reqs_pool))
     R_id_assigned = []
@@ -44,7 +46,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
     if numedges > 0:
         numreqs = len(reqs_pool)
         cost_ignore_normal = 10 ** (len(str(int(veh_trip_edges[0][3])))+3)
-        if MODEE == 'VT_replan':
+        if DISPATCHER == 'OSP-RO':
             cost_ignore_high = 100 * cost_ignore_normal
         else:
             cost_ignore_high = cost_ignore_normal
@@ -57,7 +59,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
 
         V_id = [veh_trip_edges[0][0].id]
         V_T_idx = [[]]
-        for idx, (veh, trip, schedule, cost) in zip(range(numedges), veh_trip_edges):
+        for idx, (veh, trip, sche, cost) in zip(range(numedges), veh_trip_edges):
             vid = veh.id
             if vid != V_id[-1]:
                 V_id.append(vid)
@@ -77,7 +79,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
         bux = [1.0] * numvar
 
         # Objective coefficients
-        c = [round(cost) for (veh, trip, schedule, cost) in veh_trip_edges]
+        c = [round(cost) for (veh, trip, sche, cost) in veh_trip_edges]
         for rid in R_id:
             if rid in rid_picking:
                 c.append(cost_ignore_high)
@@ -120,22 +122,24 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
                 task.putvartypelist(list(range(numvar)), [mosek.variabletype.type_int] * numvar)
                 # Set max solution time
                 task.putdouparam(mosek.dparam.mio_max_time, CUTOFF_ILP)
+                # Allow multiple threads if more threads is available (seems not working)
+                task.putintparam(mosek.iparam.intpnt_multi_thread, mosek.onoffkey.on)
 
                 # # add init solution
                 # a=[]
                 # b=[]
                 # init_assign_idx = [0.] * numedges + [1.0] * numreqs
-                # R_id_init_assigned, V_id_init_assigned, schedule_init_assigned = greedy_assign(veh_trip_edges)
-                # for i, (veh, trip, schedule, cost) in zip(range(numedges), veh_trip_edges):
+                # R_id_init_assigned, V_id_init_assigned, sche_init_assigned = greedy_assign(veh_trip_edges)
+                # for i, (veh, trip, sche, cost) in zip(range(numedges), veh_trip_edges):
                 #     if veh.id in V_id_init_assigned \
-                #             and schedule == schedule_init_assigned[V_id_init_assigned.index(veh.id)]:
+                #             and sche == sche_init_assigned[V_id_init_assigned.index(veh.id)]:
                 #         init_assign_idx[i] = 1.0
                 #         a.append(veh.id)
                 # for i, rid in zip(range(numreqs), R_id):
                 #     if rid in R_id_init_assigned:
                 #         init_assign_idx[numedges + i] = 0.
                 #         b.append(rid)
-                # # print('veh', len(a), len(V_id_init_assigned), len(schedule_init_assigned), ', req', len(b))
+                # # print('veh', len(a), len(V_id_init_assigned), len(sche_init_assigned), ', req', len(b))
                 # assert set(a) == set(V_id_init_assigned)
                 # assert set(b) == set(R_id_init_assigned)
                 # task.putxxslice(mosek.soltype.itg, 0, numvar, init_assign_idx)
@@ -147,16 +151,20 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
                 task.getxx(mosek.soltype.itg, assign_idx)
 
         # print("Optimal solution: %s" % assign_idx)
-        for yes, (veh, trip, schedule, cost) in zip(assign_idx, veh_trip_edges):
+        for yes, (veh, trip, sche, cost) in zip(assign_idx, veh_trip_edges):
             if round(yes) == 1:
                 R_id_assigned.extend([req.id for req in trip])
                 V_id_assigned.append(veh.id)
-                S_assigned.append(schedule)
+                S_assigned.append(sche)
                 # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh.id, cost))
 
         assert len(R_id_assigned) == len(set(R_id_assigned))
-        if MODEE == 'VT_replan':
-            assert set(rid_picking) <= set(R_id_assigned)
+        if DISPATCHER == 'OSP-RO':
+            if not set(rid_picking) <= set(R_id_assigned):
+                print('rid_picking not assigned this time', set(rid_picking) - set(R_id_assigned))
+                print('        ILP running time:', round((time.time() - aa), 2))
+
+            # assert set(rid_picking) <= set(R_id_assigned)
 
     return R_id_assigned, V_id_assigned, S_assigned
 
