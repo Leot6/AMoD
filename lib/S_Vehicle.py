@@ -256,6 +256,8 @@ class Veh(object):
         duration, distance, segments = get_routing(self.tnid, tnid)
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
         leg = Leg(rid, pod, tnid, ept, ddl, duration, distance, steps)
+        if rid == 45:
+            print('req', rid, [reqs[rid].onid, reqs[rid].dnid], [self.tnid, tnid], duration)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         # (this check is due to using OSRM, might not necessary now)

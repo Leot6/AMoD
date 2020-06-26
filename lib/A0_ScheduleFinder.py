@@ -19,7 +19,7 @@ def compute_schedule(veh_params, sub_S, req_params, T, K):
     min_cost = np.inf
     viol = None
 
-    n_s_c = 0  # the number of possible schedules algorithm considers
+    n_s_c = 0  # the number of possible schedules considered by the algorithm
 
     for sub_sche in sub_S:
         l = len(sub_sche)
@@ -37,7 +37,7 @@ def compute_schedule(veh_params, sub_S, req_params, T, K):
                 # if best_sche:
                 if DISPATCHER == 'GI' and best_sche:
                     assert len(feasible_sches) == 1
-                    return best_sche, min_cost, feasible_sches
+                    return best_sche, min_cost, feasible_sches, n_s_c
                 if viol > 0:
                     break
             if viol == 3:

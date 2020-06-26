@@ -14,55 +14,6 @@ from numba import jit
 G = copy.deepcopy(NOD_NET)
 
 
-class Step(object):
-    """
-    Step is a class for steps in a leg
-    Attributes:
-        t: duration
-        d: distance
-        nid: a list of nodes id
-        geo: geometry, a list of coordinates
-    """
-
-    def __init__(self, t=0.0, d=0.0, nid=[], geo=[]):
-        self.t = t
-        self.d = d
-        self.nid = nid
-        self.geo = geo
-
-    def __str__(self):
-        return 'step: distance = %.1f, duration = %.1f' % (self.d, self.t)
-
-
-class Leg(object):
-    """
-    Leg is a class for legs in the route
-    A leg may consists of a series of steps
-    Attributes:
-        rid: request id (if rebalancing then -1)
-        pod: pickup (+1) or dropoff (-1), rebalancing (0)
-        tnid: target (end of leg) node id in network
-        ept: earliest possible arrival time
-        ddl: latest arriving time
-        t: total duration
-        d: total distance
-        steps: a list of steps
-    """
-
-    def __init__(self, rid, pod, tnid, ept, ddl, t=0.0, d=0.0, steps=[]):
-        self.rid = rid
-        self.pod = pod
-        self.tnid = tnid
-        self.ept = ept
-        self.ddl = ddl
-        self.t = t
-        self.d = d
-        self.steps = deque(steps)
-
-    def __str__(self):
-        return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
-
-
 # get the duration of the best route from origin to destination
 def get_duration(onid, dnid):
     duration = NOD_TTT[onid - 1, dnid - 1]
@@ -100,7 +51,7 @@ def build_route_from_path(path):
     for i in range(len(path) - 1):
         u = path[i]
         v = path[i + 1]
-        t = get_edge_mean_dur(u, v)
+        t = get_edge_real_dur(u, v)
         d = get_edge_dist(u, v)
         u_geo = get_node_geo(u)
         v_geo = get_node_geo(v)
@@ -114,7 +65,7 @@ def build_route_from_path(path):
 
 
 # update the traffic on road network
-def upd_traffic_on_network():
+def upd_traffic_on_network(h=0):
     # sample from normal distribution
     for u, v in G.edges():
         dur = get_edge_mean_dur(u, v)
@@ -124,6 +75,10 @@ def upd_traffic_on_network():
             while sample < 0:
                 sample = np.random.normal(dur, std)
             G.edges[u, v]['dur'] = round(sample, 2)
+    # # update on hours
+    # for e, u, v in EDG_NOD:
+    #     dur = EDG_TTH[e-1, h]
+    #     G.edges[u, v]['dur'] = dur
 
 
 # get the duration based on haversine formula
@@ -182,3 +137,96 @@ def find_nearest_node(lng, lat):
         print('d', d)
         print()
     return int(nearest_node_id)
+
+
+# compute path that maximize the probability of arriving at a destination before a given time deadline
+def stochastic_shortest_path(d, onid, dnid):
+    """
+    Attributes:
+        d: deadline
+        onid: origin node id
+        dnid: destination node id
+        m: mean
+        v: variance
+        l:left
+        r:right
+    """
+
+    candidate_regions = []
+    path_0, m_0, v_0 = get_lemada_optimal_path(0, onid, dnid)
+    phi_0 = get_path_phi(d, m_0, v_0)
+    path_inf, m_inf, v_inf = get_lemada_optimal_path(np.inf, onid, dnid)
+    phi_inf = get_path_phi(d, m_inf, v_inf)
+
+    if path_0 == path_inf:
+        return path_0
+    elif phi_0 > phi_inf:
+        best_path = path_0
+        phi_best = phi_0
+    else:
+        best_path = path_inf
+        phi_best = phi_inf
+    candidate_regions.append(((m_0, v_0), (m_inf, v_inf)))
+
+    while len(candidate_regions) != 0:
+        region = candidate_regions.pop()
+        (m_l, v_l), (m_r, v_r) = region
+        phi_probe = get_path_phi(d, m_l, v_r)
+        if phi_probe < phi_best:
+            continue
+        lemada = - (m_l - m_r) / (v_l - v_r)
+        path, m, v = get_lemada_optimal_path(lemada, onid, dnid)
+        phi_path = get_path_phi(d, m, v)
+        if (m == m_l and v == v_l) or (m == m_r and v == v_r):
+            continue
+        if phi_path > phi_best:
+            best_path = path
+            phi_best = phi_path
+        phi_probe_l = get_path_phi(d, m_l, v)
+        phi_probe_r = get_path_phi(d, m, v_r)
+        if phi_probe_l > phi_best:
+            candidate_regions.append(((m_l, v_l), (m, v)))
+        if phi_probe_r > phi_best:
+            candidate_regions.append(((m, v), (m_r, v_r)))
+    return best_path
+
+
+def get_lemada_optimal_path(lemada, onid, dnid):
+    for u, v in G.edges():
+        dur = get_edge_mean_dur(u, v)
+        var = get_edge_var(u, v)
+        if dur is np.inf:
+            print('error: dur is np.inf !!!')
+            quit()
+        if lemada == np.inf:
+            weight = var
+        else:
+            weight = dur + lemada * var
+        G.edges[u, v]['dur'] = weight
+    path = get_the_minimum_duration_path(G, onid, dnid)
+    mean, var = get_path_mean_and_var(path)
+    return path, mean, var
+
+
+def get_the_minimum_duration_path(graph, source, target):
+    path = nx.shortest_path(graph, source, target, weight='dur')
+    return path
+
+
+def get_path_mean_and_var(path):
+    mean = 0.0
+    var = 0.0
+    for i in range(len(path) - 1):
+        u = path[i]
+        v = path[i + 1]
+        mean += get_edge_mean_dur(u, v)
+        var += get_edge_var(u, v)
+    return round(mean, 2), round(var, 2)
+
+
+def get_path_phi(d, m, v):
+    return round((d-m)/(math.sqrt(v)), 4)
+
+
+
+

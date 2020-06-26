@@ -24,7 +24,7 @@ class GI(object):
     def dispatch(self, amod):
         V_id_assigned = []
         l = len(amod.queue)
-        for i in range(l):  # tqdm(range(l), desc='HI'):
+        for i in range(l):  # tqdm(range(l), desc='GI'):
             req = amod.queue.pop()
             req_params = [req.id, req.onid, req.dnid, req.Tr, req.Ts, req.Clp, req.Cld]
             best_veh, best_sche = self.heuristic_insertion(amod.vehs, req_params, amod.T, amod.K)
@@ -52,7 +52,7 @@ class GI(object):
                     if leg.pod == 1 or leg.pod == -1:
                         sub_sche.append((leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl))
             veh_params = [veh.nid, veh.t_to_nid, veh.n]
-            new_sche, cost, feasible_sches = compute_schedule(veh_params, [sub_sche], req_params, T, K)
+            new_sche, cost, feasible_sches, n_s_c = compute_schedule(veh_params, [sub_sche], req_params, T, K)
             if cost < min_cost:
                 best_veh = veh
                 best_sche = new_sche
