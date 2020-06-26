@@ -8,7 +8,7 @@ import numpy as np
 import networkx as nx
 from collections import deque
 from itertools import islice
-from lib.Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT
+from lib.Configure import NOD_NET, NOD_LOC, NOD_TTT, NOD_SPT, IS_STOCHASTIC
 from numba import jit
 
 G = copy.deepcopy(NOD_NET)
@@ -63,27 +63,7 @@ class Leg(object):
         return 'leg: distance = %.1f, duration = %.1f, number of steps = %d' % (self.d, self.t, len(self.steps))
 
 
-class ScheTask(object):  # not used, cause using class will consume more time than just using tuple
-    """
-    ScheTask is a class for tasks in a schedule,
-    where a schedule is a sequence of pick up and drop off tasks in a route
-    Attributes:
-        rid: request id (if rebalancing then -1)
-        pod: pickup (+1) or dropoff (-1), rebalancing (0)
-        tnid: target (end of task) node id in network
-        ddl: latest arriving time
-    """
-
-    def __init__(self, rid, pod, tnid, ept, ddl):
-        self.rid = rid
-        self.pod = pod
-        self.tnid = tnid
-        self.ept = ept
-        self.ddl = ddl
-
-
 # get the duration of the best route from origin to destination
-# @jit
 def get_duration(onid, dnid):
     duration = NOD_TTT[onid - 1, dnid - 1]
     if duration != -1:
@@ -120,7 +100,7 @@ def build_route_from_path(path):
     for i in range(len(path) - 1):
         u = path[i]
         v = path[i + 1]
-        t = get_edge_real_dur(u, v)
+        t = get_edge_mean_dur(u, v)
         d = get_edge_dist(u, v)
         u_geo = get_node_geo(u)
         v_geo = get_node_geo(v)
@@ -133,18 +113,8 @@ def build_route_from_path(path):
     return duration, distance, steps
 
 
-# get the duration of a path
-def get_dur_from_path(path):
-    dur = 0
-    for node_idx in range(len(path) - 1):
-        u = path[node_idx]
-        v = path[node_idx + 1]
-        dur += get_edge_real_dur(u, v)
-    return dur
-
-
 # update the traffic on road network
-def upd_traffic_on_network(h=0):
+def upd_traffic_on_network():
     # sample from normal distribution
     for u, v in G.edges():
         dur = get_edge_mean_dur(u, v)
@@ -153,11 +123,7 @@ def upd_traffic_on_network(h=0):
             sample = np.random.normal(dur, std)
             while sample < 0:
                 sample = np.random.normal(dur, std)
-            G.edges[u, v]['dur'] = sample
-    # # update on hours
-    # for e, u, v in EDG_NOD:
-    #     dur = EDG_TTH[e-1, h]
-    #     G.edges[u, v]['dur'] = dur
+            G.edges[u, v]['dur'] = round(sample, 2)
 
 
 # get the duration based on haversine formula
@@ -177,9 +143,15 @@ def get_edge_real_dur(u, v):
     return G.get_edge_data(u, v, default={'dur': None})['dur']
 
 
+# return the variance of travel time of edge (u, v)
+def get_edge_var(u, v):
+    return NOD_NET.get_edge_data(u, v, default={'var': None})['var']
+
+
 # return the standard deviation of travel time of edge (u, v)
 def get_edge_std(u, v):
-    return NOD_NET.get_edge_data(u, v, default={'std': None})['std']
+    var = NOD_NET.get_edge_data(u, v, default={'var': None})['var']
+    return np.sqrt(var)
 
 
 # return the distance of edge (u, v)
@@ -210,97 +182,3 @@ def find_nearest_node(lng, lat):
         print('d', d)
         print()
     return int(nearest_node_id)
-
-
-# returns the k-shortest paths from source to target in a weighted graph G
-def k_shortest_paths(G, source, target, k=1, weight='dur'):
-    # Determine the shortest path from the source to the target
-    duration, path = nx.bidirectional_dijkstra(G, source, target, weight=weight)
-    A = [tuple([duration, path])]  # k_shortest_paths
-    B = []
-    # G_copy = G.copy()  # computational time might be long
-
-    for i in range(1, k):
-        i_path = A[-1][1]  # k-1 shortest path
-        #  The spur node ranges from the first node to the next to last node in the previous k-shortest path
-        for j in range(len(i_path) - 1):
-            # Spur node is retrieved from the previous k-shortest path, k − 1.
-            spur_node = i_path[j]
-            root_path = i_path[:j + 1]
-
-            root_path_duration = 0
-            for u_i in range(len(root_path) - 1):
-                u = root_path[u_i]
-                v = root_path[u_i + 1]
-                root_path_duration += get_edge_real_dur(u, v)
-
-            # print('root_path', root_path)
-            # print('root_path_duration', root_path_duration)
-
-            edges_removed = []
-            for path_k in A:
-                curr_path = path_k[1]
-                # Remove the links that are part of the previous shortest paths which share the same root path
-                if len(curr_path) > j and root_path == curr_path[:j + 1]:
-                    u = curr_path[j]
-                    v = curr_path[j + 1]
-                    if G.has_edge(u, v):
-                        G.remove_edge(u, v)
-                        edges_removed.append((u, v,get_edge_real_dur(u, v)))
-                        # print('u, v, edge_duration (remove)', u, v, edge_duration)
-
-            # remove rootPathNode (except spurNode) from Graph
-            for n in range(len(root_path) - 1):
-                u = root_path[n]
-                # print('node', u)
-                # out-edges
-                nodes = copy.deepcopy(G[u])
-                for v in nodes:
-                    G.remove_edge(u, v)
-                    edges_removed.append((u, v, get_edge_real_dur(u, v)))
-                    # print('u, v, edge_duration (remove)', u, v, edge_duration)
-                # if G.is_directed():
-                #     # in-edges
-                #     for u, v, edge_duration in G.in_edges_iter(node, data=True):
-                #         print('u, v, edge_duration (in)', u, v, edge_duration)
-                #         G.remove_edge(u, v)
-                #         edges_removed.append((u, v, edge_duration))
-
-            try:
-                # Calculate the spur path from the spur node to the target
-                spur_path_duration, spur_path = nx.bidirectional_dijkstra(G, spur_node, target, weight='dur')
-                # Entire path is made up of the root path and spur path
-                total_path = root_path[:-1] + spur_path
-                total_path_duration = root_path_duration + spur_path_duration
-                potential_k = tuple([total_path_duration, total_path])
-                # Add the potential k-shortest path to the heap
-                if potential_k not in B:
-                    B.append(potential_k)
-                    # print('potential_k', potential_k)
-            except nx.NetworkXNoPath:
-                # print('NetworkXNoPath')
-                pass
-
-            # Add back the edges and nodes that were removed from the graph
-            for u, v, edge_duration in edges_removed:
-                G.add_edge(u, v, weight=edge_duration)
-                # print('u, v, edge_duration (add)', u, v, edge_duration)
-
-        if len(B):
-            B.sort(key=lambda e: e[0])
-            A.append(B[0])
-            B.pop(0)
-        else:
-            break
-    A.sort(key=lambda p: p[0])
-    return A
-
-
-def k_shortest_paths_nx(source, target, k, weight='dur'):
-    return list(islice(nx.shortest_simple_paths(G, source, target, weight=weight), k))
-
-
-
-
-
-

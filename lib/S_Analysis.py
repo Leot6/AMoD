@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib import animation
 
+from lib.S_Route import get_duration
 from lib.Configure import T_WARM_UP, T_STUDY, DMD_VOL, DMD_STR, DMD_SST, FLEET_SIZE, MAX_WAIT, MAX_DELAY, \
     RIDESHARING_SIZE, DISPATCHER, INT_ASSIGN, Olng, Olat, Dlng, Dlat, MAP_WIDTH, MAP_HEIGHT, TRAVEL_TIME,\
     IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED, COEF_WAIT, DATE
@@ -19,7 +20,7 @@ def print_results(model, runtime, mean_runtime, end_time):
     count_reqs = 0
     count_rejs = 0
 
-    # both waiting time (wt) and travel delay (td) constraints have been satisfied
+    # (SWSD) both waiting time (wt) and travel delay (td) constraints have been satisfied
     count_served_1 = 0      # num of reqs that have been finished
     count_serving_1 = 0     # num of reqs that are currently on board
     wait_time_1 = 0.0       # mean waiting time
@@ -27,7 +28,7 @@ def print_results(model, runtime, mean_runtime, end_time):
     in_veh_delay_1 = 0.0    # mean in-vehicle delay
     detour_factor_1 = 0.0   # mean in-vehicle travel detour
 
-    # only travel delay constraint has been satisfied
+    # (VWSD) only travel delay constraint has been satisfied
     count_served_2 = 0
     count_serving_2 = 0
     wait_time_2 = 0.0
@@ -35,7 +36,7 @@ def print_results(model, runtime, mean_runtime, end_time):
     in_veh_delay_2 = 0.0
     detour_factor_2 = 0.0
 
-    # both waiting time and travel delay constraints have been violated
+    # (VWVD) both waiting time and travel delay constraints have been violated
     count_served_3 = 0
     count_serving_3 = 0
     wait_time_3 = 0.0
@@ -66,6 +67,8 @@ def print_results(model, runtime, mean_runtime, end_time):
                             in_veh_time_1 += req.Td - req.Tp
                             in_veh_delay_1 += req.Td - req.Tp - req.Ts
                             detour_factor_1 += req.D
+                            print('VWSD', req.id, [req.Tr, req.Ts], [req.Tp, req.Td])
+                            print('get_duration(self.onid, self.dnid)', get_duration(req.onid, req.dnid))
                         else:                                                # violate wt but satisfy td
                             count_served_2 += 1
                             wait_time_2 += req.Tp - req.Cep
