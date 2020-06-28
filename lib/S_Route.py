@@ -100,7 +100,7 @@ def build_route_from_path(path):
     for i in range(len(path) - 1):
         u = path[i]
         v = path[i + 1]
-        t = get_edge_mean_dur(u, v)
+        t = get_edge_real_dur(u, v)
         d = get_edge_dist(u, v)
         u_geo = get_node_geo(u)
         v_geo = get_node_geo(v)
@@ -138,7 +138,7 @@ def get_edge_mean_dur(u, v):
     return NOD_NET.get_edge_data(u, v, default={'dur': None})['dur']
 
 
-# return the mean travel time of edge (u, v)
+# return the current travel time of edge (u, v)
 def get_edge_real_dur(u, v):
     return G.get_edge_data(u, v, default={'dur': None})['dur']
 
