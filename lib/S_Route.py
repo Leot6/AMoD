@@ -150,8 +150,7 @@ def get_edge_var(u, v):
 
 # return the standard deviation of travel time of edge (u, v)
 def get_edge_std(u, v):
-    var = NOD_NET.get_edge_data(u, v, default={'var': None})['var']
-    return np.sqrt(var)
+    return NOD_NET.get_edge_data(u, v, default={'std': None})['std']
 
 
 # return the distance of edge (u, v)
