@@ -8,7 +8,7 @@ from dateutil.parser import parse
 # # parameters for S # #
 # taxi requests data, station loctions
 TRAVEL_TIME = 'WEEK'
-DATE = '20150505'  # '20150505' or '20150506'
+DATE = '20150506'  # '20150505' or '20150506'
 STN_NUM = '101'  # '101' or '630'
 with open(f'./data/NYC_REQ_DATA_{DATE}.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)

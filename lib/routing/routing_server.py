@@ -21,7 +21,7 @@ PATH_TABLE_LIST = [None] * NUM_OF_LAMBDA
 TIME_TABLE_LIST = [None] * NUM_OF_LAMBDA
 VAR_TABLE_LIST = [None] * NUM_OF_LAMBDA
 for i in range(NUM_OF_LAMBDA):
-    with open(f'./data/path-tables-gitignor       e/NYC_SPT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'./data/path-tables-gitignore/NYC_SPT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
         PATH_TABLE_LIST[i] = pickle.load(f)
     with open(f'./data/path-tables-gitignore/NYC_TTT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
         TIME_TABLE_LIST[i] = pickle.load(f)
