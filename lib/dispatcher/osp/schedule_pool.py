@@ -8,19 +8,25 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-from lib.Configure import RIDESHARING_SIZE, DISPATCHER, CUTOFF_VT
-from lib.A0_ScheduleFinder import compute_schedule, test_constraints_get_cost, compute_sche_cost
-from lib.S_Route import get_duration
+from lib.simulator.config import RIDESHARING_SIZE, DISPATCHER, CUTOFF_VT
+from lib.routing.routing_server import get_duration_from_origin_to_dest
+from lib.dispatcher.osp.schedule_finder import compute_schedule, test_constraints_get_cost, compute_sche_cost
+
+# avg_num_of_sche_searched: # the number of possible schedules algorithm considers when finding the optimal schedule
+# num_of_trips: # the number of different size trips algorithm considers
+avg_num_of_sche_searched = [0] * RIDESHARING_SIZE
+num_of_trip_searched = [0] * RIDESHARING_SIZE
+show_counting = False
 
 
 # build VT table for each veh, respectively
-def build_vt_table(vehs, reqs_new, reqs_prev, T, K, mean_n_s_c, n_t_c):
+def build_vt_table(vehs, reqs_new, reqs_prev, T, K):
     rid_prev = {req.id for req in reqs_prev}
 
     veh_trip_edges = []
-    for veh in vehs:
-    # for veh in tqdm(vehs, desc=DISPATCHER + ' Table'):
-        feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K, mean_n_s_c, n_t_c)
+    # for veh in vehs:
+    for veh in tqdm(vehs, desc=DISPATCHER + ' Table'):
+        feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K)
         for VTtable_k in veh.VTtable:
             for (trip, best_sche, cost, feasible_sches) in VTtable_k:
                 veh_trip_edges.append((veh, trip, best_sche, cost))
@@ -29,7 +35,7 @@ def build_vt_table(vehs, reqs_new, reqs_prev, T, K, mean_n_s_c, n_t_c):
 
 # search all feasible trips for a single vehicle, incrementally from the trip size of one
 # a time consuming step
-def feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K, mean_n_s_c, n_t_c):
+def feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K):
     veh_params = [veh.nid, veh.t_to_nid, veh.n]
     # trips of size 1
     # add old trips (size 1)
@@ -42,14 +48,15 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K, mean_n_s_c, n_t_
     # add new trips (size 1)
     sub_sches, rid_enroute = restore_basic_sub_sches(veh)
 
-    for req in reqs_new:
-    # for req in tqdm(reqs_new, desc='size 1 trip'):
+    # for req in reqs_new:
+    for req in tqdm(reqs_new, desc='size 1 trip'):
         # filter out the req which can not be served even when the veh is idle
-        if get_duration(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
+        if get_duration_from_origin_to_dest(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
             continue
         trip = tuple([req])  # trip is defined as tuple
         req_params = [req.id, req.onid, req.dnid, req.Tr, req.Ts, req.Clp, req.Cld]
-        best_sche, min_cost, feasible_sches, n_s_c = compute_schedule(veh_params, sub_sches, req_params, T, K)
+        best_sche, min_cost, feasible_sches, num_of_sche_searched \
+            = compute_schedule(veh_params, sub_sches, req_params, T, K)
         if best_sche:
             veh.VTtable[0].append((trip, best_sche, min_cost, feasible_sches))
             # debug code
@@ -72,8 +79,8 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K, mean_n_s_c, n_t_
         n_all_trips_k_1 = len(veh.VTtable[k - 2])  # number of all trips of size k-1
         n_new_trips_k_1 = n_all_trips_k_1 - n_prev_trips_k_1  # number of new trips of size k-1
 
-        for i in range(1, n_new_trips_k_1 + 1):
-        # for i in tqdm(range(1, n_new_trips_k_1 + 1), desc='size '+str(k)+' trip'):
+        # for i in range(1, n_new_trips_k_1 + 1):
+        for i in tqdm(range(1, n_new_trips_k_1 + 1), desc='size ' + str(k) + ' trip'):
             trip1 = veh.VTtable[k - 2][-i][0]  # a trip of size k-1
             for j in range(i + 1, n_all_trips_k_1 + 1):
                 trip2 = veh.VTtable[k - 2][-j][0]  # another trip of size k-1 (different from trip1)
@@ -100,14 +107,19 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T, K, mean_n_s_c, n_t_
                 sub_S1 = veh.VTtable[k - 2][-i][3]
                 req1 = tuple(set(trip_k) - set(trip1))[0]
                 req1_params = [req1.id, req1.onid, req1.dnid, req1.Tr, req1.Ts, req1.Clp, req1.Cld]
-                best_sche1, min_cost1, feasible_S1, n_s_c = compute_schedule(veh_params, sub_S1, req1_params, T, K)
+                best_sche1, min_cost1, feasible_S1, num_of_sche_searched \
+                    = compute_schedule(veh_params, sub_S1, req1_params, T, K)
 
-                # count the number of feasible schedules algorithm considers
-                mean_n_s_c[k-2] = round((mean_n_s_c[k-2] * n_t_c[k-2] + n_s_c) / (n_t_c[k-2] + 1), 2)
-                n_t_c[k - 2] += 1
-
-                print('mean counting schedules', mean_n_s_c)
-                print('count trips', n_t_c)
+                if show_counting:
+                    # count the number of feasible schedules algorithm considers
+                    global avg_num_of_sche_searched
+                    global num_of_trip_searched
+                    num_of_trip_searched[k - 2] += 1
+                    avg_num_of_sche_searched[k - 2] += ((num_of_sche_searched - avg_num_of_sche_searched[k - 2])
+                                                        / num_of_trip_searched[k - 2])
+                    avg_num_of_sche_searched[k - 2] = round(avg_num_of_sche_searched[k - 2], 2)
+                    print('mean counting schedules', avg_num_of_sche_searched)
+                    print('count trips', num_of_trip_searched)
 
                 # sub_S2 = veh.VTtable[k - 2][-j][3]
                 # req2 = tuple(set(trip_k) - set(trip2))[0]

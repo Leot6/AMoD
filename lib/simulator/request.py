@@ -3,8 +3,8 @@ definition of requests for the AMoD system
 """
 
 import matplotlib.pyplot as plt
-from lib.Configure import MAX_WAIT, MAX_DELAY, MAX_DETOUR
-from lib.S_Route import find_nearest_node, get_duration
+from lib.simulator.config import MAX_WAIT, MAX_DELAY, MAX_DETOUR
+from lib.routing.routing_server import get_duration_from_origin_to_dest
 
 
 class Req(object):
@@ -28,16 +28,16 @@ class Req(object):
         D: detour factor
     """
 
-    def __init__(self, id, Tr, olng, olat, dlng, dlat):
+    def __init__(self, id, Tr, onid, dnid, olng, olat, dlng, dlat):
         self.id = id
         self.Tr = Tr
+        self.onid = onid
+        self.dnid = dnid
         self.olng = olng
         self.olat = olat
         self.dlng = dlng
         self.dlat = dlat
-        self.onid = find_nearest_node(olng, olat)
-        self.dnid = find_nearest_node(dlng, dlat)
-        self.Ts = get_duration(self.onid, self.dnid)
+        self.Ts = get_duration_from_origin_to_dest(self.onid, self.dnid)
         self.Cep = Tr
         if MAX_DETOUR == -1:
             self.Clp = Tr + MAX_WAIT
@@ -52,11 +52,11 @@ class Req(object):
 
     # return origin
     def get_origin(self):
-        return self.olng, self.olat
+        return self.onid, self.olng, self.olat
 
     # return destination
     def get_destination(self):
-        return self.dlng, self.dlat
+        return self.dnid, self.dlng, self.dlat
 
     # visualize
     def draw(self):

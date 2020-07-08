@@ -5,10 +5,10 @@ batch assignment: computing the optimal schedule pool and then assign them toget
 import time
 import copy
 
-from lib.Configure import DISPATCHER, IS_DEBUG
-from lib.A1_VTtable import build_vt_table
-from lib.A1_AssignPlanner import ILP_assign, greedy_assign
-from lib.S_Route import get_duration
+from lib.simulator.config import DISPATCHER, IS_DEBUG
+from lib.dispatcher.osp.schedule_pool import build_vt_table
+from lib.dispatcher.osp.linear_assignment import ILP_assign, greedy_assign
+from lib.routing.routing_server import get_duration_from_origin_to_dest
 
 
 class OSP(object):
@@ -39,8 +39,7 @@ class OSP(object):
             reqs_prev = []
 
         # find the shared assignment
-        R_id_shared, V_id_shared, S_shared = self.find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K,
-                                                                    amod.mean_n_s_c, amod.n_t_c)
+        R_id_shared, V_id_shared, S_shared = self.find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K)
         # execute the assignment and build (update) route for assigned vehicles
         for vid, sche in zip(V_id_shared, S_shared):
             vehs[vid].build_route(sche, reqs, T)
@@ -93,12 +92,12 @@ class OSP(object):
         return V_id_shared + V_id_remove_r + V_id_unshared
 
     @staticmethod
-    def find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K, mean_n_s_c, n_t_c):
+    def find_shared_trips(vehs, reqs_new, reqs_prev, reqs_picking, T, K):
         # build VT-table
         if IS_DEBUG:
             print('    -T = %d, building VT-table ...' % T)
             a1 = time.time()
-        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T, K, mean_n_s_c, n_t_c)
+        veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T, K)
         if IS_DEBUG:
             print('        a1 running time:', round((time.time() - a1), 2))
 
@@ -162,7 +161,7 @@ class OSP(object):
             if veh.idle:
                 for req in reqs_unassigned:
                     sche = [(req.id, 1, req.onid, req.Tr, req.Clp), (req.id, -1, req.dnid, req.Tr + req.Ts, req.Cld)]
-                    dt = get_duration(veh.nid, req.onid)
+                    dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
                     idle_veh_req.append((veh, tuple([req]), copy.deepcopy(sche), dt))
 
         R_id_assigned, V_id_assigned, S_assigned = greedy_assign(idle_veh_req)

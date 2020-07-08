@@ -4,18 +4,15 @@ main structure for the AMoD simulator
 
 import time
 import datetime
-import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from dateutil.parser import parse
 
-from lib.Configure import DMD_VOL, FLEET_SIZE, VEH_CAPACITY, MET_ASSIGN, MET_REBL, STN_LOC, REQ_DATA, \
-    DMD_SST, INT_ASSIGN, DISPATCHER, IS_DEBUG, IS_STOCHASTIC, RIDESHARING_SIZE
-from lib.S_Request import Req
-from lib.S_Route import upd_traffic_on_network
-from lib.S_Vehicle import Veh
-from lib.A1_OSP_Main import OSP
-from lib.A2_GI import GI
+from lib.simulator.config import *
+from lib.simulator.request import Req
+from lib.simulator.vehicle import Veh
+from lib.routing.routing_server import upd_traffic_on_network, print_counting
+from lib.dispatcher.osp.osp_main import OSP
+from lib.dispatcher.gi.greedy_insertion import GI
 
 
 class Model(object):
@@ -54,7 +51,8 @@ class Model(object):
         self.vehs = []
         for i in range(self.V):
             idx = int(i * len(STN_LOC) / self.V)
-            self.vehs.append(Veh(i, STN_LOC.iloc[idx]['lng'], STN_LOC.iloc[idx]['lat'], K=self.K))
+            self.vehs.append(Veh(i, int(STN_LOC.iloc[idx]['id']),
+                                 STN_LOC.iloc[idx]['lng'], STN_LOC.iloc[idx]['lat'], K=self.K))
         self.reqs_data = REQ_DATA
         self.req_init_idx = 0
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
@@ -71,11 +69,6 @@ class Model(object):
         elif DISPATCHER == 'GI':
             self.dispatcher = GI()
         self.start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
-
-        # n_s_c: # the number of possible schedules algorithm considers
-        # n_s_c: # the number of different size trips algorithm considers
-        self.mean_n_s_c = [0] * RIDESHARING_SIZE
-        self.n_t_c = [0] * RIDESHARING_SIZE
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
     def dispatch_at_time(self, T):
@@ -109,6 +102,8 @@ class Model(object):
         if np.isclose(T % INT_ASSIGN, 0):
             # compute the assignment
             V_id_assigned = self.dispatcher.dispatch(self)
+
+            print_counting()
 
             # update traffic on routes of vehicles
             if IS_STOCHASTIC:
@@ -176,6 +171,7 @@ class Model(object):
         req_idx = self.req_init_idx + int(self.N / self.D)
         while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds <= self.T:
             req = Req(self.N, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds,
+                      self.reqs_data.iloc[req_idx]['onid'], self.reqs_data.iloc[req_idx]['dnid'],
                       self.reqs_data.iloc[req_idx]['olng'], self.reqs_data.iloc[req_idx]['olat'],
                       self.reqs_data.iloc[req_idx]['dlng'], self.reqs_data.iloc[req_idx]['dlat'])
             # print('req_idx:', req_idx, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds, req.Ts)
@@ -186,7 +182,7 @@ class Model(object):
             # check the travel time of a trip is not zero
             # if not req.Ts > 120:
             #     print('req.Ts > 120', req.Ts)
-            assert req.Ts > 30
+            assert req.Ts > 150
         assert self.N == len(self.reqs)
         if IS_DEBUG:
             print('        s3 running time:', round((time.time() - s3), 2))

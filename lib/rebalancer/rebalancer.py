@@ -3,13 +3,10 @@ rebalancing algorithm for the AMoD system
 """
 
 import copy
-import time
-import mosek
 import numpy as np
 
-from lib.Configure import IS_DEBUG
-from lib.A1_AssignPlanner import ILP_assign, greedy_assign
-from lib.S_Route import get_duration
+from lib.dispatcher.osp.linear_assignment import ILP_assign
+from lib.routing.routing_server import get_duration_from_origin_to_dest
 
 
 # not used
@@ -19,10 +16,10 @@ def naive_rebalancing(vehs, reqs_unassigned):
         if veh.idle:
             for req in reqs_unassigned:
                 schedule = [(-1, 0, req.onid, np.inf)]
-                dt = get_duration(veh.nid, req.onid)
+                dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
                 rebl_veh_req.append((veh, tuple([req]), copy.deepcopy(schedule), dt))
-    R_id_rebl, V_id_rebl, schedule_rebl = greedy_assign(rebl_veh_req)
-    # R_id_rebl, V_id_rebl, schedule_rebl = ILP_assign(rebl_veh_req, reqs_unassigned, set())
+    # R_id_rebl, V_id_rebl, schedule_rebl = greedy_assign(rebl_veh_req)
+    R_id_rebl, V_id_rebl, schedule_rebl = ILP_assign(rebl_veh_req, reqs_unassigned, set())
     return V_id_rebl, schedule_rebl
 
 

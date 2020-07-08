@@ -4,9 +4,8 @@ greedy insertion: insert requests to vehicles in first-in-first-out manner
 
 import numpy as np
 from tqdm import tqdm
-from numba import jit, prange
-from lib.S_Route import get_duration
-from lib.A0_ScheduleFinder import compute_schedule
+from lib.routing.routing_server import get_duration_from_origin_to_dest
+from lib.dispatcher.osp.schedule_finder import compute_schedule
 
 
 class GI(object):
@@ -66,7 +65,7 @@ class GI(object):
         min_cost = np.inf
         for veh in vehs:  # tqdm(vehs, desc='Candidates_NonSharing'):
             if veh.idle:
-                dt = get_duration(veh.nid, req.onid)
+                dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
                 if dt < min_cost:
                     best_veh = veh
                     min_cost = dt

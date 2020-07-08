@@ -1,13 +1,13 @@
 """
-compute all feasible schedules for given vehicle v and trip T.
+compute all feasible schedules for a given vehicle v and a trip T.
 """
 
 import copy
 import time
 import numpy as np
 from numba import jit, prange
-from lib.Configure import COEF_WAIT, DISPATCHER, IS_STOCHASTIC_CONSIDERED
-from lib.S_Route import get_duration, get_path_from_SPtable, get_edge_std
+from lib.simulator.config import COEF_WAIT, DISPATCHER, IS_STOCHASTIC_CONSIDERED
+from lib.routing.routing_server import get_duration_from_origin_to_dest
 
 
 # (schedules of trip T of size k are computed based on schedules of its subtrip of size k-1)
@@ -19,7 +19,7 @@ def compute_schedule(veh_params, sub_S, req_params, T, K):
     min_cost = np.inf
     viol = None
 
-    n_s_c = 0  # the number of possible schedules considered by the algorithm
+    num_of_schedule_searched = 0  # the number of possible schedules considered by the algorithm
 
     for sub_sche in sub_S:
         l = len(sub_sche)
@@ -27,7 +27,7 @@ def compute_schedule(veh_params, sub_S, req_params, T, K):
             # insert the req's drop-off point
             for j in range(i + 1, l + 2):
                 new_sche, new_sche_cost, viol = insert_req_to_sche(veh_params, sub_sche, req_params, i, j, T, K)
-                n_s_c += 1
+                num_of_schedule_searched += 1
                 if not new_sche_cost == np.inf:
                     feasible_sches.append(new_sche)
                     if new_sche_cost < min_cost:
@@ -37,12 +37,12 @@ def compute_schedule(veh_params, sub_S, req_params, T, K):
                 # if best_sche:
                 if DISPATCHER == 'GI' and best_sche:
                     assert len(feasible_sches) == 1
-                    return best_sche, min_cost, feasible_sches, n_s_c
+                    return best_sche, min_cost, feasible_sches, num_of_schedule_searched
                 if viol > 0:
                     break
             if viol == 3:
                 break
-    return best_sche, min_cost, feasible_sches, n_s_c
+    return best_sche, min_cost, feasible_sches, num_of_schedule_searched
 
 
 def insert_req_to_sche(veh_params, sub_sche, req_params, idx_p, idx_d, T, K):
@@ -74,23 +74,9 @@ def test_constraints_get_cost(veh_params, sche, new_rid, idx_p, idx_d, T, K):
     idx = -1
     for (rid, pod, tnid, ept, ddl) in sche:
         idx += 1
-        dt = get_duration(nid, tnid)
+        dt = get_duration_from_origin_to_dest(nid, tnid)
         t += dt
-
-        # temp solution
-        if IS_STOCHASTIC_CONSIDERED and T + t <= ddl:
-            # solution 1
-            path = get_path_from_SPtable(nid, tnid)
-            variance = 0
-            for i in range(len(path) - 1):
-                u = path[i]
-                v = path[i + 1]
-                variance += np.square(get_edge_std(u, v))
-            standard_deviation = np.sqrt(variance)
-        else:
-            standard_deviation = 0
-
-        if idx >= idx_p and T + t + 1 * standard_deviation > ddl:
+        if idx >= idx_p and T + t > ddl:
             if rid == new_rid:
                 # pod == -1 means a new pick-up insertion is needed, since later drop-off brings longer travel time
                 # pod == 1 means no more feasible schedules is available, since later pick-up brings longer wait time
@@ -111,7 +97,7 @@ def compute_sche_cost(veh_params, sche, T, K):
     c_delay = 0.0
     c_wait = 0.0
     for (rid, pod, tnid, ept, ddl) in sche:
-        dt = get_duration(nid, tnid)
+        dt = get_duration_from_origin_to_dest(nid, tnid)
         t += dt
         n += pod
         c_wait += (t + T - ept) if pod == 1 else 0

@@ -1,36 +1,11 @@
 """
-compute an assignment plan from edges in RTV
+compute an assignment plan from all possible matches
 """
 
 import time
 import mosek
 import numpy as np
-from lib.Configure import DISPATCHER, CUTOFF_ILP, IS_DEBUG
-
-
-def greedy_assign(veh_trip_edges):
-    R_id_assigned = []
-    T_id_assigned = []
-    V_id_assigned = []
-    S_assigned = []
-
-    edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
-    for (veh, trip, sche, cost) in edges:
-        veh_id = veh.id
-        trip_id = tuple([r.id for r in trip])
-        if trip_id in T_id_assigned:
-            continue
-        if veh_id in V_id_assigned:
-            continue
-        if np.any([r_id in R_id_assigned for r_id in trip_id]):
-            continue
-        R_id_assigned.extend([rid for rid in trip_id])
-        T_id_assigned.append(trip_id)
-        V_id_assigned.append(veh_id)
-        S_assigned.append(sche)
-        # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
-
-    return R_id_assigned, V_id_assigned, S_assigned
+from lib.simulator.config import DISPATCHER, CUTOFF_ILP, IS_DEBUG
 
 
 def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
@@ -168,3 +143,27 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking):
 
     return R_id_assigned, V_id_assigned, S_assigned
 
+
+def greedy_assign(veh_trip_edges):
+    R_id_assigned = []
+    T_id_assigned = []
+    V_id_assigned = []
+    S_assigned = []
+
+    edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
+    for (veh, trip, sche, cost) in edges:
+        veh_id = veh.id
+        trip_id = tuple([r.id for r in trip])
+        if trip_id in T_id_assigned:
+            continue
+        if veh_id in V_id_assigned:
+            continue
+        if np.any([r_id in R_id_assigned for r_id in trip_id]):
+            continue
+        R_id_assigned.extend([rid for rid in trip_id])
+        T_id_assigned.append(trip_id)
+        V_id_assigned.append(veh_id)
+        S_assigned.append(sche)
+        # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
+
+    return R_id_assigned, V_id_assigned, S_assigned

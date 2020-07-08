@@ -3,13 +3,13 @@ definition of vehicles for the AMoD system
 """
 
 import copy
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.Configure import T_WARM_UP, T_STUDY, RIDESHARING_SIZE
-from lib.S_Route import Step, Leg, get_routing, find_nearest_node, get_node_geo
+from lib.simulator.config import T_WARM_UP, T_STUDY, RIDESHARING_SIZE
+from lib.simulator.route import Step, Leg
+from lib.routing.routing_server import build_route_from_origin_to_dest, get_node_geo
 
 
 class Veh(object):
@@ -46,14 +46,14 @@ class Veh(object):
 
     """
 
-    def __init__(self, id, lng, lat, K=4, T=0.0):
+    def __init__(self, id, nid, lng, lat, K=4, T=0.0):
         self.id = id
         self.idle = True
         self.rebl = False
         self.T = T
         self.lng = lng
         self.lat = lat
-        self.nid = find_nearest_node(lng, lat)
+        self.nid = nid
         self.step_to_nid = None
         self.t_to_nid = 0
         self.tnid = self.nid
@@ -207,6 +207,9 @@ class Veh(object):
         self.lng = lng
         self.lat = lat
 
+    def build_path(self, sche):
+        pass
+
     # build the route of the vehicle based on a series of schedule tasks (rid, pod, tnid, ept, ddl)
     # update t, d, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
@@ -234,6 +237,7 @@ class Veh(object):
             self.tnid = leg.steps[-1].nid[1]
             self.d += leg.d
             self.t += leg.t
+
         for (rid, pod, tnid, ept, ddl) in sche:
             self.add_leg(rid, pod, tnid, ept, ddl, reqs, T)
 
@@ -253,22 +257,20 @@ class Veh(object):
 
     # add a leg based on (rid, pod, tnid, ept, ddl)
     def add_leg(self, rid, pod, tnid, ept, ddl, reqs, T):
-        duration, distance, segments = get_routing(self.tnid, tnid)
+        duration, distance, segments = build_route_from_origin_to_dest(self.tnid, tnid)
         steps = [Step(s[0], s[1], s[2], s[3]) for s in segments]
         leg = Leg(rid, pod, tnid, ept, ddl, duration, distance, steps)
-        if rid == 45:
-            print('req', rid, [reqs[rid].onid, reqs[rid].dnid], [self.tnid, tnid], duration)
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         # (this check is due to using OSRM, might not necessary now)
         assert len(leg.steps[-1].geo) == 2
         assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
         if pod == 1:
-            # if pickup and the vehicle arrives in advance, add an extra wait (not used when all trips are real time)
-            if T + self.t + leg.t < reqs[rid].Cep:
-                wait = reqs[rid].Cep - (T + self.t + leg.t)
-                leg.steps[-1].t += wait
-                leg.t += wait
+            # # if pickup and the vehicle arrives in advance, add an extra wait (not used when all trips are real time)
+            # if T + self.t + leg.t < reqs[rid].Cep:
+            #     wait = reqs[rid].Cep - (T + self.t + leg.t)
+            #     leg.steps[-1].t += wait
+            #     leg.t += wait
 
             # latest pick-up time is reduced to the expected pick-up time
             buffer = 30
@@ -326,4 +328,3 @@ class Veh(object):
                 'pickup' if leg.pod == 1 else 'dropoff' if leg.pod == -1 else 'rebalancing',
                 leg.rid, leg.tnid, leg.d, leg.t)
         return str
-

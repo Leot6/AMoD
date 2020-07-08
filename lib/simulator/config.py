@@ -6,24 +6,17 @@ from dateutil.parser import parse
 
 # ************************************************************************************** #
 # # parameters for S # #
-# taxi requests data, station loctions, graph nodes and travel time table
-DATE = '20150502'
+# taxi requests data, station loctions
 TRAVEL_TIME = 'WEEK'
-with open('./data/NYC_REQ_DATA_' + DATE + '.pickle', 'rb') as f:
+DATE = '20150505'  # '20150505' or '20150506'
+STN_NUM = '101'  # '101' or '630'
+with open(f'./data/NYC_REQ_DATA_{DATE}.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
-with open('./data/NYC_STN_LOC.pickle', 'rb') as f:
+with open(f'./data/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f:
     STN_LOC = pickle.load(f)
-with open('./data/NYC_NOD_LOC.pickle', 'rb') as f:
-    NOD_LOC = pickle.load(f)
-with open('./data/NYC_TTT_' + TRAVEL_TIME + '.pickle', 'rb') as f:
-    NOD_TTT = pickle.load(f)
-with open('./data/NYC_SPT_' + TRAVEL_TIME + '.pickle', 'rb') as f:
-    NOD_SPT = pickle.load(f)
-with open('./data/NYC_NET_' + TRAVEL_TIME + '.pickle', 'rb') as f:
-    NOD_NET = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 0.01
+DMD_VOL = 1
 DMD_SST = parse(DATE + ' 00:00:00')
 DMD_STR = 'Manhattan'
 
@@ -34,12 +27,12 @@ DISPATCHER = 'OSP-SR'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds)
 T_WARM_UP = 60 * 10
-T_STUDY = 60 * 20
+T_STUDY = 60 * 1000
 T_COOL_DOWN = 60 * 19
 T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 10
+FLEET_SIZE = 3000
 VEH_CAPACITY = 6
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
@@ -61,8 +54,8 @@ IS_DEBUG = False
 # travel time mode
 # IS_STOCHASTIC = True
 IS_STOCHASTIC = False
-# IS_STOCHASTIC_CONSIDERED = True
-IS_STOCHASTIC_CONSIDERED = False
+IS_STOCHASTIC_CONSIDERED = True
+# IS_STOCHASTIC_CONSIDERED = False
 
 # # parameters for Manhattan map
 # map width and height (km)
@@ -106,7 +99,6 @@ MET_REBL = 'none'
 # running time threshold for VTtable building(each single vehicle) and ILP solver
 CUTOFF_VT = 3000
 CUTOFF_ILP = 1200
-
 
 # coefficients for wait time, in-vehicle travel time in the cost function
 COEF_WAIT = 1.0
