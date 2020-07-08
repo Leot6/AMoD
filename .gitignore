@@ -34,7 +34,6 @@
 .idea/
 __pycache__/
 .DS_Store
-data/
-temp.py
+path-tables-gitignore/
 test.py
 

@@ -8,10 +8,10 @@ import datetime
 import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from lib.S_Main import Model
-from lib.Configure import DMD_SST, T_TOTAL, INT_ASSIGN, IS_ANIMATION, IS_ANALYSIS, IS_DEBUG, DISPATCHER, DMD_VOL, \
-    DMD_STR, RIDESHARING_SIZE, MAX_WAIT, MAX_DELAY, TRAVEL_TIME, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED, COEF_WAIT
-from lib.S_Analysis import anim, print_results
+from lib.simulator.model import Model
+from lib.simulator.config import *
+from lib.analysis.result_printer import print_results
+from lib.analysis.animation_generator import anim
 
 if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
