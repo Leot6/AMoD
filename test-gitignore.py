@@ -1,6 +1,15 @@
 from tqdm import tqdm
+from time import sleep
+
+a = [1,2,3,4,5]
+
+def test(b):
+    numreqs = 20
+    numvehs = 2000
+    cc = b.pop(2)
+
 
 if __name__ == '__main__':
-    for i in tqdm(range(0, 21), desc='computing a set of lemada tables:'):
-        NOD_TTT = pd.read_csv(f'{TABLE_PATH}mean-table.csv', index_col=0)
-        print(NOD_TTT.head(2))
+    print(a)
+    test(a)
+    print(a)

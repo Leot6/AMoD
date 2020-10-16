@@ -38,11 +38,9 @@ class Veh(object):
         Tr: accumulated rebalancing time traveled
         Lt: accumulated load, weighed by service time
         Ld: accumulated load, weighed by service distance
-        onboard_reqs = requests currently on board
-        onboard_rid = id of requests currently on board
-        new_pick_rid = id of requests newly picked up in current interval
-        new_drop_rid = id of requests newly dropped off in current interval
-        VTtable = feasible trips (trip, best_schedule, min_cost, feasible_schedules)
+        onboard_rid: id of requests currently on board
+        new_pick_rid: id of requests newly picked up in current interval
+        new_drop_rid: id of requests newly dropped off in current interval
 
     """
 
@@ -59,7 +57,8 @@ class Veh(object):
         self.tnid = self.nid
         self.K = K
         self.n = 0
-        self.assigned_sches = []
+        self.sche = []
+        self.feasible_sches = []
         self.route = deque([])
         self.t = 0.0
         self.d = 0.0
@@ -69,11 +68,11 @@ class Veh(object):
         self.Tr = 0.0
         self.Lt = 0.0
         self.Ld = 0.0
-        self.onboard_reqs = set()
-        self.onboard_rid = []
-        self.new_pick_rid = []
-        self.new_drop_rid = []
-        self.VTtable = [[] for i in range(RIDESHARING_SIZE)]
+        self.picking_rids = []
+        self.onboard_rids = []
+        self.served_rids = []
+        self.new_picked_rids = []
+        self.new_droped_rids = []
 
         # debug code starts
         self.route_record = []
@@ -88,6 +87,8 @@ class Veh(object):
         self.t_to_nid = 0
         # done is a list of finished legs
         done = []
+        self.new_picked_rids.clear()
+        self.new_droped_rids.clear()
         while dT > 0 and len(self.route) > 0:
             leg = self.route[0]
             # if the first leg could be finished by then
@@ -101,15 +102,7 @@ class Veh(object):
                     self.Dr += leg.d if leg.rid == -1 else 0
                     self.Lt += leg.t * self.n if leg.rid != -1 else 0
                     self.Ld += leg.d * self.n if leg.rid != -1 else 0
-                self.jump_to_location(leg.tnid)
-                self.n += leg.pod
-                if leg.rid != -2:
-                    done.append((leg.rid, leg.pod, self.T))
-                    # debug code starts
-                    self.route_record.append((leg.rid, leg.pod))
-                    # debug code ends
-
-                self.pop_leg()
+                self.update_service_status_after_veh_finish_a_leg(done, leg)
             else:
                 while dT > 0 and len(leg.steps) > 0:
                     step = leg.steps[0]
@@ -130,15 +123,7 @@ class Veh(object):
                         if len(leg.steps) == 0:
                             # corner case: leg.t extremely small, but still larger than dT
                             # this is due to the limited precision of the floating point numbers
-                            self.jump_to_location(leg.tnid)
-                            self.n += leg.pod
-                            if leg.rid != -2:
-                                done.append((leg.rid, leg.pod, self.T))
-                                # debug code starts
-                                self.route_record.append((leg.rid, leg.pod))
-                                # debug code ends
-
-                            self.pop_leg()
+                            self.update_service_status_after_veh_finish_a_leg(done, leg)
                             break
                     # the vehicle has to stop somewhere within the step
                     else:
@@ -158,8 +143,8 @@ class Veh(object):
                         return done
         assert dT > 0 or np.isclose(dT, 0.0)
         assert self.T < T or np.isclose(self.T, T)
-        assert len(self.route) == 0
-        assert self.n == 0
+        assert len(self.route) == len(self.sche) == 0
+        assert self.n == len(self.onboard_rids) == len(self.picking_rids) == 0
         assert np.isclose(self.d, 0.0)
         assert np.isclose(self.t, 0.0)
         self.T = T
@@ -168,6 +153,27 @@ class Veh(object):
         self.idle = True
         self.rebl = False
         return done
+
+    def update_service_status_after_veh_finish_a_leg(self, done, leg):
+        self.jump_to_location(leg.tnid)
+        self.n += leg.pod
+        if leg.rid != -2:
+            done.append((leg.rid, leg.pod, self.T))
+            self.route_record.append((leg.rid, leg.pod))
+            finished_sche_step = self.sche.pop(0)
+            assert finished_sche_step[0] == leg.rid
+            if leg.pod == 1:
+                self.picking_rids.remove(leg.rid)
+                self.new_picked_rids.append(leg.rid)
+                self.onboard_rids.append(leg.rid)
+            elif leg.pod == -1:
+                self.new_droped_rids.append(leg.rid)
+                self.onboard_rids.remove(leg.rid)
+                self.served_rids.append(leg.rid)
+        assert {sche_step[0] for sche_step in self.sche} == set(self.picking_rids + self.onboard_rids)
+        assert self.n == len(self.onboard_rids)
+        assert set(self.new_picked_rids) & set(self.new_droped_rids) == set()
+        self.pop_leg()
 
     # pop the first leg from the route list
     def pop_leg(self):
@@ -207,14 +213,15 @@ class Veh(object):
         self.lng = lng
         self.lat = lat
 
-    def build_path(self, sche):
-        pass
-
     # build the route of the vehicle based on a series of schedule tasks (rid, pod, tnid, ept, ddl)
     # update t, d, idle, rebl accordingly
     # rid, pod, tlng, tlat are defined as in class Leg
     def build_route(self, sche, reqs=None, T=None):
+        # if self.id == 142:
+        #     print('route', [(leg.rid, leg.pod) for leg in self.route])
+        #     print('sche', [(step[0], step[1]) for step in self.sche])
         self.clear_route()
+        self.sche = copy.deepcopy(sche)
         if self.step_to_nid:
             assert self.lng == self.step_to_nid.geo[0][0]
             # add the unfinished step from last move updating
@@ -240,6 +247,8 @@ class Veh(object):
 
         for (rid, pod, tnid, ept, ddl) in sche:
             self.add_leg(rid, pod, tnid, ept, ddl, reqs, T)
+            if pod == 1:
+                self.picking_rids.append(rid)
 
         if len(self.route) != 0:
             if self.route[0].rid == -1:
@@ -266,25 +275,35 @@ class Veh(object):
         assert len(leg.steps[-1].geo) == 2
         assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
         if pod == 1:
-            # # if pickup and the vehicle arrives in advance, add an extra wait (not used when all trips are real time)
+            # # if pickup and the vehicle arrives in advance, add an extra wait
+            # (designed for advance booking demand, not used when all trips are real time)
             # if T + self.t + leg.t < reqs[rid].Cep:
             #     wait = reqs[rid].Cep - (T + self.t + leg.t)
             #     leg.steps[-1].t += wait
             #     leg.t += wait
 
             # latest pick-up time is reduced to the expected pick-up time
+            # (currently, this change is not updated to parameters in schedule, so debug is needed)
             buffer = 30
-            if T + self.t + leg.t + buffer <= reqs[rid].Clp:
-                reqs[rid].Clp = T + self.t + leg.t + buffer
+            if T + self.t + leg.t + buffer < reqs[rid].Clp:
+                reqs[rid].Clp = round(T + self.t + leg.t + buffer, 2)
 
         self.route.append(leg)
         self.tnid = leg.steps[-1].nid[1]
         self.d += leg.d
         self.t += leg.t
+        if pod == 1:
+            reqs[rid].Etp = T + self.t
+        else:
+            assert pod == -1
+            reqs[rid].Etd = T + self.t
 
     # remove the current route
     def clear_route(self):
+        self.picking_rids.clear()
         self.route.clear()
+        self.sche.clear()
+        self.feasible_sches.clear()
         self.d = 0.0
         self.t = 0.0
         self.tnid = self.nid

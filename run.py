@@ -2,7 +2,7 @@
 
 import time
 # start time of initialization
-istime = time.time()
+init_time = time.time()
 print('initializing the simulator ...')
 import datetime
 import copy
@@ -17,26 +17,15 @@ if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
     frames = []
     # initialize the AMoD model
-    model = Model()
+    model = Model(init_time)
     print('*' * 80)
-    print('scenario: %s' % (DMD_STR))
-    print('simulation starts at %s, initializing time: %.02f s' % (model.start_time, time.time() - istime))
-    print('system settings:')
-    print('  - from %s to %s, with %d intervals'
-          % (DMD_SST, DMD_SST + datetime.timedelta(seconds=T_TOTAL), T_TOTAL / INT_ASSIGN))
-    print('  - fleet size: %d; capacity: %d; ride-sharing computational size: %d'
-          % (model.V, model.K, RIDESHARING_SIZE))
-    print('  - demand value:%.02f, max waiting time: %d; max delay: %d' % (DMD_VOL, MAX_WAIT, MAX_DELAY))
-    print('  - assignment mode: %s, travel time: %s, coef_wait: %.1f, interval: %.1f s'
-          % (DISPATCHER, TRAVEL_TIME, COEF_WAIT, INT_ASSIGN))
-    print('  - stochastic travel time: %s, stochastic planning: %s' % (IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED))
+    print(model)
     print('*' * 80)
-    print('')
 
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in tqdm(range(INT_ASSIGN, T_TOTAL+INT_ASSIGN, INT_ASSIGN), desc='AMoD simulation'):
+    for T in tqdm(range(INT_ASSIGN, T_TOTAL+INT_ASSIGN, INT_ASSIGN), desc=f'AMoD simulation (Δt={INT_ASSIGN}s)'):
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)
@@ -47,7 +36,7 @@ if __name__ == '__main__':
                   '(%.02f%%), %d are being picked-up (%.02f%%), %d are unassigned (%.02f%%), %d are rejected (%.02f%%).'
                   % (DMD_SST + datetime.timedelta(seconds=T),
                      model.N, len(model.reqs_served), (len(model.reqs_served) / model.N * 100),
-                     len(model.reqs_serving), (len(model.reqs_serving) / model.N * 100),
+                     len(model.reqs_onboard), (len(model.reqs_onboard) / model.N * 100),
                      len(model.reqs_picking), (len(model.reqs_picking) / model.N * 100),
                      len(model.reqs_unassigned), (len(model.reqs_unassigned) / model.N * 100),
                      len(model.rejs), (len(model.rejs) / model.N * 100)))
@@ -56,15 +45,16 @@ if __name__ == '__main__':
             print()
 
     print('End of this simulation.')
+    if IS_DEBUG:
+        if DISPATCHER == 'OSP':
+            model.dispatcher.analysis.save_analysis_data(DISPATCHER)
+
     # end time
     etime = time.time()
-    end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
+    model.end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
     # run time of this simulation
-    runtime = str(datetime.timedelta(seconds=int(etime - stime)))
-    mean_runtime = round((etime - stime) / T_TOTAL * INT_ASSIGN, 2)
-
-    # print('...running time of simulation: %s, average: %.02f'
-    #       % (str(datetime.timedelta(seconds=int(runtime))), runtime / T_TOTAL * INT_ASSIGN))
+    model.time_of_run = str(datetime.timedelta(seconds=int(etime - stime)))
+    model.avg_time_of_run = round((etime - stime) / T_TOTAL * INT_ASSIGN, 2)
 
     # generate, show and save the animation of this simulation
     if IS_ANIMATION:
@@ -75,4 +65,4 @@ if __name__ == '__main__':
 
     # output the simulation results and save data
     if IS_ANALYSIS:
-        print_results(model, runtime, mean_runtime, end_time)
+        print_results(model)

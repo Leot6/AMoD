@@ -3,33 +3,48 @@ rebalancing algorithm for the AMoD system
 """
 
 import copy
+import time
 import numpy as np
-
-from lib.dispatcher.osp.linear_assignment import ILP_assign
+from tqdm import tqdm
+from lib.simulator.config import IS_DEBUG
+from lib.dispatcher.osp.osp_assign import greedy_assign
 from lib.routing.routing_server import get_duration_from_origin_to_dest
 
 
-# not used
-def naive_rebalancing(vehs, reqs_unassigned):
-    rebl_veh_req = []
-    for veh in vehs:
-        if veh.idle:
-            for req in reqs_unassigned:
-                schedule = [(-1, 0, req.onid, np.inf)]
-                dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
-                rebl_veh_req.append((veh, tuple([req]), copy.deepcopy(schedule), dt))
-    # R_id_rebl, V_id_rebl, schedule_rebl = greedy_assign(rebl_veh_req)
-    R_id_rebl, V_id_rebl, schedule_rebl = ILP_assign(rebl_veh_req, reqs_unassigned, set())
-    return V_id_rebl, schedule_rebl
+class NR(object):
+    """
+    NR is a naive rebalancing algorithm that assign idle vehicles to unassigned requests
+    """
 
+    def __init__(self, amod):
+        self.vehs = amod.vehs
+        self.reqs = amod.reqs
+        self.reqs_picking = amod.reqs_picking
+        self.reqs_unassigned = amod.reqs_unassigned
 
-# execute the assignment from Rebalancer and build route for rebalancing vehicles (not used)
-def exec_rebalancing(V_assigned, S_assigned, reqs, T):
-    for veh, schedule in zip(V_assigned, S_assigned):
-        assert veh.idle
-        assert veh.t_to_nid == 0
-        veh.build_route(schedule, reqs, T)
-        assert schedule[0][0] == -1
+    def rebelancing(self, T):
+        if IS_DEBUG:
+            print('    -T = %d, start rebalancing...' % T)
+            a4 = time.time()
+
+        reqs_unassigned = sorted(self.reqs_unassigned, key=lambda r: r.id)
+        veh_req_pairs = []
+        for req in tqdm(reqs_unassigned, desc=f'rebalancing ({len(reqs_unassigned)} reqs)', leave=False):
+            for veh in self.vehs:
+                if veh.idle:
+                    sche = [(req.id, 1, req.onid, req.Tr, req.Clp), (req.id, -1, req.dnid, req.Tr + req.Ts, req.Cld)]
+                    dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
+                    veh_req_pairs.append((veh, tuple([req]), copy.deepcopy(sche), dt))
+        rids_rebl, vids_rebl, sches_rebl = greedy_assign(veh_req_pairs)
+        assert len(rids_rebl) == len(vids_rebl)
+        for rid, vid, sche in zip(rids_rebl, vids_rebl, sches_rebl):
+            assert rid == sche[0][0]
+            self.vehs[vid].build_route(sche, self.reqs, T)
+            self.reqs_picking.add(self.reqs[rid])
+            self.reqs_unassigned.remove(self.reqs[rid])
+        if IS_DEBUG:
+            print('        a4 running time:', round((time.time() - a4), 2))
+
 
 
 
