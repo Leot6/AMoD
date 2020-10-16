@@ -17,13 +17,14 @@ Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper
 - folder `analysis` for outputting results and evaluations
   - `result_printer.py`: evaluate the performance and print the results
   - `animation_generator.py`: make the movement of vehicles an animation.
+  - `online_analysis.py`: compare different algorithms at the same simulation run
 - folder `dispatcher` for central dispatchers that match available vehicles to requests 
-  - folder `gi` for the simple first-in-first-out assignment method
-  - (to-do) folder `sa` for the simulated-annealing batch assignment method proposed in [[4]](https://github.com/Leot6/AMoD#references)
-  - (to-do) folder `rtv` for the request-trip-vehicle batch assignment method proposed in [[2]](https://github.com/Leot6/AMoD#references)
+  - folder `gi` for the simple first-in-first-out assignment method [[2]](https://github.com/Leot6/AMoD#references)
+  - folder `sba` for the single-request batch assignment method [[3]](https://github.com/Leot6/AMoD#references)
+  - folder `rtv` for the request-trip-vehicle batch assignment method proposed in [[4]](https://github.com/Leot6/AMoD#references)
   - folder `osp` for the optimal-schedule-pool batch assignment method, improved on 'rtv'
 - folder `rebalancer` for repositioning idle vehicles
-  - (to-do) `naive_rebalancer.py`: assign the unserved request to its nearest idle vehicle
+  - `naive_rebalancer.py`: assign the unserved request to its nearest idle vehicle
 
 The main function in `run.py` will simulate the system given input parameters from `config.py`. The results of simulations can be found in folder `output`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
 
@@ -31,8 +32,9 @@ The main function in `run.py` will simulate the system given input parameters fr
 ## References
 
 1. Jian Wen. amod-abm. https://github.com/wenjian0202/amod-abm, 2017
-2. Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E. and Rus, D., 2017. [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://www.pnas.org/content/114/3/462.short). Proceedings of the National Academy of Sciences, 114(3), pp.462-467
+2. Tong, Y., Zeng, Y., Zhou, Z., Chen, L., Ye, J. and Xu, K., 2018. A unified approach to route planning for shared mobility. Proceedings of the VLDB Endowment, 11(11), p.1633.
 3. Simonetto, A., Monteil, J. and Gambella, C., 2019. [Real-time city-scale ridesharing via linear assignment problems](https://www.sciencedirect.com/science/article/pii/S0968090X18302882). Transportation Research Part C: Emerging Technologies, 101, pp.208-232.
-4. Jung, J., Jayakrishnan, R. and Park, J.Y., 2016. [Dynamic shared‐taxi dispatch algorithm with hybrid‐simulated annealing](https://dl.acm.org/doi/10.5555/2926400.2926404). Computer‐Aided Civil and Infrastructure Engineering, 31(4), pp.275-291.
+4. Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E. and Rus, D., 2017. [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://www.pnas.org/content/114/3/462.short). Proceedings of the National Academy of Sciences, 114(3), pp.462-467
+
 
 

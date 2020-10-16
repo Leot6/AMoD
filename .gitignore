@@ -35,5 +35,7 @@
 __pycache__/
 .DS_Store
 path-tables-gitignore/
-test.py
+trip-data-gitignore/
+replay-data-gitignore/
+test-gitignore.py
 

@@ -2,6 +2,7 @@
 route planning functions using stochastic travel times
 """
 
+import os
 import math
 import copy
 import pickle
@@ -9,23 +10,24 @@ import numpy as np
 import scipy.stats as st
 from lib.simulator.config import TRAVEL_TIME, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
 
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-with open(f'./data/NYC_NET_{TRAVEL_TIME}.pickle', 'rb') as f:
+with open(f'{root_path}/data/NYC_NET_{TRAVEL_TIME}.pickle', 'rb') as f:
     NETWORK = pickle.load(f)
 if IS_STOCHASTIC:
     NETWORK_STOCHASTIC = copy.deepcopy(NETWORK)
     NUM_OF_LAMBDA = 21
 else:
-    NUM_OF_LAMBDA = 21
+    NUM_OF_LAMBDA = 1
 PATH_TABLE_LIST = [None] * NUM_OF_LAMBDA
 TIME_TABLE_LIST = [None] * NUM_OF_LAMBDA
 VAR_TABLE_LIST = [None] * NUM_OF_LAMBDA
 for i in range(NUM_OF_LAMBDA):
-    with open(f'./data/path-tables-gitignore/NYC_SPT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data/path-tables-gitignore/NYC_SPT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
         PATH_TABLE_LIST[i] = pickle.load(f)
-    with open(f'./data/path-tables-gitignore/NYC_TTT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data/path-tables-gitignore/NYC_TTT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
         TIME_TABLE_LIST[i] = pickle.load(f)
-    with open(f'./data/path-tables-gitignore/NYC_TTV_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data/path-tables-gitignore/NYC_TTV_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
         VAR_TABLE_LIST[i] = pickle.load(f)
 
 num_of_path = 0
@@ -36,7 +38,7 @@ avg_path_mean_stochastic = 0
 avg_path_var_stochastic = 0
 avg_cdf = 0
 avg_cdf_0 = 0
-show_counting = True
+show_counting = False
 
 
 # get the mean duration of the best route from origin to destination

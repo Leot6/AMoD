@@ -23,8 +23,10 @@ class Req(object):
         Cep: constraint - earliest pickup
         Clp: constraint - latest pickup
         Cld: constraint - latest dropoff
-        Tp: pickup time
-        Td: dropoff time
+        Etp: estimated pickup time
+        Etd: estimated dropoff time
+        Tp: actually pickup time
+        Td: actually dropoff time
         D: detour factor
     """
 
@@ -46,6 +48,8 @@ class Req(object):
             self.Clp = Tr + min(MAX_WAIT, self.Ts * (2-MAX_DETOUR))
             self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR-1))
         self.Clp_backup = self.Clp
+        self.Etp = -1.0
+        self.Etd = -1.0
         self.Tp = -1.0
         self.Td = -1.0
         self.D = 0.0

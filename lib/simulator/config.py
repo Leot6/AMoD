@@ -2,48 +2,64 @@
 constants are found here
 """
 import pickle
+import os
 from dateutil.parser import parse
 
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+
 # ************************************************************************************** #
-# # parameters for S # #
+# # parameters for Simulator # #
 # taxi requests data, station loctions
 TRAVEL_TIME = 'WEEK'
-DATE = '20150506'  # '20150505' or '20150506'
+DATE = '20160525'
+TRIP_NUM = '400k'  # 400k(404310), 500k(504985), 600k(605660), 700k(703260), 800k(800752)
 STN_NUM = '101'  # '101' or '630'
-with open(f'./data/NYC_REQ_DATA_{DATE}.pickle', 'rb') as f:
+
+trip_path = 'trip-data-gitignore' if TRIP_NUM == '700k' or TRIP_NUM == '800k' else ''
+
+with open(f'{root_path}/data/{trip_path}/NYC_REQ_DATA_{TRIP_NUM}.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
-with open(f'./data/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f:
+with open(f'{root_path}/data/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f:
     STN_LOC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1
-DMD_SST = parse(DATE + ' 00:00:00')
+DMD_VOL = 1  # <= 1
+# DMD_SST = parse(DATE + ' 00:00:00')
+DMD_SST = parse(DATE + ' 18:30:00')
+REQ_INIT_IDX = 0
 DMD_STR = 'Manhattan'
 
 # DISPATCHER = 'GI'
-# DISPATCHER = 'OSP'
-DISPATCHER = 'OSP-SR'
-# DISPATCHER = 'OSP-RO'
+# DISPATCHER = 'SBA'
+# DISPATCHER = 'RTV'
+DISPATCHER = 'OSP'
 
-# warm-up time, study time and cool-down time of the simulation (in seconds)
-T_WARM_UP = 60 * 10
-T_STUDY = 60 * 1000
-T_COOL_DOWN = 60 * 19
-T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
+REBALANCER = 'NR'
+# REBALANCER = 'none'
+
+# warm-up time, study time and cool-down time of the simulation (in seconds), 24 hour = 1440 min
+T_WARM_UP = 60 * 30
+T_STUDY = 60 * 1370  # < 60 * 1371
+T_COOL_DOWN = 60 * 39
+# T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
-FLEET_SIZE = 3000
-VEH_CAPACITY = 6
+FLEET_SIZE = 2000
+VEH_CAPACITY = 8
+RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
 MAX_WAIT = 60 * 5
-MAX_DELAY = 60 * 10
+MAX_DELAY = MAX_WAIT * 2
 # MAX_DETOUR = -1
 MAX_DETOUR = 1.3
 
 # intervals for vehicle-request assignment and rebalancing
-INT_ASSIGN = 30
+INT_ASSIGN = 2
 INT_REBL = INT_ASSIGN * 1
+
+# coefficients for wait time in the cost function
+COEF_WAIT = 1
 
 # if true, activate the animation / analysis
 IS_ANIMATION = False
@@ -54,8 +70,8 @@ IS_DEBUG = False
 # travel time mode
 # IS_STOCHASTIC = True
 IS_STOCHASTIC = False
-IS_STOCHASTIC_CONSIDERED = True
-# IS_STOCHASTIC_CONSIDERED = False
+# IS_STOCHASTIC_CONSIDERED = True
+IS_STOCHASTIC_CONSIDERED = False
 
 # # parameters for Manhattan map
 # map width and height (km)
@@ -69,44 +85,27 @@ Olat = 40.6950
 Dlng = -73.9030
 Dlat = 40.8825
 
-
-# # parameters for london map
-# # map width and height (km)
-# MAP_WIDTH = 8.3158
-# MAP_HEIGHT = 4.4528
-# # coordinates
-# # (Olng, Olat) lower left corner
-# Olng = -0.19
-# Olat = 51.48
-# # (Dlng, Dlat) upper right corner
-# Dlng = -0.07
-# Dlat = 51.52
-
 # ************************************************************************************** #
-# # parameters for A1_OSP # #
-# ride-sharing logic mode
 
-# ridesharing size in computation
-RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
-if DISPATCHER == 'OSP-SR':
-    RIDESHARING_SIZE = 1
+if DMD_SST == parse(DATE + ' 18:30:00'):
+    T_STUDY = 60 * 60
+    VEH_CAPACITY = 8
+    if TRIP_NUM == '400k':
+        REQ_INIT_IDX = 269500
+        FLEET_SIZE = 2000
+    elif TRIP_NUM == '500k':
+        REQ_INIT_IDX = 337100
+        FLEET_SIZE = 2300
+    elif TRIP_NUM == '600k':
+        REQ_INIT_IDX = 404700
+        FLEET_SIZE = 2600
+    elif TRIP_NUM == '700k':
+        REQ_INIT_IDX = 468700
+        FLEET_SIZE = 2900
+    elif TRIP_NUM == '800k':
+        REQ_INIT_IDX = 532800
+        FLEET_SIZE = 3200
+    if IS_DEBUG:
+        T_COOL_DOWN = 1
 
-# methods for vehicle-request assignment and rebalancing
-MET_ASSIGN = 'ILP'
-# MET_REBL = 'naive'
-MET_REBL = 'none'
-
-# running time threshold for VTtable building(each single vehicle) and ILP solver
-CUTOFF_VT = 3000
-CUTOFF_ILP = 1200
-
-# coefficients for wait time, in-vehicle travel time in the cost function
-COEF_WAIT = 1.0
-COEF_INVEH = 1.0
-
-# ************************************************************************************** #
-# # parameters for A2_GI # #
-# ride-sharing logic mode
-if DISPATCHER == 'GI':
-    INT_ASSIGN = 1
-    RIDESHARING_SIZE = 0
+T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
