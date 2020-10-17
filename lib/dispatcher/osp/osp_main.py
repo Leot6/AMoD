@@ -10,8 +10,8 @@ from lib.dispatcher.osp.osp_pool import build_vt_table, get_prev_assigned_edges,
 from lib.dispatcher.osp.osp_assign import ILP_assign
 from lib.analysis.online_analysis import OnlineAnalysis
 
-Ensure_Picking = True if not FAST_COMPUTE else False
-# Ensure_Picking = False
+# Ensure_Picking = True if not FAST_COMPUTE else False
+Ensure_Picking = False
 
 
 class OSP(object):
