@@ -12,8 +12,8 @@ from lib.dispatcher.rtv.rtv_schedule import compute_schedule
 # feasible trips (trip, best_schedule, min_cost, feasible_schedules)
 RTV_GRAPH = None
 CUTOFF_RTV = 0.2
-RTV_SIZE = 750
-RV_SIZE = 20
+RTV_SIZE = 2000
+RV_SIZE = 30 if CUTOFF_RTV == 0.2 else RTV_SIZE
 
 # avg_num_of_sche_searched: # the number of possible schedules algorithm considers when finding the optimal schedule
 # num_of_trips: # the number of different size trips algorithm considers

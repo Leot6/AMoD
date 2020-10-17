@@ -12,10 +12,11 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 # taxi requests data, station loctions
 TRAVEL_TIME = 'WEEK'
 DATE = '20160525'
-TRIP_NUM = '400k'  # 400k(404310), 500k(504985), 600k(605660), 700k(703260), 800k(800752)
+TRIP_NUM = '1200k'  # 400k(404310), 500k(504985), 600k(605660), 700k(703260), 800k(800752)，1200k(1219956)
 STN_NUM = '101'  # '101' or '630'
 
-trip_path = 'trip-data-gitignore' if TRIP_NUM == '700k' or TRIP_NUM == '800k' else ''
+trip_path = 'trip-data-gitignore' if TRIP_NUM == '700k' or TRIP_NUM == '800k' \
+                                     or TRIP_NUM == '1000k' or TRIP_NUM == '1200k' else ''
 
 with open(f'{root_path}/data/{trip_path}/NYC_REQ_DATA_{TRIP_NUM}.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
@@ -30,9 +31,9 @@ REQ_INIT_IDX = 0
 DMD_STR = 'Manhattan'
 
 # DISPATCHER = 'GI'
-# DISPATCHER = 'SBA'
+DISPATCHER = 'SBA'
 # DISPATCHER = 'RTV'
-DISPATCHER = 'OSP'
+# DISPATCHER = 'OSP'
 
 REBALANCER = 'NR'
 # REBALANCER = 'none'
@@ -55,7 +56,7 @@ MAX_DELAY = MAX_WAIT * 2
 MAX_DETOUR = 1.3
 
 # intervals for vehicle-request assignment and rebalancing
-INT_ASSIGN = 2
+INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # coefficients for wait time in the cost function
@@ -105,6 +106,12 @@ if DMD_SST == parse(DATE + ' 18:30:00'):
     elif TRIP_NUM == '800k':
         REQ_INIT_IDX = 532800
         FLEET_SIZE = 3200
+    elif TRIP_NUM == '1000k':
+        REQ_INIT_IDX = 669600
+        FLEET_SIZE = 3800
+    elif TRIP_NUM == '1200k':
+        REQ_INIT_IDX = 815300
+        FLEET_SIZE = 4400
     if IS_DEBUG:
         T_COOL_DOWN = 1
 
