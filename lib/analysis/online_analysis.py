@@ -17,7 +17,7 @@ from lib.dispatcher.sba.single_req_batch_assign import ridesharing_match_sba
 from lib.dispatcher.gi.greedy_insertion import heuristic_insertion
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
-numreqs_file_path = f'{current_file_path}/numreqs-data2'
+numreqs_file_path = f'{current_file_path}/numreqs-data'
 replay_file_path = f'{current_file_path}/replay-data-gitignore'
 if not os.path.exists(numreqs_file_path):
     os.mkdir(numreqs_file_path)
