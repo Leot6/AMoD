@@ -18,6 +18,7 @@ def compute_schedule(veh_params, sub_sche, trip, T):
     min_cost = np.inf
 
     num_of_schedule_searched = 0  # the number of possible schedules considered by the algorithm
+    sches_searched = []
 
     if num_pass_onboard < exhaustive_search_size:
         basic_sche = copy.deepcopy(sub_sche)
@@ -32,6 +33,7 @@ def compute_schedule(veh_params, sub_sche, trip, T):
                 continue
             if not sche[-1][0] == sche[-2][0]:
                 num_of_schedule_searched += 1
+                # sches_searched.append(sche)
             flag, cost, viol = test_constraints_get_cost(veh_params, sche, 0, 0, 0, T)
             if cost < min_cost:
                 best_sche = sche

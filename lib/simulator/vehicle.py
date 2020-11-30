@@ -76,6 +76,10 @@ class Veh(object):
 
         # debug code starts
         self.route_record = []
+        self.candidate_sches = []
+        self.candidate_sches_rtv = []
+        self.candidate_sches_sba = []
+        self.candidate_sches_gi = []
         # debug code ends
 
     # update the vehicle location as well as the route after moving to time T
@@ -285,18 +289,20 @@ class Veh(object):
             # latest pick-up time is reduced to the expected pick-up time
             # (currently, this change is not updated to parameters in schedule, so debug is needed)
             buffer = 30
-            if T + self.t + leg.t + buffer < reqs[rid].Clp:
-                reqs[rid].Clp = round(T + self.t + leg.t + buffer, 2)
+            if reqs is not None:
+                if T + self.t + leg.t + buffer < reqs[rid].Clp:
+                    reqs[rid].Clp = round(T + self.t + leg.t + buffer, 2)
 
         self.route.append(leg)
         self.tnid = leg.steps[-1].nid[1]
         self.d += leg.d
         self.t += leg.t
-        if pod == 1:
-            reqs[rid].Etp = T + self.t
-        else:
-            assert pod == -1
-            reqs[rid].Etd = T + self.t
+        if reqs is not None:
+            if pod == 1:
+                reqs[rid].Etp = T + self.t
+            else:
+                assert pod == -1
+                reqs[rid].Etd = T + self.t
 
     # remove the current route
     def clear_route(self):

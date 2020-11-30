@@ -3,6 +3,7 @@ compute all feasible schedules of each veh-trip combinations between the vehicle
 (queue + picking + unassigned)
 """
 
+import pickle
 import copy
 import time
 import numpy as np
@@ -13,19 +14,26 @@ from lib.simulator.config import FLEET_SIZE, RIDESHARING_SIZE
 from lib.routing.routing_server import get_duration_from_origin_to_dest
 from lib.dispatcher.osp.osp_schedule import compute_schedule, test_constraints_get_cost, compute_sche_cost
 
+from lib.analysis.animation_generator import anim_sche
+from lib.dispatcher.rtv.rtv_schedule import compute_schedule as compute_sche_rtv
+
 
 # feasible trips (trip, best_schedule, min_cost, feasible_schedules)
 VT_TABLE = [[[] for i in range(RIDESHARING_SIZE)] for j in range(FLEET_SIZE)]
 PREV_VT_TABLE = None
-CUTOFF_VT = 5
-FAST_COMPUTE = True
-# FAST_COMPUTE = False
+CUTOFF_VT = 20
+# FAST_COMPUTE = True
+FAST_COMPUTE = False
 
 # avg_num_of_sche_searched: # the number of possible schedules algorithm considers when finding the optimal schedule
 # num_of_trips: # the number of different size trips algorithm considers
 avg_num_of_sche_searched = [0] * RIDESHARING_SIZE
 num_of_trip_searched = [0] * RIDESHARING_SIZE
 show_counting = False
+
+num_of_new_reqs = []
+num_of_all_reqs = []
+num_of_counting = 0
 
 
 # build VT table for each veh, respectively
@@ -38,24 +46,59 @@ def build_vt_table(vehs, reqs_new, reqs_prev, T):
         rids_prev = set()
     clear_up_vt_table()
     veh_trip_edges = []
+
+    clear_veh_candidate_sches(vehs)
     # for veh in vehs:
     for veh in tqdm(vehs, desc=f'OSP ({len(reqs_pool_vt)}/{len(reqs_new) + len(reqs_prev)} reqs)', leave=False):
         feasible_shared_trips_search(veh, reqs_pool_vt, rids_prev, T)
         for veh_vt_k in VT_TABLE[veh.id]:
             for (trip, best_sche, cost, feasible_sches) in veh_vt_k:
                 veh_trip_edges.append((veh, trip, best_sche, cost))
+                veh.candidate_sches.append(best_sche)
+
+    # # debug
+    # if 60 * (30 + 0) < T <= 60 * (30 + 30):
+    #     global num_of_new_reqs
+    #     global num_of_all_reqs
+    #     num_of_new_reqs.append(len(reqs_new))
+    #     num_of_all_reqs.append(len(reqs_new) + len(reqs_prev))
+    #     print(f'reqs:{round(np.mean(num_of_new_reqs))}/{round(np.mean(num_of_all_reqs))}')
+    #
+    #     n_largest = 0
+    #     vid_largest = 0
+    #     for veh in vehs:
+    #         veh_vt_1 = VT_TABLE[veh.id][0]
+    #         n = len(veh_vt_1)
+    #         if n > n_largest:
+    #             n_largest = n
+    #             vid_largest = veh.id
+    #     vt_largest = VT_TABLE[vid_largest]
+    #     vt_prev_largest = PREV_VT_TABLE[vid_largest]
+    #     avg_num_of_old_trips = [0] * RIDESHARING_SIZE
+    #     avg_num_of_new_trips = [0] * RIDESHARING_SIZE
+    #     for i in range(0, RIDESHARING_SIZE):
+    #         avg_num_of_old_trips[i] = len(upd_prev_sches(vehs[vid_largest], rids_prev, i+1, T))
+    #         avg_num_of_new_trips[i] = len(vt_largest[i]) - avg_num_of_old_trips[i]
+    #     print('avg_num_of_old_trips', avg_num_of_old_trips)
+    #     print('avg_num_of_new_trips', avg_num_of_new_trips)
+    # # debug
+
     return veh_trip_edges
 
 
 # search all feasible trips for a single vehicle, incrementally from the trip size of one
 # a time consuming step
-def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
+def feasible_shared_trips_search(veh, reqs_new, rids_prev, T):
     veh_params = [veh.nid, veh.t_to_nid, veh.n]
     veh_vt = VT_TABLE[veh.id]
-    # trips of size 1
 
+    if 60 * (30 + 0) < T <= 60 * (30 + 30):
+        global num_of_counting
+        num_of_counting += 1
+
+    # trips of size 1
     if FAST_COMPUTE:
-        veh_vt[0] = upd_prev_sches(veh, rid_prev, 1, T)
+        veh_vt[0] = upd_prev_sches(veh, rids_prev, 1, T)
         n_prev_trips_k = len(veh_vt[0])  # number of old trips of size 1
 
     # add new trips (size 1)
@@ -82,7 +125,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
             n_prev_trips_k_1 = n_prev_trips_k  # number of old trips of size k-1
             n_all_trips_k_1 = len(veh_vt[k - 2])  # number of all trips of size k-1
             n_new_trips_k_1 = n_all_trips_k_1 - n_prev_trips_k_1  # number of new trips of size k-1
-            veh_vt[k - 1] = upd_prev_sches(veh, rid_prev, k, T)
+            veh_vt[k - 1] = upd_prev_sches(veh, rids_prev, k, T)
             n_prev_trips_k = len(veh_vt[k - 1])  # number of old trips of size k
         else:
             n_all_trips_k_1 = len(veh_vt[k - 2])
@@ -135,6 +178,24 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
                 feasible_sches = feasible_sches1
                 num_of_sche_searched = num_of_sche_searched1
 
+                # req_Ts = sorted([r.Ts for r in trip_k])[-2]
+                #
+                # if best_sche and k == 4 and len(set([r.onid for r in trip_k] + [r.dnid for r in trip_k])) == k * 2 \
+                #         and 40 < num_of_sche_searched < 50 and req_Ts > 500 and len(veh.onboard_rids) <= 1:
+                #     best_sche_rtv, min_cost_rtv, num_of_sche_searched_rtv, sches_searched_rtv\
+                #         = compute_sche_rtv(veh_params, sub_sches[0], trip_k, T)
+                #     if not best_sche_rtv:
+                #         continue
+                #     print(f'veh {veh.id}, on_board {veh.onboard_rids}, trip {[r.id for r in trip_k]}, '
+                #           f'num of sches {num_of_sche_searched}/{num_of_sche_searched_rtv}')
+                #     # assert best_sche == best_sche_rtv
+                #     if num_of_sche_searched_rtv < 1300:
+                #         a = anim_sche(copy.deepcopy(veh), trip_k, sches_searched, best_sche, 'osp')
+                #         # b = anim_sche(copy.deepcopy(veh), trip_k, sches_searched_rtv, best_sche, 'rtv')
+                #         data = [veh, trip_k, sches_searched, sches_searched_rtv, best_sche]
+                #         with open(f'anime_sche_data_{veh.id}.pickle', 'wb') as f:
+                #             pickle.dump(data, f)
+
                 if show_counting:
                     # count the number of feasible schedules algorithm considers
                     k_c = k + len(veh.onboard_rids)
@@ -151,7 +212,7 @@ def feasible_shared_trips_search(veh, reqs_new, rid_prev, T):
                     rids_in_trip = {r.id for r in trip_k}
                     rids_in_sche = {rid for (rid, pod, tnid, ept, ddl) in best_sche} - set(veh.onboard_rids)
                     assert rids_in_trip == rids_in_sche
-                    assert {req.id for req in trip_k} <= {req.id for req in set(reqs_new)}.union(rid_prev)
+                    assert {req.id for req in trip_k} <= {req.id for req in set(reqs_new)}.union(rids_prev)
 
                 # threshold cutoff
                 current_time = time.time()
@@ -274,3 +335,8 @@ def clear_up_vt_table():
     if FAST_COMPUTE:
         PREV_VT_TABLE = VT_TABLE
     VT_TABLE = [[[] for i in range(RIDESHARING_SIZE)] for j in range(FLEET_SIZE)]
+
+
+def clear_veh_candidate_sches(vehs):
+    for veh in vehs:
+        veh.candidate_sches.clear()
