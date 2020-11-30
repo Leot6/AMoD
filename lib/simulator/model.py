@@ -56,7 +56,7 @@ class Model(object):
         self.req_init_idx = REQ_INIT_IDX
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
             self.req_init_idx += 1
-        # print('self.req_init_idx', self.req_init_idx)
+        print('self.req_init_idx', self.req_init_idx)
         self.queue = []
         self.reqs = []
         self.reqs_served = set()

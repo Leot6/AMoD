@@ -6,7 +6,7 @@ import time
 import mosek
 import numpy as np
 
-CUTOFF_ILP = 20
+CUTOFF_ILP = 50
 ignore_a_bug_temporary = True
 
 

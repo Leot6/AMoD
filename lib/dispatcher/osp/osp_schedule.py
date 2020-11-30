@@ -18,8 +18,8 @@ def compute_schedule(veh_params, sub_sches, req_params, T):
     best_sche = None
     min_cost = np.inf
     viol = None
-    num_of_schedule_searched = 0  # the number of possible schedules considered by the algorithm
-
+    num_of_sche_searched = 0  # the number of possible schedules considered by the algorithm
+    sches_searched = []
     for sub_sche in sub_sches:
         l = len(sub_sche)
         # insert the req's pick-up point
@@ -27,7 +27,8 @@ def compute_schedule(veh_params, sub_sches, req_params, T):
             # insert the req's drop-off point
             for j in range(i + 1, l + 2):
                 new_sche, new_sche_cost, viol = insert_req_to_sche(veh_params, sub_sche, req_params, i, j, T)
-                num_of_schedule_searched += 1
+                num_of_sche_searched += 1
+                # sches_searched.append(t_sche)
                 if new_sche:
                     if new_sche_cost < min_cost:
                         best_sche = new_sche
@@ -39,12 +40,12 @@ def compute_schedule(veh_params, sub_sches, req_params, T):
                 # if best_sche:
                 if not DISPATCHER == 'OSP' and best_sche:
                     assert len(feasible_sches) == 1
-                    return best_sche, min_cost, feasible_sches, num_of_schedule_searched
+                    return best_sche, min_cost, feasible_sches, num_of_sche_searched
                 if viol > 0:
                     break
             if viol == 3:
                 break
-    return best_sche, min_cost, feasible_sches, num_of_schedule_searched
+    return best_sche, min_cost, feasible_sches, num_of_sche_searched
 
 
 def insert_req_to_sche(veh_params, sub_sche, req_params, idx_p, idx_d, T):
@@ -54,6 +55,8 @@ def insert_req_to_sche(veh_params, sub_sche, req_params, idx_p, idx_d, T):
     sub_sche.insert(idx_p, (rid, 1, r_onid, r_Tr, r_Clp))
     sub_sche.insert(idx_d, (rid, -1, r_dnid, r_Tr + r_Ts, r_Cld))
     flag, c, viol = test_constraints_get_cost(veh_params, sub_sche, rid, idx_p, idx_d, T)
+
+    # test_schedule = copy.deepcopy(sub_sche)
 
     if flag:
         new_sche = copy.deepcopy(sub_sche)

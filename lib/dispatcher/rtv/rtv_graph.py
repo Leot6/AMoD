@@ -12,7 +12,7 @@ from lib.dispatcher.rtv.rtv_schedule import compute_schedule
 # feasible trips (trip, best_schedule, min_cost, feasible_schedules)
 RTV_GRAPH = None
 CUTOFF_RTV = 0.2
-RTV_SIZE = 2000
+RTV_SIZE = 1200
 RV_SIZE = 30 if CUTOFF_RTV == 0.2 else RTV_SIZE
 
 # avg_num_of_sche_searched: # the number of possible schedules algorithm considers when finding the optimal schedule
@@ -41,10 +41,13 @@ def search_feasible_trips(vehs, reqs_pool, T):
     build_rtv_graph(vehs, reqs_pool_rtv, rids_remain, T)
 
     veh_trip_edges = []
+    clear_veh_candidate_sches(vehs)
     for veh in vehs:
         for veh_rtv_k in RTV_GRAPH[veh.id]:
             for (trip, best_sche, cost) in veh_rtv_k:
                 veh_trip_edges.append((veh, trip, best_sche, cost))
+                # veh.candidate_sches.append(best_sche)
+                veh.candidate_sches_rtv.append(best_sche)
     return veh_trip_edges
 
 
@@ -167,3 +170,9 @@ def change_rtv_graph_param(cut_off, rtv_size, rv_size):
     CUTOFF_RTV = cut_off
     RTV_SIZE = rtv_size
     RV_SIZE = rv_size
+
+
+def clear_veh_candidate_sches(vehs):
+    for veh in vehs:
+        # veh.candidate_sches.clear()
+        veh.candidate_sches_rtv.clear()

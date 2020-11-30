@@ -5,13 +5,13 @@ batch assignment: computing the optimal schedule pool and then assign them toget
 import time
 import copy
 
-from lib.simulator.config import IS_DEBUG
+from lib.simulator.config import IS_DEBUG, T_WARM_UP, T_STUDY
 from lib.dispatcher.osp.osp_pool import build_vt_table, get_prev_assigned_edges, CUTOFF_VT, FAST_COMPUTE
 from lib.dispatcher.osp.osp_assign import ILP_assign
 from lib.analysis.online_analysis import OnlineAnalysis
 
 # Ensure_Picking = True if not FAST_COMPUTE else False
-Ensure_Picking = False
+Ensure_Picking = True
 
 
 class OSP(object):
@@ -40,7 +40,7 @@ class OSP(object):
             ridesharing_match_osp(self.vehs, reqs_new, reqs_prev, self.reqs_picking, prev_assigned_edges, T)
         osp_run_time = round((time.time() - osp_time), 2)
 
-        if IS_DEBUG and 60 * (30 + 0) < T <= 60 * (30 + 60):
+        if IS_DEBUG and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
             self.analysis.run_comparison_analysis(self.vehs, self.reqs, self.queue, self.reqs_picking,
                                                   self.reqs_unassigned, prev_assigned_edges, T, rids_assigned,
                                                   num_edges, osp_run_time)

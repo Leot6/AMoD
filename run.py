@@ -15,7 +15,7 @@ from lib.analysis.animation_generator import anim
 
 if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
-    frames = []
+    frames_vehs = []
     # initialize the AMoD model
     model = Model(init_time)
     print('*' * 80)
@@ -29,8 +29,8 @@ if __name__ == '__main__':
         # start time of each episode
         estime = time.time()
         model.dispatch_at_time(T)
-        if IS_ANIMATION:
-            frames.append(copy.deepcopy(model.vehs))
+        if IS_ANIMATION and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
+            frames_vehs.append(copy.deepcopy(model.vehs))
         if IS_DEBUG:
             print('System situation at %s : %d reqs have been received, %d have been served (%.02f%%), %d are on board '
                   '(%.02f%%), %d are being picked-up (%.02f%%), %d are unassigned (%.02f%%), %d are rejected (%.02f%%).'
@@ -45,7 +45,8 @@ if __name__ == '__main__':
             print()
 
     print('End of this simulation.')
-    if IS_DEBUG:
+    # if IS_DEBUG:
+    if True:
         if DISPATCHER == 'OSP':
             model.dispatcher.analysis.save_analysis_data(DISPATCHER)
 
@@ -59,8 +60,7 @@ if __name__ == '__main__':
     # generate, show and save the animation of this simulation
     if IS_ANIMATION:
         print('...Outputing simulation video...')
-        anime = anim(frames)
-        anime.save('output/anim.mp4', dpi=130, fps=None, extra_args=['-vcodec', 'libx264'])
+        anime = anim(frames_vehs)
         # plt.show()
 
     # output the simulation results and save data

@@ -29,6 +29,7 @@ class GI(object):
         self.rejs = amod.rejs
 
     def dispatch(self, T):
+        clear_veh_candidate_sches(self.vehs)
         vids_assigned = []
         l= len(self.queue)
         for i in tqdm(range(l), desc=f'GI ({l} reqs)', leave=False):
@@ -63,6 +64,9 @@ def heuristic_insertion(vehs, req_params, T):
             best_veh = veh
             best_sche = new_sche
             min_cost = cost
+        if new_sche:
+            # veh.candidate_sches.append(new_sche)
+            veh.candidate_sches_gi.append(new_sche)
     return best_veh, best_sche
 
 
@@ -81,3 +85,7 @@ def rebalancing_assign(vehs, req):
     return best_veh, best_sche
 
 
+def clear_veh_candidate_sches(vehs):
+    for veh in vehs:
+        # veh.candidate_sches.clear()
+        veh.candidate_sches_gi.clear()

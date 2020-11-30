@@ -281,16 +281,16 @@ def print_results(model):
     # writer.writerow(row)
     # f.close()
 
-    # write and save data of all requests
-    f = open('output/requests.csv', 'w')
-    writer = csv.writer(f)
-    writer.writerow(['id', 'olng', 'olat', 'dlng', 'dlat', 'Ts', 'Tr', 'Cep', 'Tp', 'Td', 'WT', 'TD', 'D'])
-    for req in model.reqs:
-        if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
-            row = [req.id, req.olng, req.olat, req.dlng, req.dlat, req.Ts, req.Tr, req.Cep, req.Tp, req.Td,
-                   req.Tp - req.Cep if req.Tp >= 0 else -1, req.Td - req.Tp - req.Ts if req.Td >= 0 else -1, req.D]
-            writer.writerow(row)
-    f.close()
+    # # write and save data of all requests
+    # f = open('output/requests.csv', 'w')
+    # writer = csv.writer(f)
+    # writer.writerow(['id', 'olng', 'olat', 'dlng', 'dlat', 'Ts', 'Tr', 'Cep', 'Tp', 'Td', 'WT', 'TD', 'D'])
+    # for req in model.reqs:
+    #     if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
+    #         row = [req.id, req.olng, req.olat, req.dlng, req.dlat, req.Ts, req.Tr, req.Cep, req.Tp, req.Td,
+    #                req.Tp - req.Cep if req.Tp >= 0 else -1, req.Td - req.Tp - req.Ts if req.Td >= 0 else -1, req.D]
+    #         writer.writerow(row)
+    # f.close()
 
     # # write and save data of all requests
     # f = open('output/requests.csv', 'w')
@@ -302,3 +302,4 @@ def print_results(model):
     #             row = [req.id, req.Ts, round(req.Tp - req.Cep, 2), round(req.Td - req.Tp - req.Ts, 2), round(req.D, 2)]
     #         writer.writerow(row)
     # f.close()
+
