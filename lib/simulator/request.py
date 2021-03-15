@@ -2,9 +2,10 @@
 definition of requests for the AMoD system
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 from lib.simulator.config import MAX_WAIT, MAX_DELAY, MAX_DETOUR
-from lib.routing.routing_server import get_duration_from_origin_to_dest
+from lib.routing.routing_server import get_duration_from_origin_to_dest, get_distance_from_origin_to_dest
 
 
 class Req(object):
@@ -20,11 +21,10 @@ class Req(object):
         onid: nearest origin node id in network
         dnid: nearest destination node id in network
         Ts: shortest travel time
+        Ds: shortest travel distance
         Cep: constraint - earliest pickup
         Clp: constraint - latest pickup
         Cld: constraint - latest dropoff
-        Etp: estimated pickup time
-        Etd: estimated dropoff time
         Tp: actually pickup time
         Td: actually dropoff time
         D: detour factor
@@ -40,19 +40,34 @@ class Req(object):
         self.dlng = dlng
         self.dlat = dlat
         self.Ts = get_duration_from_origin_to_dest(self.onid, self.dnid)
+        self.Ds = get_distance_from_origin_to_dest(self.onid, self.dnid)
         self.Cep = Tr
-        if MAX_DETOUR == -1:
+        if MAX_DETOUR == 0 or MAX_DETOUR == np.inf:
             self.Clp = Tr + MAX_WAIT
             self.Cld = Tr + self.Ts + MAX_DELAY
         else:
             self.Clp = Tr + min(MAX_WAIT, self.Ts * (2 - MAX_DETOUR))
             self.Cld = Tr + self.Ts + min(MAX_DELAY, self.Clp - Tr + self.Ts * (MAX_DETOUR - 1))
         self.Clp_backup = self.Clp
-        self.Etp = -1.0
-        self.Etd = -1.0
         self.Tp = -1.0
         self.Td = -1.0
         self.D = 0.0
+        self.base_fee = round(self.Ds / 1000 * 2, 2)
+        self.price_est = self.base_fee
+        self.price_act = self.base_fee
+
+    def update_price_est(self, extra_delay_est):
+        self.price_est = round(self.base_fee - extra_delay_est * 0.02, 2)
+
+    def update_price_act(self, extra_delay_act):
+        self.price_act = round(self.base_fee - extra_delay_act * 0.02, 2)
+
+    def update_pick_info(self, t):
+        self.Tp = t
+
+    def update_drop_info(self, t):
+        self.Td = t
+        self.D = (self.Td - self.Tp) / self.Ts
 
     # return origin
     def get_origin(self):

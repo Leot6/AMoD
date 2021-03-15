@@ -11,7 +11,7 @@ from lib.dispatcher.rtv.rtv_schedule import compute_schedule
 
 # feasible trips (trip, best_schedule, min_cost, feasible_schedules)
 RTV_GRAPH = None
-CUTOFF_RTV = 0.2
+CUTOFF_RTV = 0.02
 RTV_SIZE = 1200
 RV_SIZE = 30 if CUTOFF_RTV == 0.2 else RTV_SIZE
 
@@ -41,13 +41,10 @@ def search_feasible_trips(vehs, reqs_pool, T):
     build_rtv_graph(vehs, reqs_pool_rtv, rids_remain, T)
 
     veh_trip_edges = []
-    clear_veh_candidate_sches(vehs)
     for veh in vehs:
         for veh_rtv_k in RTV_GRAPH[veh.id]:
             for (trip, best_sche, cost) in veh_rtv_k:
                 veh_trip_edges.append((veh, trip, best_sche, cost))
-                # veh.candidate_sches.append(best_sche)
-                veh.candidate_sches_rtv.append(best_sche)
     return veh_trip_edges
 
 
@@ -60,7 +57,7 @@ def build_rv_graph(vehs, reqs_pool, rids_remain, T):
         for veh in vehs:
             if get_duration_from_origin_to_dest(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
                 continue
-            veh_params = [veh.nid, veh.t_to_nid, veh.n]
+            veh_params = [veh.nid, veh.t_to_nid, veh.d_to_nid, veh.n]
             sub_sche = restore_basic_sub_sche(veh, rids_remain)
             best_sche, cost, num_of_sche_searched = compute_schedule(veh_params, sub_sche, trip, T)
             # print(f'sche: {best_sche}/{best_sche2}, cost: {cost}/{cost2}, n_s_c: {n_s_c}/{n_s_c2}')
@@ -68,7 +65,7 @@ def build_rv_graph(vehs, reqs_pool, rids_remain, T):
                 rv_links.append((veh.id, tuple([req]), best_sche, cost))
                 # debug code
                 assert {req.id} == \
-                       {rid for (rid, pod, tnid, ept, ddl) in best_sche} - set(veh.onboard_rids + rids_remain)
+                       {rid for (rid, pod, tnid, ddl) in best_sche} - set(veh.onboard_rids + rids_remain)
                 assert {req.id} <= {r.id for r in reqs_pool}
         rv_links = sorted(rv_links, key=lambda l: l[3])
         for (vid, trip, best_sche, cost) in rv_links[:RV_SIZE]:
@@ -127,7 +124,7 @@ def build_rtv_graph(vehs, reqs_pool, rids_remain, T):
                         # debug code
                         rids_in_trip = {r.id for r in trip_k}
                         rids_in_sche = \
-                            {rid for (rid, pod, tnid, ept, ddl) in best_sche} - set(veh.onboard_rids + rids_remain)
+                            {rid for (rid, pod, tnid, ddl) in best_sche} - set(veh.onboard_rids + rids_remain)
                         assert rids_in_trip == rids_in_sche
                         assert {req.id for req in trip_k} <= {req.id for req in reqs_pool}
 
@@ -154,7 +151,7 @@ def restore_basic_sub_sche(veh, rids_remain):
     if not veh.idle:
         for leg in veh.route:
             if leg.rid in veh.onboard_rids or leg.rid in rids_remain:
-                sub_sche.append((leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl))
+                sub_sche.append((leg.rid, leg.pod, leg.tnid, leg.ddl))
     return sub_sche
 
 
@@ -171,8 +168,3 @@ def change_rtv_graph_param(cut_off, rtv_size, rv_size):
     RTV_SIZE = rtv_size
     RV_SIZE = rv_size
 
-
-def clear_veh_candidate_sches(vehs):
-    for veh in vehs:
-        # veh.candidate_sches.clear()
-        veh.candidate_sches_rtv.clear()

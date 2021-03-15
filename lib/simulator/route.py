@@ -33,18 +33,16 @@ class Leg(object):
         rid: request id (if rebalancing then -1)
         pod: pickup (+1) or dropoff (-1), rebalancing (0)
         tnid: target (end of leg) node id in network
-        ept: earliest possible arrival time
         ddl: latest arriving time
         t: total duration
         d: total distance
         steps: a list of steps
     """
 
-    def __init__(self, rid, pod, tnid, ept, ddl, t=0.0, d=0.0, steps=[]):
+    def __init__(self, rid, pod, tnid, ddl, t=0.0, d=0.0, steps=[]):
         self.rid = rid
         self.pod = pod
         self.tnid = tnid
-        self.ept = ept
         self.ddl = ddl
         self.t = t
         self.d = d

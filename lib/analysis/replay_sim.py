@@ -28,7 +28,7 @@ def replay_simulation():
     for (vehs, reqs, queue, reqs_picking, reqs_unassigned, T) in tqdm(replay_data, desc='replay'):
         reqs_new = queue
         reqs_prev = sorted(reqs_picking.union(reqs_unassigned), key=lambda r: r.id)
-        prev_assigned_edges = get_prev_assigned_edges(vehs, reqs, T)
+        prev_assigned_edges = get_prev_assigned_edges(vehs, reqs)
 
         osp_time = time.time()
         osp_rids_assigned, osp_vids_assigned, osp_sches_assigned, osp_num_edges = \

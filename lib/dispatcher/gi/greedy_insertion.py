@@ -29,12 +29,11 @@ class GI(object):
         self.rejs = amod.rejs
 
     def dispatch(self, T):
-        clear_veh_candidate_sches(self.vehs)
         vids_assigned = []
         l= len(self.queue)
         for i in tqdm(range(l), desc=f'GI ({l} reqs)', leave=False):
             req = self.queue.pop()
-            req_params = [req.id, req.onid, req.dnid, req.Tr, req.Ts, req.Clp, req.Cld]
+            req_params = [req.id, req.onid, req.dnid, req.Clp, req.Cld]
             best_veh, best_sche = heuristic_insertion(self.vehs, req_params, T)
             if not best_veh and REBALANCER == 'NR':
                 best_veh, best_sche = rebalancing_assign(self.vehs, req)
@@ -64,9 +63,6 @@ def heuristic_insertion(vehs, req_params, T):
             best_veh = veh
             best_sche = new_sche
             min_cost = cost
-        if new_sche:
-            # veh.candidate_sches.append(new_sche)
-            veh.candidate_sches_gi.append(new_sche)
     return best_veh, best_sche
 
 
@@ -83,9 +79,3 @@ def rebalancing_assign(vehs, req):
     if best_veh:
         best_sche = [(req.id, 1, req.onid, req.Tr, req.Clp), (req.id, -1, req.dnid, req.Tr + req.Ts, req.Cld)]
     return best_veh, best_sche
-
-
-def clear_veh_candidate_sches(vehs):
-    for veh in vehs:
-        # veh.candidate_sches.clear()
-        veh.candidate_sches_gi.clear()

@@ -5,38 +5,43 @@ compute an assignment plan from all possible matches
 import time
 import mosek
 import numpy as np
+from lib.simulator.config import OBJECTIVE, Reliability_Shreshold
+from lib.dispatcher.osp.osp_schedule import compute_sche_delay, compute_sche_reward, compute_sche_reliability
 
-CUTOFF_ILP = 50
+CUTOFF_ILP = 5
+# when the num of edges is very large, ILP solver might not find a proper solution
+# that could ensure picking all previous assigned requests (one or two would be missed)
+# (try to solve it by introduce initial solution by selecting previous assigned edges, but not work yet)
 ignore_a_bug_temporary = True
 
 
-def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
+def ILP_assign(veh_trip_edges, reqs_pool, reqs_all, reqs_picking=[], prev_assigned_edges=[]):
     aa = time.time()
+    assert isinstance(reqs_pool, list)
     veh_trip_edges = sorted(veh_trip_edges, key=lambda e: (e[0].id, -len(e[1]), e[3]))
+    prev_vid_Tid_edges = [(veh.id, [r.id for r in trip]) for (veh, trip, sche, cost) in prev_assigned_edges]
+
     rids_picking = [r.id for r in reqs_picking]
     assert len(reqs_pool) == len(set(reqs_pool))
     rids_assigned = []
     vids_assigned = []
     sches_assigned = []
-    assign_cost = 0
 
     numedges = len(veh_trip_edges)
     if numedges > 0:
         numreqs = len(reqs_pool)
-        cost_ignore_normal = 10 ** (len(str(int(veh_trip_edges[0][3])))+3)
-        if rids_picking:
-            cost_ignore_high = 100 * cost_ignore_normal
-        else:
-            cost_ignore_high = cost_ignore_normal
+
+        reject_penalty = 10 ** (len(str(int(veh_trip_edges[0][3])))+2)
+        cost_ignore_normal = 1 * reject_penalty
+        cost_ignore_high = 100 * reject_penalty
 
         inf = 0.0  # Since the actual value of Infinity is ignores, we define it solely for symbolic purposes
 
         # for matrix A of coefficients of constraints
-        rids_pool = [req.id for req in reqs_pool]
-        R_T_idx = [[numedges+i] for i in range(numreqs)]
-
         vids_pool = [veh_trip_edges[0][0].id]
         V_T_idx = [[]]
+        rids_pool = [req.id for req in reqs_pool]
+        R_T_idx = [[numedges + i] for i in range(numreqs)]
         for idx, (veh, trip, sche, cost) in zip(range(numedges), veh_trip_edges):
             vid = veh.id
             if vid != vids_pool[-1]:
@@ -45,6 +50,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
             V_T_idx[-1].append(idx)
             for req in trip:
                 R_T_idx[rids_pool.index(req.id)].append(idx)
+        # S_T_idx = list(range(numedges))
 
         numvar = numedges + numreqs
         numvehs = len(vids_pool)
@@ -56,13 +62,49 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
         blx = [0.0] * numvar
         bux = [1.0] * numvar
 
-        # Objective coefficients
-        c = [round(cost) for (veh, trip, sche, cost) in veh_trip_edges]
+        # Objective coefficients and initial solution (if applicable)
+        c = []
+        # reliability = [] if OBJECTIVE == 'Reliability' else [1.0] * numedges
+        if reqs_picking:
+            # the init solution added here is used to ensure picking previous assigned requests
+            init_assign_idx = [0.0] * numedges + [1.0] * numreqs
+            var_idx = -1
+            num_init_assign_edge = 0
+            num_init_assign_req = 0
+        for (veh, trip, sche, cost) in veh_trip_edges:
+            if OBJECTIVE == 'Time':
+                objective_cost = cost
+            elif OBJECTIVE == 'ServiceRate':
+                objective_cost = 1
+            elif OBJECTIVE == 'Profit':
+                objective_cost = - compute_sche_reward(veh, sche, reqs_all) * 100
+            elif OBJECTIVE == 'Reliability':
+                average_arrival_reliability, num_reqs_in_sche = compute_sche_reliability(veh, sche)
+                objective_cost = - average_arrival_reliability * 100
+                # objective_cost = num_reqs_in_sche * (1 - average_arrival_reliability) * 100
+                # reliability.append(num_reqs_in_sche * (average_arrival_reliability * 100 - Reliability_Shreshold))
+            c.append(round(objective_cost))
+            if reqs_picking:
+                var_idx += 1
+                if (veh.id, [r.id for r in trip]) in prev_vid_Tid_edges:
+                    assert init_assign_idx[var_idx] == 0.0
+                    init_assign_idx[var_idx] = 1.0
+                    num_init_assign_edge += 1
         for rid in rids_pool:
-            if rid in rids_picking:
-                c.append(cost_ignore_high)
+            if reqs_picking:
+                var_idx += 1
+                if rid in rids_picking:
+                    c.append(cost_ignore_high)
+                    assert init_assign_idx[var_idx] == 1.0
+                    init_assign_idx[var_idx] = 0.0
+                    num_init_assign_req += 1
+                else:
+                    c.append(cost_ignore_normal)
             else:
                 c.append(cost_ignore_normal)
+        if reqs_picking:
+            assert num_init_assign_edge == len(prev_assigned_edges)
+            assert num_init_assign_req == len(reqs_picking)
 
         # Bound keys for constraints
         bkc = [mosek.boundkey.up] * numvehs + [mosek.boundkey.fx] * numreqs
@@ -74,6 +116,14 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
         aidx = V_T_idx + R_T_idx
         # Non-zero Values of row i.
         aval = [[1.0] * len(row) for row in aidx]
+
+        # add reliability constraint (not used now)
+        # bkc += [mosek.boundkey.lo]
+        # blc += [0.0]
+        # buc += [+inf]
+        # aidx.append(S_T_idx)
+        # aval.append(reliability)
+        # numcon += 1
 
         with mosek.Env() as env:
             with env.Task(0, 0) as task:
@@ -103,7 +153,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
                 # Allow multiple threads if more threads is available (seems not working)
                 task.putintparam(mosek.iparam.intpnt_multi_thread, mosek.onoffkey.on)
 
-                # # add init solution
+                # # add initial solution (method 2, using greedy assignment as baseline)
                 # a=[]
                 # b=[]
                 # init_assign_idx = [0.] * numedges + [1.0] * numreqs
@@ -125,7 +175,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
                 # Optimize the task
                 task.optimize()
                 # Output a solution
-                assign_idx = [0.] * numvar
+                assign_idx = init_assign_idx if reqs_picking else [0.0] * numvar
                 task.getxx(mosek.soltype.itg, assign_idx)
 
         # print("Optimal solution: %s" % assign_idx)
@@ -134,15 +184,15 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_picking=[]):
                 rids_assigned.extend([req.id for req in trip])
                 vids_assigned.append(veh.id)
                 sches_assigned.append(sche)
-                assign_cost += cost
                 # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh.id, cost))
 
         assert len(rids_assigned) == len(set(rids_assigned))
         if rids_picking:
             # if not set(rids_picking) <= set(rids_assigned):
-                # rids_removed_ILP = list(set(rids_picking) - set(rids_assigned))
-                # print('rids_picking not assigned this time', rids_removed_ILP)
-                # print('        ILP running time:', round((time.time() - aa), 2))
+            #     rids_removed_ILP = list(set(rids_picking) - set(rids_assigned))
+            #     print('rids_picking not assigned this time', rids_removed_ILP)
+            #     print('        ILP running time:', round((time.time() - aa), 2))
+            #     print('        num of reqs')
             if not ignore_a_bug_temporary:
                 assert set(rids_picking) <= set(rids_assigned)
 
@@ -174,28 +224,3 @@ def greedy_assign(veh_trip_edges):
 
     return rids_assigned, vids_assigned, sches_assigned
 
-
-#
-# def greedy_assign(veh_trip_edges):
-#     R_id_assigned = []
-#     T_id_assigned = []
-#     V_id_assigned = []
-#     S_assigned = []
-#
-#     edges = sorted(veh_trip_edges, key=lambda e: (-len(e[1]), e[3]))
-#     for (veh, trip, sche, cost) in edges:
-#         veh_id = veh.id
-#         trip_id = tuple([r.id for r in trip])
-#         if trip_id in T_id_assigned:
-#             continue
-#         if veh_id in V_id_assigned:
-#             continue
-#         if np.any([r_id in R_id_assigned for r_id in trip_id]):
-#             continue
-#         R_id_assigned.extend([rid for rid in trip_id])
-#         T_id_assigned.append(trip_id)
-#         V_id_assigned.append(veh_id)
-#         S_assigned.append(sche)
-#         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
-#
-#     return R_id_assigned, V_id_assigned, S_assigned

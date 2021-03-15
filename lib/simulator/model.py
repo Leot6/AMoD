@@ -3,6 +3,7 @@ main structure for the AMoD simulator
 """
 
 import time
+import copy
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ import matplotlib.pyplot as plt
 from lib.simulator.config import *
 from lib.simulator.request import Req
 from lib.simulator.vehicle import Veh
-from lib.routing.routing_server import upd_traffic_on_network, print_counting
+from lib.routing.routing_server import print_counting
 from lib.dispatcher.gi.greedy_insertion import GI
 from lib.dispatcher.sba.single_req_batch_assign import SBA
 from lib.dispatcher.rtv.rtv_main import RTV
@@ -56,7 +57,7 @@ class Model(object):
         self.req_init_idx = REQ_INIT_IDX
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
             self.req_init_idx += 1
-        print('self.req_init_idx', self.req_init_idx)
+        # print('self.req_init_idx', self.req_init_idx)
         self.queue = []
         self.reqs = []
         self.reqs_served = set()
@@ -88,17 +89,15 @@ class Model(object):
         self.reject_long_wait_reqs()
         # 2. update statuses of vehicles and requests
         self.upd_vehs_and_reqs_stat_to_time()
-        # 3. update traffic
-        self.update_traffic()
-        # 4. generate new reqs
+        # 3. generate new reqs
         self.gen_reqs_to_time()
         if np.isclose(T % INT_ASSIGN, 0):
-            # 5. compute the assignment
+            # 4. compute the assignment
             vids_assigned = self.dispatcher.dispatch(T)
             print_counting()
-            # 6. update traffic on routes of vehicles
+            # 5. update traffic on routes of vehicles
             self.upd_traffic_on_route_of_vehs(vids_assigned)
-            # check assignment and update reqs clustering status
+            # 6. check assignment and update reqs clustering status
             self.assign_constraint_check_and_upd_reqs_grouping_status()
 
         if np.isclose(T % INT_REBL, 0):
@@ -107,22 +106,24 @@ class Model(object):
 
     def reject_long_wait_reqs(self):
         if len(self.reqs_unassigned) > 0:
-            reqs_rejected = set()
-            for req in self.reqs_unassigned:
-                # if req.Clp <= self.T:
-                if min(req.Tr + 150, req.Clp) <= self.T:
-                    reqs_rejected.add(req)
-            self.reqs_unassigned.difference_update(reqs_rejected)
-            self.rejs.update(reqs_rejected)
-
-    def update_traffic(self):
-        if IS_STOCHASTIC:
-            if IS_DEBUG:
-                print('    -T = %d, updating traffics ...' % self.T)
-            s2 = time.time()
-            upd_traffic_on_network()
-            if IS_DEBUG:
-                print('        s2 running time:', round((time.time() - s2), 2))
+            if MAX_DETOUR != np.inf:
+                reqs_rejected = set()
+                for req in self.reqs_unassigned:
+                    # if req.Clp <= self.T:
+                    if min(req.Tr + 150, req.Clp) <= self.T:
+                        reqs_rejected.add(req)
+                self.reqs_unassigned.difference_update(reqs_rejected)
+                self.rejs.update(reqs_rejected)
+            else:
+                assert len(self.queue) == 0
+                for req in sorted(self.reqs_unassigned, key=lambda r: r.id):
+                    assert req.Clp >= req.Clp_backup
+                    req.Clp += 120
+                    req.Clp_backup = req.Clp
+                    req.Cld += 120
+                    self.queue.append(req)
+                self.reqs_unassigned.difference_update(set(self.queue))
+                assert len(self.reqs_unassigned) == 0
 
     # update vehs and reqs status to their current positions at time T
     def upd_vehs_and_reqs_stat_to_time(self):
@@ -133,14 +134,13 @@ class Model(object):
             done = veh.move_to_time(self.T)
             for (rid, pod, t) in done:
                 if pod == 1:
-                    self.reqs[rid].Tp = t
+                    self.reqs[rid].update_pick_info(t)
                     self.reqs_picking.remove(self.reqs[rid])
                     self.reqs_onboard.add(self.reqs[rid])
                     # print('veh', veh.id, 'picked', rid)
 
                 elif pod == -1:
-                    self.reqs[rid].Td = t
-                    self.reqs[rid].D = (self.reqs[rid].Td - self.reqs[rid].Tp) / self.reqs[rid].Ts
+                    self.reqs[rid].update_drop_info(t)
                     self.reqs_onboard.remove(self.reqs[rid])
                     self.reqs_served.add(self.reqs[rid])
 
@@ -177,37 +177,54 @@ class Model(object):
                   f'reqs in pool: {len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned)}, '
                   f'idle vehs: {noi} / {self.V}')
 
+            # debug
+            # print(f'reqs in queue: {[r.id for r in self.queue]}; reqs picking:{[r.id for r in self.reqs_picking]};'
+            #       f'reqs onboard: {[r.id for r in self.reqs_onboard]}')
+            # print(f'reqs unassign: {[r.id for r in self.reqs_unassigned]}')
+            # for veh in self.vehs:
+            #     print(f'veh {veh.id} picking: {veh.picking_rids} dropping: {veh.onboard_rids}')
+
     def upd_traffic_on_route_of_vehs(self, vids_assigned):
-        if IS_STOCHASTIC:
+        if IS_STOCHASTIC_TRAFFIC:
             if IS_DEBUG:
                 print('    -T = %d, update traffic on routes of vehicles...' % self.T)
                 s4 = time.time()
             for veh in self.vehs:
-                schedule = []
                 if not veh.idle and veh.id not in vids_assigned:
-                    for leg in veh.route:
-                        if leg.pod == 1 or leg.pod == -1:
-                            schedule.append((leg.rid, leg.pod, leg.tnid, leg.ept, leg.ddl))
-                    veh.build_route(schedule, self.reqs, self.T)
+                    veh.build_route(copy.deepcopy(veh.sche), self.reqs, self.T)
             if IS_DEBUG:
                 print('        s4 running time:', round((time.time() - s4), 2))
 
     def assign_constraint_check_and_upd_reqs_grouping_status(self):
-        #  check each req is not assigned to multiple vehs
+        # check each req is not assigned to multiple vehs
         rids_enroute = []
         rids_picking = []
         rids_onboard = []
         for veh in self.vehs:
-            T_id = {leg.rid for leg in veh.route} - {-2}
+            T_id = {leg.rid for leg in veh.route} - {-2, -1}
             rids_enroute.extend(list(T_id))
             rids_picking.extend(veh.picking_rids)
             rids_onboard.extend(veh.onboard_rids)
         assert len(rids_enroute) == len(set(rids_enroute))
-        assert sorted(rids_enroute) == sorted(rids_onboard + rids_picking)
         assert set(rids_onboard) == {req.id for req in self.reqs_onboard}
+        assert sorted(rids_enroute) == sorted(rids_onboard + rids_picking)
+
+        # # check that no servable request is unassigned in last epoch
+        # rids_unassigned_in_last_epoch = [req.id for req in self.reqs_unassigned]
+        # num_reqs_unassigned = len(rids_unassigned_in_last_epoch)
+        # rids_missed = set(rids_unassigned_in_last_epoch) - (set(rids_unassigned_in_last_epoch) - set(rids_picking))
+        # num_rids_missed = len(rids_missed)
+        # if num_rids_missed != 0:
+        #     print('rids_missed', rids_missed)
+        # if set(rids_unassigned_in_last_epoch) - set(rids_picking) != set(rids_unassigned_in_last_epoch):
+        #     print('rids_unassigned_in_last_epoch', rids_unassigned_in_last_epoch)
+        #     print('picking', rids_picking)
+        #     print('set(rids_unassigned_in_last_epoch) - set(rids_picking)',
+        #           set(rids_unassigned_in_last_epoch) - set(rids_picking))
+        # assert set(rids_unassigned_in_last_epoch) - set(rids_picking) == set(rids_unassigned_in_last_epoch)
 
         # update reqs grouping status
-        if not DISPATCHER == 'GI':
+        if DISPATCHER != 'GI':
             rids_enroute.sort()
             reqs_picking = {self.reqs[rid] for rid in rids_picking}
             reqs_unassigned = set(self.queue).union(self.reqs_unassigned).union(self.reqs_picking) - reqs_picking
@@ -239,15 +256,19 @@ class Model(object):
         plt.show()
 
     def __str__(self):
-        str = f'scenario: {DMD_STR}' \
-              f'\nsimulation starts at {self.start_time}, initializing time: {self.time_of_init} s' \
-              f'\nsimulation ends at {self.end_time}, runtime time: {self.time_of_run}, ' \
-              f'average: {self.avg_time_of_run}' \
-              f'\nsystem settings:' \
-              f'\n  - from {DMD_SST} to {DMD_SST + datetime.timedelta(seconds=T_TOTAL)}, ' \
-              f'with {round(T_TOTAL / INT_ASSIGN)} intervals' \
-              f'\n  - fleet size: {self.V}; capacity: {self.K}; coef_wait: {COEF_WAIT}, interval: {INT_ASSIGN} s' \
-              f'\n  - demand value: {DMD_VOL}({TRIP_NUM}), max waiting time: {MAX_WAIT} s; max delay: {MAX_DELAY} s' \
-              f'\n  - {self.dispatcher}, rebalancer: {REBALANCER}' \
-              f'\n  - stochastic travel time: {IS_STOCHASTIC}, stochastic planning: {IS_STOCHASTIC_CONSIDERED}'
-        return str
+        param = f'scenario: {DMD_STR}' \
+                f'\nsimulation starts at {self.start_time}, initializing time: {self.time_of_init} s' \
+                f'\nsimulation ends at {self.end_time}, runtime time: {self.time_of_run},' \
+                f' average: {self.avg_time_of_run}' \
+                f'\nsystem settings:' \
+                f'\n  - from {DMD_SST} to {DMD_SST + datetime.timedelta(seconds=T_TOTAL)},' \
+                f' with {round(T_WARM_UP / INT_ASSIGN)}+{round(T_STUDY / INT_ASSIGN)}+' \
+                f'{round(T_COOL_DOWN / INT_ASSIGN)}={round(T_TOTAL / INT_ASSIGN)} intervals' \
+                f'\n  - fleet size: {self.V}, capacity: {self.K}, interval: {INT_ASSIGN} s, objective: {OBJECTIVE}' \
+                f' ({Reliability_Shreshold})' \
+                f'\n  - demand value: {DMD_VOL}({TRIP_NUM}), max waiting: {MAX_WAIT} s, max delay: {MAX_DELAY} s' \
+                f' ({MAX_DETOUR})' \
+                f'\n  - {self.dispatcher}, rebalancer: {REBALANCER}' \
+                f'\n  - stochastic traffic: {IS_STOCHASTIC_TRAFFIC}, scheduling: {IS_STOCHASTIC_SCHEDULE},' \
+                f' routing: {IS_STOCHASTIC_ROUTING} ({LEVEl_OF_STOCHASTIC})'
+        return param

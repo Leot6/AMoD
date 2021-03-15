@@ -32,7 +32,7 @@ class RTV(object):
         reqs_pool = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id) + self.queue
 
         # compute the ride-sharing assignment
-        prev_assigned_edges = get_prev_assigned_edges(self.vehs, self.reqs, T)
+        prev_assigned_edges = get_prev_assigned_edges(self.vehs, self.reqs)
         rids_assigned, vids_assigned, sches_assigned, num_edges = \
             ridesharing_match_rtv(self.vehs, reqs_pool, self.reqs_picking, prev_assigned_edges, T)
 

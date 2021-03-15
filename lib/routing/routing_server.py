@@ -8,27 +8,32 @@ import copy
 import pickle
 import numpy as np
 import scipy.stats as st
-from lib.simulator.config import TRAVEL_TIME, IS_STOCHASTIC, IS_STOCHASTIC_CONSIDERED
+from lib.simulator.config import TRAVEL_TIME, IS_STOCHASTIC_TRAFFIC, IS_STOCHASTIC_ROUTING, LEVEl_OF_STOCHASTIC
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-with open(f'{root_path}/data/NYC_NET_{TRAVEL_TIME}.pickle', 'rb') as f:
+with open(f'{root_path}/data/{TRAVEL_TIME}/NYC_NET.pickle', 'rb') as f:
     NETWORK = pickle.load(f)
-if IS_STOCHASTIC:
+with open(f'{root_path}/data/{TRAVEL_TIME}/path-tables-gitignore/NYC_TDT_0.pickle', 'rb') as f:
+    DIST_TABLE = pickle.load(f)
+
+if IS_STOCHASTIC_TRAFFIC:
     NETWORK_STOCHASTIC = copy.deepcopy(NETWORK)
-    NUM_OF_LAMBDA = 21
+    NUM_OF_LAMBDA = 21 if IS_STOCHASTIC_ROUTING else 1
 else:
     NUM_OF_LAMBDA = 1
 PATH_TABLE_LIST = [None] * NUM_OF_LAMBDA
 TIME_TABLE_LIST = [None] * NUM_OF_LAMBDA
 VAR_TABLE_LIST = [None] * NUM_OF_LAMBDA
 for i in range(NUM_OF_LAMBDA):
-    with open(f'{root_path}/data/path-tables-gitignore/NYC_SPT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    file_floder = 'path-tables-gitignore' if i == 0 else 'path-tables-stochastic-gitignore'
+    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_SPT_{str(i)}.pickle', 'rb') as f:
         PATH_TABLE_LIST[i] = pickle.load(f)
-    with open(f'{root_path}/data/path-tables-gitignore/NYC_TTT_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_TTT_{str(i)}.pickle', 'rb') as f:
         TIME_TABLE_LIST[i] = pickle.load(f)
-    with open(f'{root_path}/data/path-tables-gitignore/NYC_TTV_{TRAVEL_TIME}_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_TVT_{str(i)}.pickle', 'rb') as f:
         VAR_TABLE_LIST[i] = pickle.load(f)
+
 
 num_of_path = 0
 num_of_stochastic_path = 0
@@ -36,7 +41,7 @@ avg_path_mean = 0
 avg_path_var = 0
 avg_path_mean_stochastic = 0
 avg_path_var_stochastic = 0
-avg_cdf = 0
+avg_cdf_stochastic = 0
 avg_cdf_0 = 0
 show_counting = False
 
@@ -50,17 +55,33 @@ def get_duration_from_origin_to_dest(onid, dnid):
         None
 
 
+# get the variance of the best route from origin to destination
+def get_variance_from_origin_to_dest(onid, dnid):
+    variance = VAR_TABLE_LIST[0][onid - 1, dnid - 1]
+    assert variance != -1
+    return variance * LEVEl_OF_STOCHASTIC * LEVEl_OF_STOCHASTIC
+
+
+# get the distance of the best route from origin to destination
+def get_distance_from_origin_to_dest(onid, dnid):
+    distance = DIST_TABLE[onid - 1, dnid - 1]
+    assert distance != -1
+    return distance
+
+
 # get the best route from origin to destination
-def build_route_from_origin_to_dest(onid, dnid):
-    path = get_path_from_origin_to_dest(onid, dnid)
+def build_route_from_origin_to_dest(onid, dnid, ddl=0):
+    path = get_path_from_origin_to_dest(onid, dnid, ddl)
     duration, distance, steps = build_route_from_path(path)
     return duration, distance, steps
 
 
 # recover the best path from origin to destination from the path table
-def get_path_from_origin_to_dest(onid, dnid):
-    if IS_STOCHASTIC_CONSIDERED:
-        lambda_idx = get_best_lambda_idx(onid, dnid)
+def get_path_from_origin_to_dest(onid, dnid, ddl=0):
+    if IS_STOCHASTIC_ROUTING:
+        if ddl == 0:
+            ddl = get_duration_from_origin_to_dest(onid, dnid) * 1.2
+        lambda_idx = get_best_lambda_idx(onid, dnid, ddl)
     else:
         lambda_idx = 0
     path = [dnid]
@@ -70,6 +91,27 @@ def get_path_from_origin_to_dest(onid, dnid):
         pre_node = PATH_TABLE_LIST[lambda_idx][onid - 1, pre_node - 1]
     path.reverse()
 
+    # lambda_idx = 0
+    # path = [dnid]
+    # pre_node = PATH_TABLE_LIST[0][onid - 1, dnid - 1]
+    # while pre_node > 0:
+    #     path.append(pre_node)
+    #     pre_node = PATH_TABLE_LIST[lambda_idx][onid - 1, pre_node - 1]
+    # path.reverse()
+    # mean, var = get_path_mean_and_var(path)
+    # cdf = round(st.norm(mean, var ** 0.5).cdf(ddl) * 100, 2)
+    # if cdf < 100:
+    #     if IS_STOCHASTIC_ROUTING:
+    #         ddl = get_duration_from_origin_to_dest(onid, dnid) * 1.2
+    #         lambda_idx = get_best_lambda_idx(onid, dnid, ddl)
+    #         if lambda_idx !=0:
+    #             path = [dnid]
+    #             pre_node = PATH_TABLE_LIST[0][onid - 1, dnid - 1]
+    #             while pre_node > 0:
+    #                 path.append(pre_node)
+    #                 pre_node = PATH_TABLE_LIST[lambda_idx][onid - 1, pre_node - 1]
+    #             path.reverse()
+
     if show_counting:
         global num_of_path
         global num_of_stochastic_path
@@ -77,18 +119,17 @@ def get_path_from_origin_to_dest(onid, dnid):
         global avg_path_var
         global avg_path_mean_stochastic
         global avg_path_var_stochastic
-        global avg_cdf
+        global avg_cdf_stochastic
         global avg_cdf_0
         mean, var = get_path_mean_and_var(path)
         num_of_path += 1
         avg_path_mean += (mean - avg_path_mean) / num_of_path
         avg_path_var += (var - avg_path_var) / num_of_path
         if lambda_idx != 0:
+
             num_of_stochastic_path += 1
             avg_path_mean_stochastic += (mean - avg_path_mean_stochastic) / num_of_stochastic_path
             avg_path_var_stochastic += (var - avg_path_var_stochastic) / num_of_stochastic_path
-
-            ddl = get_duration_from_origin_to_dest(onid, dnid) * 1.2
             path_0 = [dnid]
             pre_node_0 = PATH_TABLE_LIST[0][onid - 1, dnid - 1]
             while pre_node_0 > 0:
@@ -96,10 +137,13 @@ def get_path_from_origin_to_dest(onid, dnid):
                 pre_node_0 = PATH_TABLE_LIST[0][onid - 1, pre_node_0 - 1]
             path_0.reverse()
             mean_0, var_0 = get_path_mean_and_var(path_0)
-            cdf_0 = round(st.norm(mean_0, var_0).cdf(ddl) * 100, 2)
+            cdf_0 = round(st.norm(mean_0, var_0 ** 0.5).cdf(ddl) * 100, 2)
             avg_cdf_0 += (cdf_0 - avg_cdf_0) / num_of_stochastic_path
-            cdf = round(st.norm(mean, var).cdf(ddl) * 100, 2)
-            avg_cdf += (cdf - avg_cdf) / num_of_stochastic_path
+            cdf_stochastic = round(st.norm(mean, var ** 0.5).cdf(ddl) * 100, 2)
+            avg_cdf_stochastic += (cdf_stochastic - avg_cdf_stochastic) / num_of_stochastic_path
+            print('Travel time ', get_duration_from_origin_to_dest(onid, dnid), 'ddl', ddl)
+            print('shortest', mean_0, var_0, cdf_0)
+            print('stochastic', mean, var, cdf_stochastic)
 
     return path
 
@@ -127,14 +171,19 @@ def build_route_from_path(path):
 
 # return the mean travel time of edge (u, v)
 def get_edge_dur(u, v):
-    if IS_STOCHASTIC:
-        return NETWORK_STOCHASTIC.get_edge_data(u, v, default={'dur': None})['dur']
+    if IS_STOCHASTIC_TRAFFIC:
+        mean = NETWORK.get_edge_data(u, v, default={'dur': None})['dur']
+        std = get_edge_std(u, v)
+        assert mean is not np.inf
+        sample = np.random.normal(mean, std)
+        return sample
+        # return NETWORK_STOCHASTIC.get_edge_data(u, v, default={'dur': None})['dur']
     else:
         return NETWORK.get_edge_data(u, v, default={'dur': None})['dur']
 
 
 def get_edge_std(u, v):
-    return NETWORK.get_edge_data(u, v, default={'std': None})['std']
+    return NETWORK.get_edge_data(u, v, default={'std': None})['std'] * LEVEl_OF_STOCHASTIC
 
 
 # return the distance of edge (u, v)
@@ -147,7 +196,7 @@ def get_node_geo(nid):
     return list(NETWORK.nodes[nid]['pos'])
 
 
-# update the traffic on road network
+# update the traffic on road network (not used, would cause a very large variance)
 def upd_traffic_on_network():
     # sample from normal distribution
     for u, v in NETWORK_STOCHASTIC.edges():
@@ -155,13 +204,12 @@ def upd_traffic_on_network():
         std = get_edge_std(u, v)
         if mean is not np.inf:
             sample = np.random.normal(mean, std)
-            while sample < 0:
-                sample = np.random.normal(mean, std)
+            # while sample < 0:
+            #     sample = np.random.normal(mean, std)
             NETWORK_STOCHASTIC.edges[u, v]['dur'] = round(sample, 2)
 
 
-def get_best_lambda_idx(onid, dnid, num_of_l=NUM_OF_LAMBDA):
-    ddl = get_duration_from_origin_to_dest(onid, dnid) * 1.2
+def get_best_lambda_idx(onid, dnid, ddl, num_of_l=NUM_OF_LAMBDA):
     phi_0 = get_lambda_optimal_path_phi(0, onid, dnid, ddl)
     phi_inf = get_lambda_optimal_path_phi(num_of_l - 1, onid, dnid, ddl)
     if np.isclose(phi_0, phi_inf):
@@ -187,7 +235,7 @@ def get_lambda_optimal_path_phi(lambda_idx, onid, dnid, ddl):
     # avoid warning: RuntimeWarning: invalid value encountered in double_scalars
     if np.isclose(var, 0):
         var += 1
-    phi = (ddl - mean) / (math.sqrt(var))
+    phi = (ddl - mean) / (var ** 0.5)
     return phi
 
 
@@ -209,5 +257,5 @@ def print_counting():
         print(f'{num_of_stochastic_path / num_of_path * 100:.2f}% ({num_of_stochastic_path}/{num_of_path}) '
               f'of the paths is different. The mean is ({avg_path_mean_stochastic:.2f}/{avg_path_mean:.2f}) '
               f'and var is ({avg_path_var_stochastic:.2f}/{avg_path_var:.2f})')
-        print(f'cdf:{avg_cdf_0:.2f}% / {avg_cdf:.2f}%')
+        print(f'cdf:{avg_cdf_stochastic:.2f}% / {avg_cdf_0:.2f}%')
         print('                           ')

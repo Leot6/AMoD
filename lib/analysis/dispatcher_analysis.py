@@ -15,19 +15,19 @@ from lib.simulator.config import TRIP_NUM, FLEET_SIZE, IS_DEBUG
 from lib.dispatcher.osp.osp_assign import ILP_assign
 from lib.dispatcher.rtv.rtv_graph import change_rtv_graph_param, search_feasible_trips
 from lib.dispatcher.sba.single_req_batch_assign import ridesharing_match_sba
-from lib.dispatcher.gi.greedy_insertion import heuristic_insertion, clear_veh_candidate_sches
+from lib.dispatcher.gi.greedy_insertion import heuristic_insertion
 from lib.analysis.animation_generator import anim, anim_compare_sches_found, anim_sche
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
-numreqs_file_path = f'{current_file_path}/numreqs-data'
-replay_file_path = f'{current_file_path}/replay-data-gitignore'
-if not os.path.exists(numreqs_file_path):
-    os.mkdir(numreqs_file_path)
-if not os.path.exists(replay_file_path):
-    os.mkdir(replay_file_path)
+# numreqs_file_path = f'{current_file_path}/numreqs-data'
+# replay_file_path = f'{current_file_path}/replay-data-gitignore'
+# if not os.path.exists(numreqs_file_path):
+#     os.mkdir(numreqs_file_path)
+# if not os.path.exists(replay_file_path):
+#     os.mkdir(replay_file_path)
 
 
-class OnlineAnalysis:
+class DispatcherAnalysis:
 
     def __init__(self, is_replay=False):
         self.numreqs_data_osp = []
@@ -157,7 +157,7 @@ class OnlineAnalysis:
                 pickle.dump(self.anime_data, f)
 
 
-# because we cannot import functions from rtv_main.py, so here we just paste it here
+# because we cannot import functions from rtv_main.py, so we just paste it here
 def ridesharing_match_rtv(vehs, reqs_pool, reqs_picking, prev_assigned_edges, T):
     if IS_DEBUG:
         print('    -T = %d, building RTV graph ...' % T)
@@ -178,9 +178,8 @@ def ridesharing_match_rtv(vehs, reqs_pool, reqs_picking, prev_assigned_edges, T)
 
 def ridesharing_match_gi(vehs, reqs, reqs_new, T):
     rids_assigned = []
-    clear_veh_candidate_sches(vehs)
     for req in reqs_new:
-        req_params = [req.id, req.onid, req.dnid, req.Tr, req.Ts, req.Clp, req.Cld]
+        req_params = [req.id, req.onid, req.dnid, req.Clp, req.Cld]
         best_veh, best_sche = heuristic_insertion(vehs, req_params, T)
         if best_veh:
             best_veh.build_route(best_sche, reqs, T)

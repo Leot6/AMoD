@@ -11,7 +11,7 @@ from tqdm import tqdm
 from lib.simulator.model import Model
 from lib.simulator.config import *
 from lib.analysis.result_printer import print_results
-from lib.analysis.animation_generator import anim
+from lib.analysis.animation_generator import anim, anim_objective
 
 if __name__ == '__main__':
     # frames record the states of the AMoD model for animation purpose
@@ -48,7 +48,8 @@ if __name__ == '__main__':
     # if IS_DEBUG:
     if True:
         if DISPATCHER == 'OSP':
-            model.dispatcher.analysis.save_analysis_data(DISPATCHER)
+            print('...Saving analysis animation data...')
+            model.dispatcher.analysis.save_analysis_data()
 
     # end time
     etime = time.time()
@@ -65,4 +66,5 @@ if __name__ == '__main__':
 
     # output the simulation results and save data
     if IS_ANALYSIS:
+        print('...Outputing analysis results...')
         print_results(model)
