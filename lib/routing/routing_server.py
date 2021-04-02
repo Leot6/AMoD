@@ -8,13 +8,13 @@ import copy
 import pickle
 import numpy as np
 import scipy.stats as st
-from lib.simulator.config import TRAVEL_TIME, IS_STOCHASTIC_TRAFFIC, IS_STOCHASTIC_ROUTING, LEVEl_OF_STOCHASTIC
+from lib.simulator.config import IS_STOCHASTIC_TRAFFIC, IS_STOCHASTIC_ROUTING, LEVEl_OF_STOCHASTIC
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-with open(f'{root_path}/data/{TRAVEL_TIME}/NYC_NET.pickle', 'rb') as f:
+with open(f'{root_path}/data-gitignore/NYC_NET.pickle', 'rb') as f:
     NETWORK = pickle.load(f)
-with open(f'{root_path}/data/{TRAVEL_TIME}/path-tables-gitignore/NYC_TDT_0.pickle', 'rb') as f:
+with open(f'{root_path}/data-gitignore/path-tables/NYC_TDT_0.pickle', 'rb') as f:
     DIST_TABLE = pickle.load(f)
 
 if IS_STOCHASTIC_TRAFFIC:
@@ -26,12 +26,12 @@ PATH_TABLE_LIST = [None] * NUM_OF_LAMBDA
 TIME_TABLE_LIST = [None] * NUM_OF_LAMBDA
 VAR_TABLE_LIST = [None] * NUM_OF_LAMBDA
 for i in range(NUM_OF_LAMBDA):
-    file_floder = 'path-tables-gitignore' if i == 0 else 'path-tables-stochastic-gitignore'
-    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_SPT_{str(i)}.pickle', 'rb') as f:
+    file_floder = 'path-tables' if i == 0 else 'path-tables-stochastic'
+    with open(f'{root_path}/data-gitignore/{file_floder}/NYC_SPT_{str(i)}.pickle', 'rb') as f:
         PATH_TABLE_LIST[i] = pickle.load(f)
-    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_TTT_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data-gitignore/{file_floder}/NYC_TTT_{str(i)}.pickle', 'rb') as f:
         TIME_TABLE_LIST[i] = pickle.load(f)
-    with open(f'{root_path}/data/{TRAVEL_TIME}/{file_floder}/NYC_TVT_{str(i)}.pickle', 'rb') as f:
+    with open(f'{root_path}/data-gitignore/{file_floder}/NYC_TVT_{str(i)}.pickle', 'rb') as f:
         VAR_TABLE_LIST[i] = pickle.load(f)
 
 

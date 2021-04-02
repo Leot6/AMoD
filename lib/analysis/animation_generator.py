@@ -65,7 +65,7 @@ def anim(frames_vehs):
     # print('objective', objective, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output/anim_new.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_new.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -173,7 +173,7 @@ def anim_objective(frames_vehs, frames_violations, frames_num_new_reqs, frames_n
     print('objective', objective, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output/anim_{objective}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_{objective}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -274,7 +274,7 @@ def anim_compare_sches_found(frames_vehs, frames_reqs=None, frames_edges=None, d
     print('Dispatcher', dispatcher, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output/anim_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -367,6 +367,6 @@ def anim_sche(veh, trip, sches, best_sche, dispatcher=''):
     print('saving animation....')
     start_time = time.time()
     # plt.show()
-    anime.save(f'{root_path}/output/anim_sche{veh.id}_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_sche{veh.id}_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime

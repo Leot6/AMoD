@@ -11,18 +11,17 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 # ************************************************************************************** #
 # # parameters for Simulator # #
 # taxi requests data, station loctions
-TRAVEL_TIME = 'mit'  # mit or uber
 DATE = '20160525'
 TRIP_NUM = '400k'  # 400k(404310), 500k(504985), 600k(605660), 700k(703260), 800k(800752)，1200k(1219956)
 STN_NUM = '101'  # '101' or '630'
 
-with open(f'{root_path}/data/{TRAVEL_TIME}/NYC_REQ_DATA_{TRIP_NUM}.pickle', 'rb') as f:
+with open(f'{root_path}/data-gitignore/NYC_REQ_DATA_{TRIP_NUM}.pickle', 'rb') as f:
     REQ_DATA = pickle.load(f)
-with open(f'{root_path}/data/{TRAVEL_TIME}/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f:
+with open(f'{root_path}/data-gitignore/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f:
     STN_LOC = pickle.load(f)
 
 # demand volume (percentage of total), simulation start time and its nickname
-DMD_VOL = 1  # <= 1
+DMD_VOL = 0.01  # <= 1
 # DMD_SST = parse(DATE + ' 00:00:00')
 DMD_SST = parse(DATE + ' 18:30:00')
 REQ_INIT_IDX = 0
@@ -30,7 +29,7 @@ DMD_STR = 'Manhattan'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds), 24 hour = 1440 min
 T_WARM_UP = 60 * 30
-T_STUDY = 60 * 60  # < 60 * 1371
+T_STUDY = 60 * 30  # < 60 * 1371
 T_COOL_DOWN = 60 * 39
 # T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
@@ -79,7 +78,7 @@ IS_STOCHASTIC_TRAFFIC = False
 IS_STOCHASTIC_SCHEDULE = False
 # IS_STOCHASTIC_ROUTING = True
 IS_STOCHASTIC_ROUTING = False
-LEVEl_OF_STOCHASTIC = 1
+LEVEl_OF_STOCHASTIC = 4
 
 # # parameters for Manhattan map
 # map width and height (km)

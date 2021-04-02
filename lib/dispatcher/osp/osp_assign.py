@@ -8,7 +8,7 @@ import numpy as np
 from lib.simulator.config import OBJECTIVE, Reliability_Shreshold
 from lib.dispatcher.osp.osp_schedule import compute_sche_delay, compute_sche_reward, compute_sche_reliability
 
-CUTOFF_ILP = 5
+CUTOFF_ILP = 20
 # when the num of edges is very large, ILP solver might not find a proper solution
 # that could ensure picking all previous assigned requests (one or two would be missed)
 # (try to solve it by introduce initial solution by selecting previous assigned edges, but not work yet)

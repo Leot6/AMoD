@@ -34,9 +34,11 @@
 .idea/
 __pycache__/
 .DS_Store
-path-tables-gitignore/
-path-tables-stochastic-gitignore/
-trip-data-gitignore/
+
+# large data files
+data-gitignore/
+output-gitignore/
 replay-data-gitignore/
 test-gitignore.py
+
 

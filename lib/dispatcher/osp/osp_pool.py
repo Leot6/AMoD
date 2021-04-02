@@ -21,7 +21,7 @@ from lib.dispatcher.rtv.rtv_schedule import compute_schedule as compute_sche_rtv
 # feasible trips (trip, best_schedule, min_cost, feasible_schedules)
 VT_TABLE = [[[] for i in range(RIDESHARING_SIZE)] for j in range(FLEET_SIZE)]
 PREV_VT_TABLE = None
-CUTOFF_VT = 1
+CUTOFF_VT = 20
 # FAST_COMPUTE = True
 FAST_COMPUTE = False
 
