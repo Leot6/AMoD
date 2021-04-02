@@ -28,7 +28,14 @@ Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper
 - folder `rebalancer` for repositioning idle vehicles
   - `naive_rebalancer.py`: assign the unserved request to its nearest idle vehicle
 
-The main function in `run.py` will simulate the system given input parameters from `config.py`. The results of simulations can be found in folder `output`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
+To run a samulation, download data files from [this google drive link](https://drive.google.com/drive/folders/1ja6du-6hcxM3ooohTcoPuRvcgFfpu2La?usp=sharing), and put the data folder in the root directory.
+```
+|-- data-gitignore
+|-- doc
+|-- lib
+|-- output-gitignore
+```
+The main function in `run.py` will simulate the system given input parameters from `config.py`. The results of simulations can be found in folder `output-gitignore`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
 
 
 ## References
