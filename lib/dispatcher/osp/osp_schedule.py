@@ -123,8 +123,8 @@ def compute_sche_delay(veh, sche, reqs_all):
     for (rid, pod, tnid, ddl) in sche:
         dt = get_duration_from_origin_to_dest(nid, tnid)
         t += dt
-        c_wait += (t + T - reqs_all[rid].Clp) if pod == 1 else 0
-        c_delay += (t + T - reqs_all[rid].Cld) if pod == -1 else 0
+        c_wait += (t + T - reqs_all[rid].Tr) if pod == 1 else 0
+        c_delay += (t + T - reqs_all[rid].Tr - reqs_all[rid].Ts) if pod == -1 else 0
         nid = tnid
     delay = c_wait * 1.0 + c_delay
     return delay
