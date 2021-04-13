@@ -28,7 +28,8 @@ Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper
 - folder `rebalancer` for repositioning idle vehicles
   - `naive_rebalancer.py`: assign the unserved request to its nearest idle vehicle
 
-To run a samulation, download data files from [this onedrive link](https://1drv.ms/u/s!AsqflzzqZj9qg-85wlz4OGQ0nKbusA?e=axV2NS) or [this google drive link](https://drive.google.com/drive/folders/1ja6du-6hcxM3ooohTcoPuRvcgFfpu2La?usp=sharing), and put the downloaded folders in the root directory.
+To run a samulation, download data files from [this onedrive link](https://1drv.ms/u/s!AsqflzzqZj9qg-85wlz4OGQ0nKbusA?e=axV2NS) or [this google drive link](https://drive.google.com/drive/folders/1ja6du-6hcxM3ooohTcoPuRvcgFfpu2La?usp=sharing), and put the downloaded folders in the root directory. Files in `data-gitignore` were generated using repository [Manhattan-Map](https://github.com/Leot6/Manhattan-Map).
+
 ```
 |-- AMoD
    |-- data-gitignore
