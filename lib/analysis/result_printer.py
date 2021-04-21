@@ -18,12 +18,11 @@ def print_results(model):
 
     # analyze requests whose demand time is within the period of study
     for req in model.reqs:
-        if T_WARM_UP <= req.Cep <= T_WARM_UP + T_STUDY:
+        if T_WARM_UP <= req.Cep < T_WARM_UP + T_STUDY:
             count_reqs += 1
             pass
             if np.isclose(req.Tp, -1.0):
                 count_rejs += 1
-                pass
             else:
                 max_wait = req.Clp_backup - req.Tr
                 actual_wait = round(req.Tp - req.Tr, 2)
@@ -47,10 +46,9 @@ def print_results(model):
         serving_rate = 100.0 * count_onboard / num_reqs
         served_rate = 100.0 * count_served / num_reqs
         service_rate = serving_rate + served_rate
-        mean_Ts = df_reqs['Ts'].mean()
-        mean_wait = df_reqs['ActualWait'].mean()
+        mean_Ts = df_reqs[(df_reqs['ActualDelay'] != -1)]['Ts'].mean()
+        mean_wait = df_reqs[(df_reqs['ActualDelay'] != -1)]['ActualWait'].mean()
         mean_delay = df_reqs[(df_reqs['ActualDelay'] != -1)]['ActualDelay'].mean()
-
         return count_onboard, count_served, count_service, serving_rate, served_rate, service_rate, \
                mean_Ts, mean_wait, mean_delay
 
@@ -104,15 +102,15 @@ def print_results(model):
     print('simulation results:')
     print(f'  - requests ({count_reqs}):')
     print(f'    + total req distance: {req_total_dist:.2f} km, mean: {req_mean_dist:.2f} km')
-    print(f'    + ALL_: served: {served_rate_ALL:.2f}% ({count_served_ALL}), '
-          f'serving: {serving_rate_ALL:.2f}% ({count_onboard_ALL}), '
-          f'service: {service_rate_ALL:.2f}% ({count_service_ALL})')
+    print(f'    + ALL_: complete: {served_rate_ALL:.2f}% ({count_served_ALL}), '
+          f'onboard: {serving_rate_ALL:.2f}% ({count_onboard_ALL}), '
+          f'total service: {service_rate_ALL:.2f}% ({count_service_ALL})')
     print(f'    +     : Ts: {mean_Ts_ALL:.2f} s, waiting: {mean_wait_ALL:.2f} s, delay: {mean_delay_ALL:.2f} s')
-    print(f'    + __VD: served: {served_rate_VD:.2f}% ({count_served_VD}), '
-          f'serving: {serving_rate_VD:.2f}% ({count_onboard_VD}), '
-          f'service: {service_rate_VD:.2f}% ({count_service_VD})')
+    print(f'    + __VD: complete: {served_rate_VD:.2f}% ({count_served_VD}), '
+          f'onboard: {serving_rate_VD:.2f}% ({count_onboard_VD}), '
+          f'total service: {service_rate_VD:.2f}% ({count_service_VD})')
     print(f'    +     : Ts: {mean_Ts_VD:.2f} s, waiting: {mean_wait_VD:.2f} s, delay: {mean_delay_VD:.2f} s')
-    print(f'  - vehicles ({veh_total_reqs}):')
+    print(f'  - vehicles ({FLEET_SIZE}):')
     print(f'    + vehicle service distance: {veh_total_dist:.2f} km, mean: {veh_mean_dist:.2f} km')
     # print(f'    + vehicle empty distance: {veh_total_empty_dist:.2f} km, mean: {veh_mean_empty_dist:.2f} km')
     print(f'    + vehicle mean service time: {veh_mean_time:.2f} s ({veh_mean_time_percent:.2f}%), '

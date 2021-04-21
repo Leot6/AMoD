@@ -44,10 +44,10 @@ class ObjectiveAnalysis:
             total_load = 0
             num_non_idle_vehs = 0
             for veh, viol in zip(vehs, violations_vehs):
-                if veh.new_droped_rids:
-                    for rid in veh.new_droped_rids:
+                if veh.new_dropped_rids:
+                    for rid in veh.new_dropped_rids:
                         req = reqs[rid]
-                        num_dropped_reqs += len(veh.new_droped_rids)
+                        num_dropped_reqs += len(veh.new_dropped_rids)
                         if req.Td > req.Cld:
                             viol.append(rid)
                         income += req.price_act

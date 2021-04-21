@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from lib.simulator.config import T_WARM_UP, T_STUDY, RIDESHARING_SIZE
+from lib.simulator.config import T_WARM_UP, T_STUDY, IS_DEBUG
 from lib.simulator.route import Step, Leg
 from lib.routing.routing_server import build_route_from_origin_to_dest, get_node_geo
 
@@ -78,7 +78,7 @@ class Veh(object):
         self.onboard_rids_STUDY = []
         self.served_rids_STUDY = []
         self.new_picked_rids = []
-        self.new_droped_rids = []
+        self.new_dropped_rids = []
 
         # debug code starts
         self.route_record = []
@@ -96,7 +96,7 @@ class Veh(object):
         # done is a list of finished legs
         done = []
         self.new_picked_rids.clear()
-        self.new_droped_rids.clear()
+        self.new_dropped_rids.clear()
         while dT > 0 and len(self.route) > 0:
             leg = self.route[0]
             # if the first leg could be finished by then
@@ -182,17 +182,21 @@ class Veh(object):
                 self.picking_rids.remove(leg.rid)
                 self.new_picked_rids.append(leg.rid)
                 self.onboard_rids.append(leg.rid)
+                # if IS_DEBUG:
+                #     print(f'            +vehicle #{self.id} picked up req #{leg.rid} at {self.T}s')
             elif leg.pod == -1:
-                self.new_droped_rids.append(leg.rid)
+                self.new_dropped_rids.append(leg.rid)
                 self.onboard_rids.remove(leg.rid)
                 self.served_rids.append(leg.rid)
+                # if IS_DEBUG:
+                #     print(f'            +vehicle #{self.id} dropped up req #{leg.rid} at {self.T}s')
                 if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
                     self.served_rids_STUDY.append(leg.rid)
                     self.onboard_rids_STUDY = copy.deepcopy(self.onboard_rids)
         assert self.n == len(self.onboard_rids)
-        # if set(self.new_picked_rids) & set(self.new_droped_rids) != set():
-        #     print('debug11', self.new_picked_rids, self.new_droped_rids)
-        # assert set(self.new_picked_rids) & set(self.new_droped_rids) == set()
+        # if set(self.new_picked_rids) & set(self.new_dropped_rids) != set():
+        #     print('debug11', self.new_picked_rids, self.new_dropped_rids)
+        # assert set(self.new_picked_rids) & set(self.new_dropped_rids) == set()
         self.pop_leg()
 
     # pop the first leg from the route list

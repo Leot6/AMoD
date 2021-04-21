@@ -53,6 +53,12 @@ class Model(object):
             idx = int(i * len(STN_LOC) / self.V)
             self.vehs.append(Veh(i, int(STN_LOC.iloc[idx]['id']),
                                  STN_LOC.iloc[idx]['lng'], STN_LOC.iloc[idx]['lat'], K=self.K))
+
+        # if IS_DEBUG:
+        #     print(f"[DEBUG] Check vehicles initial positions")
+        #     for veh in self.vehs:
+        #         print(f" -vehicle {veh.id} at station {veh.nid}")
+
         self.reqs_data = REQ_DATA
         self.req_init_idx = REQ_INIT_IDX
         while parse(self.reqs_data.iloc[self.req_init_idx]['ptime']) < DMD_SST:
@@ -85,6 +91,11 @@ class Model(object):
     def dispatch_at_time(self, T):
         self.T = T
 
+        if IS_DEBUG:
+            stime = time.time()
+            print(f'[DEBUG] T = {T-INT_ASSIGN}s: '
+                  f'Epoch {round(T / INT_ASSIGN)}/{round(T_TOTAL / INT_ASSIGN)} is running.')
+
         # 1. reject long waited requests
         self.reject_long_wait_reqs()
         # 2. update statuses of vehicles and requests
@@ -103,6 +114,14 @@ class Model(object):
         if np.isclose(T % INT_REBL, 0):
             # 7. rebalancing
             self.rebalancing_idle_vehs()
+
+        if IS_DEBUG:
+            print(f'        T = {T}s: Epoch {round(T / INT_ASSIGN)}/{round(T_TOTAL / INT_ASSIGN)} has finished. '
+                  f'Total reqs received = {self.N}, of which {len(self.reqs_served)} complete '
+                  f'+ {len(self.reqs_onboard)} onboard + {len(self.reqs_picking)} picking '
+                  f'+ {len(self.reqs_unassigned)} pending + {len(self.rejs)} walkaway '
+                  f'({round((time.time() - stime), 2)})')
+            print()
 
     def reject_long_wait_reqs(self):
         if len(self.reqs_unassigned) > 0:
@@ -128,7 +147,7 @@ class Model(object):
     # update vehs and reqs status to their current positions at time T
     def upd_vehs_and_reqs_stat_to_time(self):
         if IS_DEBUG:
-            print('    -T = %d, updating status of vehicles and requests...' % self.T)
+            print('        -updating status of vehicles and requests...')
             s1 = time.time()
         for veh in self.vehs:
             done = veh.move_to_time(self.T)
@@ -147,35 +166,44 @@ class Model(object):
                     # print('veh', veh.id, 'dropped', rid)
 
         if IS_DEBUG:
-            print('        s1 running time:', round((time.time() - s1), 2))
+            noi = 0  # number of idle vehicles
+            nop = 0  # number of picked requests
+            nod = 0  # number of dropped requests
+            for veh in self.vehs:
+                nop += len(veh.new_picked_rids)
+                nod += len(veh.new_dropped_rids)
+                if veh.idle:
+                    noi += 1
+            print(f'            +picked reqs: {nop}, dropped reqs: {nod}, '
+                  f'idle vehicles: {noi}/{self.V}  ({round((time.time() - s1), 2)}s)')
 
     # generate requests up to time T, loading from reqs data file
     def gen_reqs_to_time(self):
         if IS_DEBUG:
-            print('    -T = %d, loading new reqs ...' % self.T)
+            print('        -loading new reqs ...')
             s3 = time.time()
         req_idx = self.req_init_idx + int(self.N / self.D)
-        while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds <= self.T:
+        while (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds < self.T:
             req = Req(self.N, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds,
                       self.reqs_data.iloc[req_idx]['onid'], self.reqs_data.iloc[req_idx]['dnid'],
                       self.reqs_data.iloc[req_idx]['olng'], self.reqs_data.iloc[req_idx]['olat'],
                       self.reqs_data.iloc[req_idx]['dlng'], self.reqs_data.iloc[req_idx]['dlat'])
-            # print('req_idx:', req_idx, (parse(self.reqs_data.iloc[req_idx]['ptime']) - DMD_SST).seconds, req.Ts)
             self.reqs.append(req)
             self.N += 1
             req_idx = self.req_init_idx + int(self.N / self.D)
             self.queue.append(self.reqs[-1])
             assert req.Ts > 150
+
+            # if IS_DEBUG:
+            #     new_req = self.reqs[-1]
+            #     print(f'            +req {new_req.id} requested at {new_req.Tr}, '
+            #           f'from {new_req.onid} to {new_req.dnid}, Ts = {new_req.Ts}s')
+
         assert self.N == len(self.reqs)
         if IS_DEBUG:
-            print('        s3 running time:', round((time.time() - s3), 2))
-            noi = 0  # number of idle vehicles
-            for veh in self.vehs:
-                if veh.idle:
-                    noi += 1
-            print(f'            reqs in queue: {len(self.queue)}, '
-                  f'reqs in pool: {len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned)}, '
-                  f'idle vehs: {noi} / {self.V}')
+            print(f'            +reqs in queue: {len(self.queue)}, '
+                  f'reqs in pool: {len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned)}  '
+                  f'({round((time.time() - s3), 2)}s)')
 
             # debug
             # print(f'reqs in queue: {[r.id for r in self.queue]}; reqs picking:{[r.id for r in self.reqs_picking]};'
@@ -259,7 +287,7 @@ class Model(object):
         param = f'scenario: {DMD_STR}' \
                 f'\nsimulation starts at {self.start_time}, initializing time: {self.time_of_init} s' \
                 f'\nsimulation ends at {self.end_time}, runtime time: {self.time_of_run},' \
-                f' average: {self.avg_time_of_run}' \
+                f' average: {self.avg_time_of_run} s' \
                 f'\nsystem settings:' \
                 f'\n  - from {DMD_SST} to {DMD_SST + datetime.timedelta(seconds=T_TOTAL)},' \
                 f' with {round(T_WARM_UP / INT_ASSIGN)}+{round(T_STUDY / INT_ASSIGN)}+' \

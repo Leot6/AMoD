@@ -40,10 +40,10 @@ def compute_schedule(veh_params, sub_sches, req_params, T):
                     else:
                         feasible_sches.append(new_sche)
                 # always return the first found feasible schedule (will speed up the computation)
-                if best_sche:
-                # if DISPATCHER != 'OSP' and best_sche:
-                    assert len(feasible_sches) == 1
-                    return best_sche, min_cost, feasible_sches, num_of_sche_searched
+                # if best_sche:
+                # # if DISPATCHER != 'OSP' and best_sche:
+                #     assert len(feasible_sches) == 1
+                #     return best_sche, min_cost, feasible_sches, num_of_sche_searched
                 if viol > 0:
                     break
             if viol == 3:
@@ -55,6 +55,10 @@ def insert_req_to_sche(veh_params, sub_sche, req_params, idx_p, idx_d, T):
     [rid, r_onid, r_dnid, r_Clp, r_Cld] = req_params
     new_sche = None
     new_sche_cost = np.inf
+
+    flag = False
+    if len(sub_sche) > 1 and sub_sche[0][0] == 11651:
+        flag = True
 
     sub_sche.insert(idx_p, (rid, 1, r_onid, r_Clp))
     sub_sche.insert(idx_d, (rid, -1, r_dnid, r_Cld))

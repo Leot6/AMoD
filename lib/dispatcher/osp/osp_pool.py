@@ -296,7 +296,7 @@ def upd_prev_sches(veh, rids_prev, k, T):
     updated_prev_vt_k = []
 
     new_pick_rids = set(veh.new_picked_rids)
-    new_drop_rids = set(veh.new_droped_rids)
+    new_drop_rids = set(veh.new_dropped_rids)
     new_both_rids = new_pick_rids.union(new_drop_rids)
     n_new_pick = len(new_pick_rids)
     n_new_drop = len(new_drop_rids)
