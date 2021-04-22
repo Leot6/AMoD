@@ -28,9 +28,9 @@ REQ_INIT_IDX = 0
 DMD_STR = 'Manhattan'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds), 24 hour = 1440 min
-T_WARM_UP = 60 * 30    # = 60 * 30
-T_STUDY = 60 * 80     # < 60 * 1371
-T_COOL_DOWN = 60 * 39  # = 60 * 39
+T_WARM_UP = 60 * 0    # = 60 * 30
+T_STUDY = 60 * 60     # < 60 * 1371
+T_COOL_DOWN = 60 * 0  # = 60 * 39
 # T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
@@ -55,13 +55,13 @@ DISPATCHER = 'GI'
 # DISPATCHER = 'OSP'
 # DISPATCHER = 'RTV'
 
-# REBALANCER = 'NR'
-REBALANCER = 'none'
+REBALANCER = 'NR'
+# REBALANCER = 'none'
 
-# OBJECTIVE = 'Time'
+OBJECTIVE = 'Time'
 # OBJECTIVE = 'ServiceRate'
 # OBJECTIVE = 'Reliability'
-OBJECTIVE = 'Profit'
+# OBJECTIVE = 'Profit'
 Reliability_Shreshold = 0
 
 # if true, activate the animation / analysis

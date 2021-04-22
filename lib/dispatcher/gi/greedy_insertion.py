@@ -93,5 +93,6 @@ def rebalancing_assign(vehs, req):
                 best_veh = veh
                 min_cost = dt
     if best_veh:
-        best_sche = [(req.id, 1, req.onid, req.Tr, req.Clp), (req.id, -1, req.dnid, req.Tr + req.Ts, req.Cld)]
+        # best_sche = [(req.id, 1, req.onid, req.Clp), (req.id, -1, req.dnid, req.Cld)]
+        best_sche = [(-1, 0, req.onid, dt * 1.1)]
     return best_veh, best_sche
