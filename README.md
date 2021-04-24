@@ -37,7 +37,7 @@ To run a samulation, download data files from [this onedrive link](https://1drv.
 ```
 The main function in `run.py` will simulate the system given input parameters from `config.py`. The results of simulations can be found in folder `output-gitignore`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side. 
 
-Note: running dispatcher `sba`/`rtv`/`osp` needs [mosek](https://www.mosek.com/) (an commerical ILP solver, free to academic users) installed.
+Note: running dispatcher `sba`/`rtv`/`osp` needs [mosek](https://www.mosek.com/) (an commerical ILP solver, free to academic users) installed. If mosek is not installed, the code can be run by replacing the uses of function `ILP_assign` to `greedy_assign` (do not forget to comment the codes using mosek in file `osp_assign`), with expected worse performances.
 
 
 ## References

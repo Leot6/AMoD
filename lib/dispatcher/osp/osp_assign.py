@@ -201,7 +201,6 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_all, reqs_picking=[], prev_assign
 
 def greedy_assign(veh_trip_edges):
     rids_assigned = []
-    T_id_assigned = []
     vids_assigned = []
     sches_assigned = []
 
@@ -209,14 +208,11 @@ def greedy_assign(veh_trip_edges):
     for (veh, trip, sche, cost) in edges:
         vid = veh.id
         T_id = tuple([r.id for r in trip])
-        if T_id in T_id_assigned:
-            continue
         if vid in vids_assigned:
             continue
         if np.any([rid in rids_assigned for rid in T_id]):
             continue
         rids_assigned.extend([rid for rid in T_id])
-        T_id_assigned.append(T_id)
         vids_assigned.append(vid)
         sches_assigned.append(sche)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
