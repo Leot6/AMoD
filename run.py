@@ -25,10 +25,16 @@ if __name__ == '__main__':
     # start time of simulation
     stime = time.time()
     # dispatch the system for T_TOTAL seconds, at the interval of INT_ASSIGN
-    for T in tqdm(range(INT_ASSIGN, T_TOTAL+INT_ASSIGN, INT_ASSIGN), desc=f'AMoD simulation (Δt={INT_ASSIGN}s)'):
-        model.dispatch_at_time(T)
-        if IS_ANIMATION and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
-            frames_vehs.append(copy.deepcopy(model.vehs))
+    if IS_DEBUG:
+        for T in range(INT_ASSIGN, T_TOTAL + INT_ASSIGN, INT_ASSIGN):
+            model.dispatch_at_time(T)
+            if IS_ANIMATION and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
+                frames_vehs.append(copy.deepcopy(model.vehs))
+    else:
+        for T in tqdm(range(INT_ASSIGN, T_TOTAL + INT_ASSIGN, INT_ASSIGN), desc=f'AMoD simulation (Δt={INT_ASSIGN}s)'):
+            model.dispatch_at_time(T)
+            if IS_ANIMATION and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
+                frames_vehs.append(copy.deepcopy(model.vehs))
 
     if IS_DEBUG:
         if DISPATCHER == 'OSP':

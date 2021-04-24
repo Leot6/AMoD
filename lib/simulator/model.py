@@ -120,7 +120,7 @@ class Model(object):
                   f'Total reqs received = {self.N}, of which {len(self.reqs_served)} complete '
                   f'+ {len(self.reqs_onboard)} onboard + {len(self.reqs_picking)} picking '
                   f'+ {len(self.reqs_unassigned)} pending + {len(self.rejs)} walkaway '
-                  f'({round((time.time() - stime), 2)})')
+                  f'({round((time.time() - stime), 2)}s)')
             print()
 
     def reject_long_wait_reqs(self):
@@ -167,6 +167,7 @@ class Model(object):
 
         if IS_DEBUG:
             noi = 0  # number of idle vehicles
+            nor = 0  # number of rebalancing vehicles
             nop = 0  # number of picked requests
             nod = 0  # number of dropped requests
             for veh in self.vehs:
@@ -174,8 +175,11 @@ class Model(object):
                 nod += len(veh.new_dropped_rids)
                 if veh.idle:
                     noi += 1
-            print(f'            +picked reqs: {nop}, dropped reqs: {nod}, '
-                  f'idle vehicles: {noi}/{self.V}  ({round((time.time() - s1), 2)}s)')
+                if veh.rebl:
+                    nor += 1
+            print(f'            +picked reqs: {nop}, dropped reqs: {nod}')
+            print(f'            +idle vehs: {noi}/{self.V}, rebl vehs: {nor}/{self.V}  '
+                  f'({round((time.time() - s1), 2)}s)')
 
     # generate requests up to time T, loading from reqs data file
     def gen_reqs_to_time(self):
@@ -201,9 +205,7 @@ class Model(object):
 
         assert self.N == len(self.reqs)
         if IS_DEBUG:
-            print(f'            +reqs in queue: {len(self.queue)}, '
-                  f'reqs in pool: {len(self.queue) + len(self.reqs_picking) + len(self.reqs_unassigned)}  '
-                  f'({round((time.time() - s3), 2)}s)')
+            print(f'            +new received reqs: {len(self.queue)}  ({round((time.time() - s3), 2)}s)')
 
             # debug
             # print(f'reqs in queue: {[r.id for r in self.queue]}; reqs picking:{[r.id for r in self.reqs_picking]};'

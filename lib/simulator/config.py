@@ -22,15 +22,15 @@ with open(f'{root_path}/data-gitignore/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1  # <= 1
-DMD_SST = parse(DATE + ' 00:00:00')
-# DMD_SST = parse(DATE + ' 18:30:00')
+# DMD_SST = parse(DATE + ' 00:00:00')
+DMD_SST = parse(DATE + ' 18:30:00')   # peak hour
 REQ_INIT_IDX = 0
 DMD_STR = 'Manhattan'
 
 # warm-up time, study time and cool-down time of the simulation (in seconds), 24 hour = 1440 min
-T_WARM_UP = 60 * 0    # = 60 * 30
+T_WARM_UP = 60 * 30    # = 60 * 30
 T_STUDY = 60 * 60     # < 60 * 1371
-T_COOL_DOWN = 60 * 0  # = 60 * 39
+T_COOL_DOWN = 60 * 39  # = 60 * 39
 # T_TOTAL = (T_WARM_UP + T_STUDY + T_COOL_DOWN)
 
 # fleet size, vehicle capacity and ridesharing size
@@ -50,8 +50,8 @@ INT_ASSIGN = 30
 INT_REBL = INT_ASSIGN * 1
 
 # dispatching and rebalancing methods
-DISPATCHER = 'GI'
-# DISPATCHER = 'SBA'
+# DISPATCHER = 'GI'
+DISPATCHER = 'SBA'
 # DISPATCHER = 'OSP'
 # DISPATCHER = 'RTV'
 
@@ -65,11 +65,11 @@ OBJECTIVE = 'Time'
 Reliability_Shreshold = 0
 
 # if true, activate the animation / analysis
+IS_ANALYSIS = True
 IS_ANIMATION = False
 # IS_ANIMATION = True
-IS_ANALYSIS = True
-# IS_DEBUG = False
-IS_DEBUG = True
+IS_DEBUG = False
+# IS_DEBUG = True
 
 # travel time mode
 # IS_STOCHASTIC_TRAFFIC = True

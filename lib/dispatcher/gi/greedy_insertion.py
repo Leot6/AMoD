@@ -31,8 +31,8 @@ class GI(object):
 
     def dispatch(self, T):
         if IS_DEBUG:
-            print('        -assigning reqs to vehs through GI...')
             t = time.time()
+            print(f'        -assigning {len(self.queue)} reqs to vehs through GI...')
 
         num_dispatched_req = 0
         vids_assigned = []

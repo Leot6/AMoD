@@ -5,7 +5,7 @@ compute an assignment plan from all possible matches
 import time
 import mosek
 import numpy as np
-from lib.simulator.config import OBJECTIVE, Reliability_Shreshold
+from lib.simulator.config import IS_DEBUG, OBJECTIVE, Reliability_Shreshold
 from lib.dispatcher.osp.osp_schedule import compute_sche_delay, compute_sche_reward, compute_sche_reliability
 
 CUTOFF_ILP = 20
@@ -200,6 +200,7 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_all, reqs_picking=[], prev_assign
 
 
 def greedy_assign(veh_trip_edges):
+    t = time.time()
     rids_assigned = []
     vids_assigned = []
     sches_assigned = []
@@ -217,6 +218,9 @@ def greedy_assign(veh_trip_edges):
         sches_assigned.append(sche)
         # print('     *trip %s is assigned to veh %d with cost %.2f' % ([req.id for req in trip], veh_id, cost))
         assert len(rids_assigned) == len(set(rids_assigned))
+
+    if IS_DEBUG:
+        print(f'                +greedy assignment...  ({round((time.time() - t), 2)}s)')
 
     return rids_assigned, vids_assigned, sches_assigned
 

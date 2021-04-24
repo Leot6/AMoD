@@ -7,7 +7,7 @@ from tqdm import tqdm
 from lib.simulator.config import IS_DEBUG
 from lib.routing.routing_server import get_duration_from_origin_to_dest
 from lib.dispatcher.osp.osp_pool import build_vt_table
-from lib.dispatcher.osp.osp_assign import ILP_assign
+from lib.dispatcher.osp.osp_assign import ILP_assign, greedy_assign
 from lib.dispatcher.osp.osp_schedule import compute_schedule
 
 # MULTI_ASSIGN = True
@@ -42,8 +42,8 @@ class SBA(object):
 
 def ridesharing_match_sba(vehs, reqs_all, reqs_pool, T):
     if IS_DEBUG:
-        print('    -T = %d, find veh req pairs ...' % T)
-        a1 = time.time()
+        t = time.time()
+        print(f'        -assigning {len(reqs_pool)} reqs to vehs through SBA...')
 
     if MULTI_ASSIGN:
         reqs_prev = []
@@ -53,21 +53,34 @@ def ridesharing_match_sba(vehs, reqs_all, reqs_pool, T):
         # veh_req_edges = search_feasible_veh_req_edges(vehs, reqs_pool, T)
     num_edges = len(veh_req_edges)
 
-    if IS_DEBUG:
-        print('        a1 running time:', round((time.time() - a1), 2))
-
     # ILP assign
-    if IS_DEBUG:
-        print('    -T = %d, start ILP assign with %d edges...' % (T, len(veh_req_edges)))
-        a2 = time.time()
-    rids_assigned, vids_assigned, sches_assigned = ILP_assign(veh_req_edges, reqs_pool, reqs_all)
-    # rids_assigned, vids_assigned, sches_assigned = greedy_assign(veh_req_edges)
+    # rids_assigned, vids_assigned, sches_assigned = ILP_assign(veh_req_edges, reqs_pool, reqs_all)
+    rids_assigned, vids_assigned, sches_assigned = greedy_assign(veh_req_edges)
 
     if IS_DEBUG:
-        print('        a2 running time:', round((time.time() - a2), 2))
+        print(f'            +assigned reqs {len(rids_assigned)}  ({round((time.time() - t), 2)}s)')
 
     return rids_assigned, vids_assigned, sches_assigned, num_edges
 
+
+# when numreqs << numvehs, this one runs faster than the following one
+def build_rv_graph(vehs, reqs_pool, T):
+    t = time.time()
+    veh_req_edges = []
+    for req in tqdm(reqs_pool, desc=f'req search ({len(reqs_pool)} reqs)', leave=False):
+        req_params = [req.id, req.onid, req.dnid, req.Clp, req.Cld]
+        trip = tuple([req])
+        for veh in tqdm(vehs, desc=f'candidate veh ({len(vehs)} vehs)', leave=False):
+            if get_duration_from_origin_to_dest(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
+                continue
+            veh_params = [veh.nid, veh.t_to_nid, veh.n]
+            sub_sche = veh.sche
+            best_sche, cost, feasible_sches, n_s_c = compute_schedule(veh_params, [sub_sche], req_params, T)
+            if best_sche:
+                veh_req_edges.append((veh, trip, best_sche, cost))
+    if IS_DEBUG:
+        print(f'                +computing feasible veh req pairs...  ({round((time.time() - t), 2)}s)')
+    return veh_req_edges
 
 # def search_feasible_veh_req_edges(vehs, reqs_pool, T):
 #     veh_req_edges = []
@@ -85,21 +98,3 @@ def ridesharing_match_sba(vehs, reqs_all, reqs_pool, T):
 #             if best_sche:
 #                 veh_req_edges.append((veh, trip, best_sche, min_cost))
 #     return veh_req_edges
-
-
-# when numreqs << numvehs, this one runs faster than the above one
-def build_rv_graph(vehs, reqs_pool, T):
-    veh_req_edges = []
-    for req in tqdm(reqs_pool, desc=f'req search ({len(reqs_pool)} reqs)', leave=False):
-        req_params = [req.id, req.onid, req.dnid, req.Clp, req.Cld]
-        trip = tuple([req])
-        for veh in tqdm(vehs, desc=f'candidate veh ({len(vehs)} vehs)', leave=False):
-            if get_duration_from_origin_to_dest(veh.nid, req.onid) + veh.t_to_nid + T > req.Clp:
-                continue
-            veh_params = [veh.nid, veh.t_to_nid, veh.n]
-            sub_sche = veh.sche
-            best_sche, cost, feasible_sches, n_s_c = compute_schedule(veh_params, [sub_sche], req_params, T)
-            if best_sche:
-                veh_req_edges.append((veh, trip, best_sche, cost))
-    return veh_req_edges
-

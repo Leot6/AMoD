@@ -24,8 +24,12 @@ class NR(object):
 
     def rebelancing(self, T):
         if IS_DEBUG:
-            print('    -T = %d, start rebalancing...' % T)
-            a4 = time.time()
+            t = time.time()
+            noi = 0  # number of idle vehicles
+            for veh in self.vehs:
+                if veh.idle:
+                    noi += 1
+            print(f'        -repositioning {noi} idle vehs to {len(self.reqs_unassigned)} positions through NR...')
 
         reqs_unassigned = sorted(self.reqs_unassigned, key=lambda r: r.id)
         veh_rebl_pairs = []
@@ -42,5 +46,5 @@ class NR(object):
             self.vehs[vid].build_route(sche, self.reqs, T)
 
         if IS_DEBUG:
-            print('        a4 running time:', round((time.time() - a4), 2))
+            print(f'            +rebalancing vehs {len(vids_rebl)}  ({round((time.time() - t), 2)}s)')
 
