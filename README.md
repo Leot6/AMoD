@@ -3,10 +3,13 @@
 
 (The illustration above shows an example instance using London map and [OSRM](https://github.com/Project-OSRM/osrm-backend). Now we have moved to Manhattan map and offline routing.) 
 
-Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper [[4]](https://github.com/Leot6/AMoD#references). Simulation on Manhattan with 2,000 vehicles of capacity 4 and 394,695 requests (on 2 Mar, 2015) shows a service rate around 96.15%, when maximum wait time and maximum delay of each request are *MaxWait = min(300s, ShortestTravelTime * 0.7)* and *MaxDelay = min(600s, MaxWait + ShortestTravelTime * 0.3)*, respectively. If single-request assignment is considered instead of multi-request assignment (as proposed in paper [[3]](https://github.com/Leot6/AMoD#references)), the service rate goes down to around 94% along with significant reduce on computational time (from 12.57s to 2.65s), slight reduce on mean wait time (from 147.4s to 146.5s), slight increase on mean in-vehicle delay (from 125.91s to 137.88s) and mean vehicle travel distance (from 396.82km to 406.77km).
+
+## Transitioned to [`AMoD2`](https://github.com/Leot6/AMoD2).
+Thanks to [wenjian0202](https://github.com/wenjian0202)‘s c++ platform [mod-abm-2.0](https://github.com/wenjian0202/mod-abm-2.0), we could continue our work on a much more efficient simulator (more than 5 times faster).
 
 
 ## Main Parts
+Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper [[4]](https://github.com/Leot6/AMoD#references). Simulation on Manhattan with 2,000 vehicles of capacity 4 and 394,695 requests (on 2 Mar, 2015) shows a service rate around 96.15%, when maximum wait time and maximum delay of each request are *MaxWait = min(300s, ShortestTravelTime * 0.7)* and *MaxDelay = min(600s, MaxWait + ShortestTravelTime * 0.3)*, respectively. If single-request assignment is considered instead of multi-request assignment (as proposed in paper [[3]](https://github.com/Leot6/AMoD#references)), the service rate goes down to around 94% along with significant reduce on computational time (from 12.57s to 2.65s), slight reduce on mean wait time (from 147.4s to 146.5s), slight increase on mean in-vehicle delay (from 125.91s to 137.88s) and mean vehicle travel distance (from 396.82km to 406.77km).
 
 - folder `simulator` for a free-floating AMoD system, with a fleet of vehicles
   - `model.py`: all other class are connected by it
