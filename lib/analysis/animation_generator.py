@@ -15,7 +15,7 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 veh_showing_route_step = 1
 amin_frame_interval = 75
-
+dpi = 100
 
 # animation
 def anim(frames_vehs):
@@ -50,7 +50,7 @@ def anim(frames_vehs):
     fig = plt.figure(figsize=(MAP_WIDTH, MAP_HEIGHT))
     plt.xlim((Olng, Dlng))
     plt.ylim((Olat, Dlat))
-    img = mpimg.imread(f'{root_path}/map.png')
+    img = mpimg.imread(f'{root_path}/map.jpg')
     plt.imshow(img, extent=[Olng, Dlng, Olat, Dlat], aspect=(Dlng - Olng) / (Dlat - Olat) * MAP_HEIGHT / MAP_WIDTH)
     fig.subplots_adjust(left=0.00, bottom=0.00, right=1.00, top=1.00)
     vehs = []
@@ -65,7 +65,7 @@ def anim(frames_vehs):
     # print('objective', objective, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output-gitignore/anim_new.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_new.mp4', dpi=dpi, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -141,7 +141,7 @@ def anim_objective(frames_vehs, frames_violations, frames_num_new_reqs, frames_n
     fig = plt.figure(figsize=(MAP_WIDTH, MAP_HEIGHT))
     plt.xlim((Olng, Dlng))
     plt.ylim((Olat, Dlat))
-    img = mpimg.imread(f'{root_path}/map.png')
+    img = mpimg.imread(f'{root_path}/map.jpg')
     plt.imshow(img, extent=[Olng, Dlng, Olat, Dlat], aspect=(Dlng - Olng) / (Dlat - Olat) * MAP_HEIGHT / MAP_WIDTH)
     fig.subplots_adjust(left=0.00, bottom=0.00, right=1.00, top=1.00)
     vehs = []
@@ -173,7 +173,7 @@ def anim_objective(frames_vehs, frames_violations, frames_num_new_reqs, frames_n
     print('objective', objective, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output-gitignore/anim_{objective}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_{objective}.mp4', dpi=dpi, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -244,7 +244,7 @@ def anim_compare_sches_found(frames_vehs, frames_reqs=None, frames_edges=None, d
     fig = plt.figure(figsize=(MAP_WIDTH, MAP_HEIGHT))
     plt.xlim((Olng, Dlng))
     plt.ylim((Olat, Dlat))
-    img = mpimg.imread(f'{root_path}/map.png')
+    img = mpimg.imread(f'{root_path}/map.jpg')
     plt.imshow(img, extent=[Olng, Dlng, Olat, Dlat], aspect=(Dlng - Olng) / (Dlat - Olat) * MAP_HEIGHT / MAP_WIDTH)
     fig.subplots_adjust(left=0.00, bottom=0.00, right=1.00, top=1.00)
     vehs = []
@@ -274,7 +274,7 @@ def anim_compare_sches_found(frames_vehs, frames_reqs=None, frames_edges=None, d
     print('Dispatcher', dispatcher, 'num of frames', len(frames_vehs))
     print('saving animation....')
     start_time = time.time()
-    anime.save(f'{root_path}/output-gitignore/anim_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_{dispatcher}.mp4', dpi=dpi, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime
 
@@ -334,7 +334,7 @@ def anim_sche(veh, trip, sches, best_sche, dispatcher=''):
     plt.xlim((Olng, Dlng))
     plt.ylim((Olat, Dlat))
 
-    img = mpimg.imread(f'{root_path}/map.png')
+    img = mpimg.imread(f'{root_path}/map.jpg')
     plt.imshow(img, extent=[Olng, Dlng, Olat, Dlat], aspect=(Dlng - Olng) / (Dlat - Olat) * MAP_HEIGHT / MAP_WIDTH)
     fig.subplots_adjust(left=0.00, bottom=0.00, right=1.00, top=1.00)
     [veh_lng, veh_lat] = get_node_geo(veh.nid)
@@ -367,6 +367,6 @@ def anim_sche(veh, trip, sches, best_sche, dispatcher=''):
     print('saving animation....')
     start_time = time.time()
     # plt.show()
-    anime.save(f'{root_path}/output-gitignore/anim_sche{veh.id}_{dispatcher}.mp4', dpi=200, fps=None, extra_args=['-vcodec', 'libx264'])
+    anime.save(f'{root_path}/output-gitignore/anim_sche{veh.id}_{dispatcher}.mp4', dpi=dpi, fps=None, extra_args=['-vcodec', 'libx264'])
     print('...running time of encoding video : %.05f seconds' % (time.time() - start_time))
     return anime

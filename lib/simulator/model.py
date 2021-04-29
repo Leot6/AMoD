@@ -71,6 +71,7 @@ class Model(object):
         self.reqs_picking = set()
         self.reqs_unassigned = set()
         self.rejs = set()
+        self.default_dispatcher = SBA(self)
         if DISPATCHER == 'OSP':
             self.dispatcher = OSP(self)
         elif DISPATCHER == 'RTV':
@@ -104,7 +105,10 @@ class Model(object):
         self.gen_reqs_to_time()
         if np.isclose(T % INT_ASSIGN, 0):
             # 4. compute the assignment
-            vids_assigned = self.dispatcher.dispatch(T)
+            if T_WARM_UP <= T <= T_WARM_UP + T_STUDY:
+                vids_assigned = self.dispatcher.dispatch(T)
+            else:
+                vids_assigned = self.default_dispatcher.dispatch(T)
             print_counting()
             # 5. update traffic on routes of vehicles
             self.upd_traffic_on_route_of_vehs(vids_assigned)

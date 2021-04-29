@@ -16,7 +16,7 @@ ignore_a_bug_temporary = True
 
 
 def ILP_assign(veh_trip_edges, reqs_pool, reqs_all, reqs_picking=[], prev_assigned_edges=[]):
-    aa = time.time()
+    t = time.time()
     assert isinstance(reqs_pool, list)
     veh_trip_edges = sorted(veh_trip_edges, key=lambda e: (e[0].id, -len(e[1]), e[3]))
     prev_vid_Tid_edges = [(veh.id, [r.id for r in trip]) for (veh, trip, sche, cost) in prev_assigned_edges]
@@ -191,11 +191,13 @@ def ILP_assign(veh_trip_edges, reqs_pool, reqs_all, reqs_picking=[], prev_assign
             # if not set(rids_picking) <= set(rids_assigned):
             #     rids_removed_ILP = list(set(rids_picking) - set(rids_assigned))
             #     print('rids_picking not assigned this time', rids_removed_ILP)
-            #     print('        ILP running time:', round((time.time() - aa), 2))
+            #     print('        ILP running time:', round((time.time() - t), 2))
             #     print('        num of reqs')
             if not ignore_a_bug_temporary:
                 assert set(rids_picking) <= set(rids_assigned)
 
+    if IS_DEBUG:
+        print(f'                +ILP assignment...  ({round((time.time() - t), 2)}s)')
     return rids_assigned, vids_assigned, sches_assigned
 
 

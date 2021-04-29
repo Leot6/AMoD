@@ -54,11 +54,11 @@ def ridesharing_match_sba(vehs, reqs_all, reqs_pool, T):
     num_edges = len(veh_req_edges)
 
     # ILP assign
-    # rids_assigned, vids_assigned, sches_assigned = ILP_assign(veh_req_edges, reqs_pool, reqs_all)
-    rids_assigned, vids_assigned, sches_assigned = greedy_assign(veh_req_edges)
+    rids_assigned, vids_assigned, sches_assigned = ILP_assign(veh_req_edges, reqs_pool, reqs_all)
+    # rids_assigned, vids_assigned, sches_assigned = greedy_assign(veh_req_edges)
 
     if IS_DEBUG:
-        print(f'            +assigned reqs {len(rids_assigned)}  ({round((time.time() - t), 2)}s)')
+        print(f'            +assigned reqs: {len(rids_assigned)}  ({round((time.time() - t), 2)}s)')
 
     return rids_assigned, vids_assigned, sches_assigned, num_edges
 

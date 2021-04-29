@@ -22,8 +22,8 @@ with open(f'{root_path}/data-gitignore/NYC_STN_LOC_{STN_NUM}.pickle', 'rb') as f
 
 # demand volume (percentage of total), simulation start time and its nickname
 DMD_VOL = 1  # <= 1
-# DMD_SST = parse(DATE + ' 00:00:00')
-DMD_SST = parse(DATE + ' 18:30:00')   # peak hour
+DMD_SST = parse(DATE + ' 00:00:00')
+# DMD_SST = parse(DATE + ' 18:30:00')   # peak hour
 REQ_INIT_IDX = 0
 DMD_STR = 'Manhattan'
 
@@ -35,7 +35,7 @@ T_COOL_DOWN = 60 * 39  # = 60 * 39
 
 # fleet size, vehicle capacity and ridesharing size
 FLEET_SIZE = 2000  #  int(2000 * DMD_VOL)
-VEH_CAPACITY = 4
+VEH_CAPACITY = 6
 RIDESHARING_SIZE = int(VEH_CAPACITY * 1.8)
 
 # maximum wait time window, maximum total delay and maximum in-vehicle detour
@@ -51,8 +51,8 @@ INT_REBL = INT_ASSIGN * 1
 
 # dispatching and rebalancing methods
 # DISPATCHER = 'GI'
-DISPATCHER = 'SBA'
-# DISPATCHER = 'OSP'
+# DISPATCHER = 'SBA'
+DISPATCHER = 'OSP'
 # DISPATCHER = 'RTV'
 
 REBALANCER = 'NR'
@@ -78,7 +78,7 @@ IS_STOCHASTIC_TRAFFIC = False
 IS_STOCHASTIC_SCHEDULE = False
 # IS_STOCHASTIC_ROUTING = True
 IS_STOCHASTIC_ROUTING = False
-LEVEl_OF_STOCHASTIC = 4
+LEVEl_OF_STOCHASTIC = 1
 
 # # parameters for Manhattan map
 # map width and height (km)

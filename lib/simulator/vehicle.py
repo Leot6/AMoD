@@ -104,15 +104,17 @@ class Veh(object):
                 dT -= leg.t
                 self.T += leg.t
                 if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
-                    self.Ts += leg.t if not self.rebl else 0
-                    self.Ds += leg.d if not self.rebl else 0
+                    self.Ts += leg.t
+                    self.Ds += leg.d
+                    self.Lt += leg.t * self.n
+                    self.Ld += leg.d * self.n
                     if self.n == 0:
                         self.Ts_empty += leg.t if not self.rebl else 0
                         self.Ds_empty += leg.d if not self.rebl else 0
-                    self.Tr += leg.t if self.rebl else 0
-                    self.Dr += leg.d if self.rebl else 0
-                    self.Lt += leg.t * self.n if not self.rebl else 0
-                    self.Ld += leg.d * self.n if not self.rebl else 0
+                    if self.rebl:
+                        self.Tr += leg.t
+                        self.Dr += leg.d
+
                 self.update_service_status_after_veh_finish_a_leg(done, leg)
             else:
                 while dT > 0 and len(leg.steps) > 0:
@@ -122,15 +124,17 @@ class Veh(object):
                         dT -= step.t
                         self.T += step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
-                            self.Ts += step.t if not self.rebl else 0
-                            self.Ds += step.d if not self.rebl else 0
+                            self.Ts += step.t
+                            self.Ds += step.d
+                            self.Lt += step.t * self.n
+                            self.Ld += step.d * self.n
                             if self.n == 0:
                                 self.Ts_empty += step.t if not self.rebl else 0
                                 self.Ds_empty += step.d if not self.rebl else 0
-                            self.Tr += step.t if self.rebl else 0
-                            self.Dr += step.d if self.rebl else 0
-                            self.Lt += step.t * self.n if not self.rebl else 0
-                            self.Ld += step.d * self.n if not self.rebl else 0
+                            if self.rebl:
+                                self.Tr += step.t
+                                self.Dr += step.d
+
                         self.jump_to_location(step.nid[1], step.geo[1][0], step.geo[1][1])
                         self.pop_step()
 
@@ -143,15 +147,17 @@ class Veh(object):
                     else:
                         pct = dT / step.t
                         if T_WARM_UP <= self.T <= T_WARM_UP + T_STUDY:
-                            self.Ts += dT if not self.rebl else 0
-                            self.Ds += step.d * pct if not self.rebl else 0
+                            self.Ts += dT
+                            self.Ds += step.d * pct
+                            self.Lt += dT * self.n
+                            self.Ld += step.d * pct * self.n
                             if self.n == 0:
                                 self.Ts_empty += dT if not self.rebl else 0
                                 self.Ds_empty += step.d * pct if not self.rebl else 0
-                            self.Tr += dT if self.rebl else 0
-                            self.Dr += step.d * pct if self.rebl else 0
-                            self.Lt += dT * self.n if not self.rebl else 0
-                            self.Ld += step.d * pct * self.n if not self.rebl else 0
+                            if self.rebl:
+                                self.Tr += dT
+                                self.Dr += step.d * pct
+
                         # find the exact location the vehicle stops and update the step
                         self.cut_step(pct)
                         self.jump_to_location(step.nid[0], step.geo[0][0], step.geo[0][1])

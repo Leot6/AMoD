@@ -7,7 +7,7 @@ import copy
 
 from lib.simulator.config import IS_DEBUG, T_WARM_UP, T_STUDY
 from lib.dispatcher.osp.osp_pool import build_vt_table, get_prev_assigned_edges, CUTOFF_VT, FAST_COMPUTE
-from lib.dispatcher.osp.osp_assign import ILP_assign
+from lib.dispatcher.osp.osp_assign import ILP_assign, greedy_assign
 from lib.analysis.dispatcher_analysis import DispatcherAnalysis
 from lib.analysis.objective_analysis import ObjectiveAnalysis
 
@@ -34,6 +34,7 @@ class OSP(object):
         self.analysis = ObjectiveAnalysis()
 
     def dispatch(self, T):
+        t = time.time()
 
         reqs_new = self.queue
         if Reject_Unassigned:
@@ -41,13 +42,14 @@ class OSP(object):
         else:
             reqs_prev = sorted(self.reqs_picking.union(self.reqs_unassigned), key=lambda r: r.id)
 
+        if IS_DEBUG:
+            print(f'        -assigning {len(reqs_prev) + len(reqs_new)} reqs to vehs through OSP...')
+
         # compute the ride-sharing assignment
         prev_assigned_edges = get_prev_assigned_edges(self.vehs, self.reqs)
 
-        osp_time = time.time()
         rids_assigned, vids_assigned, sches_assigned, num_edges = \
             ridesharing_match_osp(self.vehs, self.reqs, reqs_new, reqs_prev, self.reqs_picking, prev_assigned_edges, T)
-        osp_run_time = round((time.time() - osp_time), 2)
 
         # if IS_DEBUG and T_WARM_UP < T <= T_WARM_UP + T_STUDY:
         #     self.analysis.run_comparison_analysis(self.vehs, self.reqs, self.queue, self.reqs_picking,
@@ -67,6 +69,9 @@ class OSP(object):
         for vid, sche in zip(vids_remove_r, sches_remove_r):
             self.vehs[vid].build_route(sche, self.reqs, T)
 
+        if IS_DEBUG:
+            print(f'            +assigned reqs: {len(rids_assigned)}  ({round((time.time() - t), 2)}s)')
+
         return vids_assigned + vids_remove_r
 
     def __str__(self):
@@ -77,10 +82,8 @@ class OSP(object):
 
 def ridesharing_match_osp(vehs, reqs_all, reqs_new, reqs_prev, reqs_picking, prev_assigned_edges, T):
     # build VT-table
-    if IS_DEBUG:
-        print('    -T = %d, building VT-table ...' % T)
-        a1 = time.time()
     veh_trip_edges = build_vt_table(vehs, reqs_new, reqs_prev, T)
+    veh_trip_edges = sorted(veh_trip_edges, key=lambda e: (e[0].id, -len(e[1]), e[3]))
     num_edges = len(veh_trip_edges)
 
     vid_Tid_edges = [(veh.id, [r.id for r in trip]) for (veh, trip, sche, cost) in veh_trip_edges]
@@ -90,29 +93,17 @@ def ridesharing_match_osp(vehs, reqs_all, reqs_new, reqs_prev, reqs_picking, pre
             missed_prev_assigned_edges.append((veh, trip, sche, cost))
     veh_trip_edges.extend(missed_prev_assigned_edges)
 
-    if IS_DEBUG:
-        print('        a1 running time:', round((time.time() - a1), 2))
-
     # ILP assign shared trips using VT-table
-    if IS_DEBUG:
-        print('    -T = %d, start ILP assign with %d edges...' % (T, len(veh_trip_edges)))
-        a2 = time.time()
     reqs_pool = reqs_prev + reqs_new
     ensure_picking_list = reqs_picking if Ensure_Picking else []
     rids_assigned, vids_assigned, sches_assigned = \
         ILP_assign(veh_trip_edges, reqs_pool, reqs_all, ensure_picking_list, prev_assigned_edges)
-
-    if IS_DEBUG:
-        print('        a2 running time:', round((time.time() - a2), 2))
 
     return rids_assigned, vids_assigned, sches_assigned, num_edges
 
 
 # find vehicles with schedule changed
 def find_changed_trips(vehs, vids_assigned_in_ILP, T):
-    if IS_DEBUG:
-        print('    -T = %d, find vehicles with removed requests ...' % T)
-        a3 = time.time()
     vids_remove_r = []
     sches_remove_r = []
     for veh in vehs:
@@ -123,8 +114,6 @@ def find_changed_trips(vehs, vids_assigned_in_ILP, T):
                     new_sche.append((rid, pod, tnid, ddl))
             vids_remove_r.append(veh.id)
             sches_remove_r.append(copy.deepcopy(new_sche))
-    if IS_DEBUG:
-        print('        a3 running time:', round((time.time() - a3), 2))
     return vids_remove_r, sches_remove_r
 
 
