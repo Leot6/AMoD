@@ -1,55 +1,39 @@
 # `AMoD Simulation`
 <img src="https://github.com/Leot6/AMoD/blob/master/demo.gif" width="1024">
 
-(The illustration above shows an example instance using London map and [OSRM](https://github.com/Project-OSRM/osrm-backend). Now we have moved to Manhattan map and offline routing.) 
+(The illustration above shows an example instance using London map and [OSRM](https://github.com/Project-OSRM/osrm-backend). Now we have moved to Manhattan map and offline routing.)
 
-
-## Transitioned to [`AMoD2`](https://github.com/Leot6/AMoD2).
-Thanks to [wenjian0202](https://github.com/wenjian0202)‘s c++ platform [mod-abm-2.0](https://github.com/wenjian0202/mod-abm-2.0), we could continue our work on a much more efficient simulator (more than 5 times faster).
-
+This simulator and algorithms are written in python. A C++ version, which runs much faster, can be found in [AMoD2](https://github.com/Leot6/AMoD2).
 
 ## Main Parts
-Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper [[4]](https://github.com/Leot6/AMoD#references). Simulation on Manhattan with 2,000 vehicles of capacity 4 and 394,695 requests (on 2 Mar, 2015) shows a service rate around 96.15%, when maximum wait time and maximum delay of each request are *MaxWait = min(300s, ShortestTravelTime * 0.7)* and *MaxDelay = min(600s, MaxWait + ShortestTravelTime * 0.3)*, respectively. If single-request assignment is considered instead of multi-request assignment (as proposed in paper [[3]](https://github.com/Leot6/AMoD#references)), the service rate goes down to around 94% along with significant reduce on computational time (from 12.57s to 2.65s), slight reduce on mean wait time (from 147.4s to 146.5s), slight increase on mean in-vehicle delay (from 125.91s to 137.88s) and mean vehicle travel distance (from 396.82km to 406.77km).
+Based on amod-abm [[1]](https://github.com/Leot6/AMoD#references) and this paper [[3]](https://github.com/Leot6/AMoD#references). Simulation on Manhattan with 2,000 vehicles of capacity 4 and 394,695 requests (on 2 Mar, 2015) shows a service rate around 96.15%, when maximum wait time and maximum delay of each request are *MaxWait = min(300s, ShortestTravelTime * 0.7)* and *MaxDelay = min(600s, MaxWait + ShortestTravelTime * 0.3)*, respectively. If single-request assignment is considered instead of multi-request assignment (as proposed in paper [[2]](https://github.com/Leot6/AMoD#references)), the service rate goes down to around 94% along with significant reduce on computational time (from 12.57s to 2.65s), slight reduce on mean wait time (from 147.4s to 146.5s), slight increase on mean in-vehicle delay (from 125.91s to 137.88s) and mean vehicle travel distance (from 396.82km to 406.77km). P.S., the above results are generated with a very early version of the code and slightly different results are expected with the latest version of the code.
 
-- folder `simulator` for a free-floating AMoD system, with a fleet of vehicles
-  - `model.py`: all other class are connected by it
-  - `vehicle.py`: (shared) autonomous vehicles, the capacity of which can be set to 1 (no sharing), 2 (at most 2 travelers sharing at a time) or more
-  - `request.py`: on-demand requests, loaded from NYC trip data (350,878 trips on 5 May, 2016)
-  - `route.py`: definition of road segments
-  - `config.py`: system parameters
-- folder `routing` for routing planning
-  - `routing_server.py`: offline path finding, the complete road network of Manhattan (4,091 nodes and 9,452 edges) are considered, with the travel time on each edge of the network given by the daily mean travel time estimation
-- folder `analysis` for outputting results and evaluations
-  - `result_printer.py`: evaluate the performance and print the results
-  - `animation_generator.py`: make the movement of vehicles an animation.
-  - `online_analysis.py`: compare different algorithms at the same simulation run
-- folder `dispatcher` for central dispatchers that match available vehicles to requests 
-  - folder `gi` for the simple first-in-first-out assignment method [[2]](https://github.com/Leot6/AMoD#references) (i.e., an exhaustive version of [[3]](https://github.com/Leot6/AMoD#references))
-  - folder `sba` for the single-request batch assignment method [[4]](https://github.com/Leot6/AMoD#references)
-  - folder `rtv` for the request-trip-vehicle batch assignment method proposed in [[5]](https://github.com/Leot6/AMoD#references)
-  - folder `osp` for the optimal-schedule-pool batch assignment method, improved on 'rtv'
-- folder `rebalancer` for repositioning idle vehicles
-  - `naive_rebalancer.py`: assign the unserved request to its nearest idle vehicle
+- Dispatcher
+    - Single-Request Batch Assignment (SBA) [[2]](https://github.com/Leot6/AMoD#references): It takes the new orders for a batch period and assigns them together in a one-to-one match manner, where at most one new order is assigned to a single vehicle.
+    - Optimal Schedule Pool (OSP) [[4]](https://github.com/Leot6/AMoD#references): It takes all picking and pending orders received so far and assigns them together in a multi-to-one match manner, where multiple orders (denoted by a trip) can be assigned to a single vehicle. Trips are also allowed to be reassigned to different vehicles for better system performance. OSP is an improved version of Request Trip Vehicle (RTV) assignment [[3]](https://github.com/Leot6/AMoD#references), it computes all possible vehicle-trip pairs along with the optimal schedule of each pair. The computation of the optimal schedule ensures that no feasible trip is mistakenly ignored. Based on this complete feasible solution space (called optimal schedule pool, each optimal schedule representing a vehicle-trip pair), the optimal assignment policy could be found by an ILP solver.
+- Rebalancer
+    - Nearest Pending Order (NPO): It repositions idle vehicles to the nearest locations of unassigned pending orders, under the assumption that it is likely that more requests occur in the same area where all requests cannot be satisfied.
+  
 
-To run a samulation, Download code and data files from the [releases](https://github.com/Leot6/AMoD/releases). Data files should be located in the root directory of the code. Files in `data-gitignore.zip` were generated using repository [Manhattan-Map](https://github.com/Leot6/Manhattan-Map).
+To run a samulation, Download code and data files from the [releases](https://github.com/Leot6/AMoD/releases). Data files should be located in the root directory of the code. Files in `datalog-gitignore.zip` were generated using repository [Manhattan-Map](https://github.com/Leot6/Manhattan-Map).
 
 ```
 |-- AMoD
-   |-- data-gitignore
-   |-- output-gitignore
+   |-- datalog-gitignore
+   |-- media-gitignore
+   |-- src
 ```
-The main function in `run.py` will simulate the system given input parameters from `config.py`. The results of simulations can be found in folder `output-gitignore`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side. 
+Before running simulations, we need to run `data_serializer.py` to load taxi data and map data files in advance and store them in pickle files. This is to accelerate the initialization time of the simulator.
+The main function in `main.py` will simulate the system given input parameters from `config.py`. System performance indicators for analysis include wait time, travel time, detour and service rate at the traveler side, as well as vehicle miles traveled and average load at the operator side.
 
-Note: running dispatcher `sba`/`rtv`/`osp` needs [mosek](https://www.mosek.com/) (an commerical ILP solver, free to academic users) installed. If mosek is not installed, the code can be run by replacing the uses of function `ILP_assign` to `greedy_assign` (do not forget to comment the codes using mosek in file `osp_assign`), with expected worse performances.
+Note: Running dispatcher `sba`/`osp` needs [gurobi](https://www.gurobi.com/) (an commerical optimization solver, free to academic users) installed. If `gurobi` is not installed, the code can be run by replacing the uses of function `ILP_assignment` to `greedy_assignment` (do not forget to comment the codes using gurobi in file `ilp_assign`), with expected worse performances. 
 
 
 ## References
 
 1. Jian Wen. amod-abm. https://github.com/wenjian0202/amod-abm, 2017
-2. Tong, Y., Zeng, Y., Zhou, Z., Chen, L., Ye, J. and Xu, K., 2018. A unified approach to route planning for shared mobility. Proceedings of the VLDB Endowment, 11(11), p.1633.
-3. Ma, S., Zheng, Y. and Wolfson, O., 2013, April. T-share: A large-scale dynamic taxi ridesharing service. In 2013 IEEE 29th International Conference on Data Engineering (ICDE) (pp. 410-421). IEEE.
-4. Simonetto, A., Monteil, J. and Gambella, C., 2019. [Real-time city-scale ridesharing via linear assignment problems](https://www.sciencedirect.com/science/article/pii/S0968090X18302882). Transportation Research Part C: Emerging Technologies, 101, pp.208-232.
-5. Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E. and Rus, D., 2017. [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://www.pnas.org/content/114/3/462.short). Proceedings of the National Academy of Sciences, 114(3), pp.462-467
-
+2. Simonetto, A., Monteil, J. and Gambella, C., 2019. [Real-time city-scale ridesharing via linear assignment problems](https://www.sciencedirect.com/science/article/pii/S0968090X18302882). Transportation Research Part C: Emerging Technologies, 101, pp.208-232.
+3. Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E. and Rus, D., 2017. [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://www.pnas.org/content/114/3/462.short). Proceedings of the National Academy of Sciences, 114(3), pp.462-467
+4. Li, C., Parker, D. and Hao, Q., 2021, February. [Optimal Online Dispatch for High-Capacity Shared Autonomous Mobility-on-Demand Systems](https://www.cs.bham.ac.uk/~parkerdx/papers/icra21samod.pdf). In Proc. IEEE International Conference on Robotics and Automation (ICRA'21).
 
 

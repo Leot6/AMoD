@@ -36,9 +36,8 @@ __pycache__/
 .DS_Store
 
 # large data files
-data-gitignore/
-output-gitignore/
-replay-data-gitignore/
-test-gitignore.py
+datalog-gitignore/
+media-gitignore/
+test_gitignore.py
 
 
