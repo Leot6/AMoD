@@ -1,12 +1,11 @@
 """
 optimal batch assignment: computing the optimal schedule pool and then assign them together
 """
-import copy
 
 from src.dispatcher.ilp_assign import *
 from itertools import permutations
 
-FEASIBLE_TRIP_TABLE = [[[] for i in range(VEH_CAPACITY + 2)] for j in range(FLEET_SIZE)]
+FEASIBLE_TRIP_TABLE = [[[] for i in range(VEH_CAPACITY + 4)] for j in range(FLEET_SIZE)]
 PREV_FEASIBLE_TRIP_TABLE = [[]]
 
 
@@ -23,9 +22,9 @@ def assign_orders_through_osp(new_received_rids: list[int], reqs: list[Req], veh
     #        Orders that have been assigned vehicles are guaranteed to be served to ensure a good user experience.
     #        The objective of assignment could be further improved if this guarantee is abandoned.
     ensure_ilp_assigning_reqs_that_are_picking = True
-    #        Fast_compute only computing combinations between the new requests and the previous ones, rather than
-    #        between all known unpicked-up requests, makes the algorithm more efficient. But some bugs exist now and
-    #        make the results a little bit worse when enabling fast_compute.
+    #        Fast_compute only computes combinations between the new requests and the previous ones, rather than
+    #        between all known unpicked-up requests, to make the algorithm more efficient. But some bugs exist now
+    #        and makes the results a little bit worse when enabling fast_compute.
     enable_fast_compute = False
 
     # 1. Get the list of considered orders, normally including all picking and pending orders.
@@ -59,7 +58,7 @@ def assign_orders_through_osp(new_received_rids: list[int], reqs: list[Req], veh
 
     # 5. Update the assigned vehicles' schedules and the considered orders' statuses.
     for rid in considered_rids:
-        reqs[rid].status == OrderStatus.PENDING
+        reqs[rid].status = OrderStatus.PENDING
     upd_schedule_for_vehicles_in_selected_vt_pairs(candidate_veh_trip_pairs, selected_veh_trip_pair_indices)
 
     # # 6. Update the schedule of vehicles, of which the assigned (picking) orders are reassigned to other vehicles.
@@ -119,14 +118,17 @@ def build_feasible_trip_table_for_one_veh(new_received_rids: list[int], consider
                                           enable_reoptimization: bool, enable_fast_compute: bool) \
         -> [Veh, list[Req], list[[int, int, int, float, float]], float]:
 
-    # 1. Get the basic schedules of the vehicle.
-    basic_sches = compute_basic_sches_of_one_veh(veh, enable_reoptimization)
-    basic_candidate_vt_pair = [veh, [], basic_sches[0], compute_sche_cost(veh, basic_sches[0]), 0.0]
-    # 1.1. Set the search list of requests.
+    # 0. Set the search list of requests and other parameters added for fast compute.
     search_rids = considered_rids
+    prev_rids_set = None
+    n_prev_trips_of_size_k = 0
     if enable_fast_compute:
         prev_rids_set = set(considered_rids) - set(new_received_rids)
         search_rids = new_received_rids
+
+    # 1. Get the basic schedules of the vehicle.
+    basic_sches = compute_basic_sches_of_one_veh(veh, enable_reoptimization)
+    basic_candidate_vt_pair = [veh, [], basic_sches[0], compute_sche_cost(veh, basic_sches[0]), 0.0]
 
     # 2. Compute trips of size 1.
     #      Update previous trips.
@@ -322,4 +324,4 @@ def initialize_feasible_trip_table(enable_fast_compute: bool):
     global FEASIBLE_TRIP_TABLE, PREV_FEASIBLE_TRIP_TABLE
     if enable_fast_compute:
         PREV_FEASIBLE_TRIP_TABLE = FEASIBLE_TRIP_TABLE
-    FEASIBLE_TRIP_TABLE = [[[] for i in range(VEH_CAPACITY + 2)] for j in range(FLEET_SIZE)]
+    FEASIBLE_TRIP_TABLE = [[[] for i in range(VEH_CAPACITY + 4)] for j in range(FLEET_SIZE)]

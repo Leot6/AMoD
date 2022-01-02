@@ -1,12 +1,12 @@
 
 import shutil
 import copy
+import numpy as np
 from tqdm import tqdm
 from dateutil.parser import parse
 from tqdm import tqdm
 
 from src.simulator.types import *
-from src.utility.result_printer import *
 from src.utility.animation_generator import anim
 
 from datetime import datetime, timedelta

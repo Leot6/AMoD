@@ -3,7 +3,6 @@ compute all feasible schedules for a given vehicle v and a trip T.
 """
 
 import numpy as np
-import scipy.stats as st
 from src.simulator.request import Req
 from src.simulator.vehicle import Veh
 from src.simulator.router_func import *

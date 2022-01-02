@@ -50,11 +50,6 @@ def reposition_idle_vehicles_to_nearest_pending_orders(reqs: list[Req], vehs: li
         # 4. Push the rebalancing task to the assigned vehicle.
         veh.build_route(sche)
 
-    # # 3. Select suitable rebalancing candidates. Greedily from the one with the shortest travel time.
-    # selected_rebl_pair_indices = greedy_assign(rebl_veh_req_pairs)
-    # # 4. Push the rebalancing task to the assigned vehicle.
-    # upd_schedule_for_vehicles_in_selected_vt_pairs(rebl_veh_req_pairs, selected_rebl_pair_indices)
-
     if DEBUG_PRINT:
         print(f"            +Rebalancing vehicles: {len(selected_vids)} ({timer_end(t)})")
 

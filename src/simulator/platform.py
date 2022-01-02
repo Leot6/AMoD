@@ -70,7 +70,7 @@ class Platform(object):
         # System report about running time.
         self.time_of_init = get_runtime_sec_from_t_to_now(simulation_start_time_stamp)
         self.start_time_stamp = get_time_stamp_datetime()
-        self.end_time_stamp = None
+        self.end_time_stamp = get_time_stamp_datetime()
         self.main_sim_start_time_stamp = get_time_stamp_datetime()
         self.main_sim_end_time_stamp = get_time_stamp_datetime()
 
@@ -88,6 +88,8 @@ class Platform(object):
                 self.dispatch_at_time(T)
                 if RENDER_VIDEO and self.main_sim_start_time_sec < T <= self.main_sim_end_time_sec:
                     frames_system_states.append(copy.deepcopy(self.vehs))
+
+        self.end_time_stamp = get_time_stamp_datetime()
         return frames_system_states
 
     # dispatch the AMoD system: move vehicles, generate requests, assign and rebalance
@@ -238,10 +240,17 @@ class Platform(object):
 
         return new_received_rids
 
-    def __str__(self):
-        # Get the real world time when the simulation starts and ends.
+    def create_report(self):
+        # 1. Get the width of the current console window.
+        window_width = shutil.get_terminal_size().columns
+        if window_width == 0 or window_width > 90:
+            window_width = 90
+        dividing_line = "-" * window_width
+        print(dividing_line)
+
+        # 2. Report the simulation config.
+        #    Get the real world time when the simulation starts and ends.
         simulation_start_time_real_world_date = self.start_time_stamp.strftime('%Y-%m-%d %H:%M:%S')
-        self.end_time_stamp = get_time_stamp_datetime()
         if len(self.reqs) == 0:
             simulation_end_time_real_world_date = "0000-00-00 00:00:00"
         else:
@@ -249,11 +258,11 @@ class Platform(object):
         total_sim_runtime_s = (self.end_time_stamp - self.start_time_stamp).seconds
         main_sim_runtime_s = (self.main_sim_end_time_stamp - self.main_sim_start_time_stamp).seconds
 
-        # Convert the running time to format h:m:s.
+        #    Convert the running time to format h:m:s.
         total_sim_runtime_formatted = str(timedelta(seconds=int(total_sim_runtime_s)))
         main_sim_runtime_formatted = str(timedelta(seconds=int(main_sim_runtime_s)))
 
-        # Get some system configurations
+        #    Get some system configurations
         sim_start_time_date = SIMULATION_START_TIME
         main_sim_start_date = str(parse(SIMULATION_START_TIME) + timedelta(seconds=self.main_sim_start_time_sec))
         main_sim_end_date = str(parse(SIMULATION_START_TIME) + timedelta(seconds=self.main_sim_end_time_sec))
@@ -261,19 +270,115 @@ class Platform(object):
         num_of_epochs = int(self.system_shutdown_time_sec / CYCLE_S)
         num_of_main_epochs = int(SIMULATION_DURATION_MIN * 60 / CYCLE_S)
 
-        param = f"# Simulation Runtime" \
-                f"\n  - Start: {simulation_start_time_real_world_date}, End: {simulation_end_time_real_world_date}, " \
-                f"Time: {total_sim_runtime_formatted}." \
-                f"\n  - Main Simulation: init_time = {self.time_of_init:.2f} s, runtime = {main_sim_runtime_formatted}, "\
-                f"avg_time = {main_sim_runtime_s / num_of_main_epochs:.2f} s. "\
-                f"\n# System Configurations"\
-                f"\n  - From {sim_start_time_date[11:]} to {sim_end_time_date[11:]}. "\
-                f"(main simulation between {main_sim_start_date[11:]} and {main_sim_end_date[11:]})."\
-                f"\n  - Fleet Config: size = {FLEET_SIZE}, capacity = {VEH_CAPACITY}. "\
-                f"({int(WARMUP_DURATION_MIN * 60 / CYCLE_S)} + {num_of_main_epochs} + "\
-                f"{int(WINDDOWN_DURATION_MIN * 60 / CYCLE_S)} = {num_of_epochs} epochs)."\
-                f"\n  - Order Config: density = {REQUEST_DENSITY} ({DATA_FILE}), "\
-                f"max_wait = {MAX_PICKUP_WAIT_TIME_MIN * 60} s. (Δt = {CYCLE_S} s)."\
-                f"\n  - Dispatch Config: dispatcher = {DISPATCHER}, rebalancer = {REBALANCER}."
+        #    Print the simulation runtime.
+        print("# Simulation Runtime")
+        print(f"  - Start: {simulation_start_time_real_world_date}, End: {simulation_end_time_real_world_date}, "
+              f"Time: {total_sim_runtime_formatted}.")
+        print(f"  - Main Simulation: init_time = {self.time_of_init:.2f} s, runtime = {main_sim_runtime_formatted}, "
+              f"avg_time = {main_sim_runtime_s / num_of_main_epochs:.2f} s.")
 
-        return param
+        #   Print the platform configurations.
+        print("# System Configurations")
+        print(f"  - From {sim_start_time_date[11:]} to {sim_end_time_date[11:]}. "
+              f"(main simulation between {main_sim_start_date[11:]} and {main_sim_end_date[11:]}).")
+        print(f"  - Fleet Config: size = {FLEET_SIZE}, capacity = {VEH_CAPACITY}. "
+              f"({int(WARMUP_DURATION_MIN * 60 / CYCLE_S)} + {num_of_main_epochs} + "
+              f"{int(WINDDOWN_DURATION_MIN * 60 / CYCLE_S)} = {num_of_epochs} epochs).")
+        print(f"  - Order Config: density = {REQUEST_DENSITY} ({DATA_FILE}), "
+              f"max_wait = {MAX_PICKUP_WAIT_TIME_MIN * 60} s. (Δt = {CYCLE_S} s).")
+        print(f"  - Dispatch Config: dispatcher = {DISPATCHER}, rebalancer = {REBALANCER}.")
+
+        if len(self.reqs) == 0:
+            print(dividing_line)
+            return
+
+        # 3. Report order status.
+        req_count = 0
+        walkaway_req_count = 0
+        complete_req_count = 0
+        onboard_req_count = 0
+        picking_req_count = 0
+        pending_req_count = 0
+        total_wait_time_sec = 0
+        total_delay_time_sec = 0
+        total_req_time_sec = 0
+
+        for req in self.reqs:
+            if req.Tr <= self.main_sim_start_time_sec:
+                continue
+            if req.Tr > self.main_sim_end_time_sec:
+                break
+            req_count += 1
+            if req.status == OrderStatus.WALKAWAY:
+                walkaway_req_count += 1
+            elif req.status == OrderStatus.COMPLETE:
+                complete_req_count += 1
+                total_wait_time_sec += req.Tp - req.Tr
+                total_delay_time_sec += req.Td - (req.Tr + req.Ts)
+                total_req_time_sec += req.Ts
+            elif req.status == OrderStatus.ONBOARD:
+                onboard_req_count += 1
+            elif req.status == OrderStatus.PICKING:
+                picking_req_count += 1
+            elif req.status == OrderStatus.PENDING:
+                pending_req_count += 1
+
+        service_req_count = complete_req_count + onboard_req_count
+        assert (service_req_count + picking_req_count + pending_req_count == req_count - walkaway_req_count)
+        print(f"# Orders ({req_count - walkaway_req_count}/{req_count})")
+        print(f"  - complete = {complete_req_count} ({100.0 * complete_req_count / req_count:.2f}%), "
+              f"onboard = {onboard_req_count} ({100.0 * onboard_req_count / req_count:.2f}%), "
+              f"total_service = {service_req_count} ({100.0 * service_req_count / req_count:.2f}%).")
+        if picking_req_count + pending_req_count > 0:
+            print(f"  - picking = {picking_req_count} ({100.0 * picking_req_count / req_count:.2f}%), "
+                  f"pending = {pending_req_count} ({100.0 * pending_req_count / req_count:.2f}%).")
+        if complete_req_count > 0:
+            print(f"  - avg_shortest_travel = {total_req_time_sec / complete_req_count:.2f} s, "
+                  f"avg_wait = {total_wait_time_sec / complete_req_count:.2f} s, "
+                  f"avg_delay = {total_delay_time_sec / complete_req_count:.2f} s.")
+        else:
+            print("  [PLEASE USE LONGER SIMULATION DURATION TO BE ABLE TO COMPLETE ORDERS!]")
+
+        # 4. Report veh status.
+        total_dist_traveled = 0
+        total_loaded_dist_traveled = 0
+        total_empty_dist_traveled = 0
+        total_rebl_dist_traveled = 0
+        total_time_traveled_sec = 0
+        total_loaded_time_traveled_sec = 0
+        total_empty_time_traveled_sec = 0
+        total_rebl_time_traveled_sec = 0
+
+        for veh in self.vehs:
+            total_dist_traveled += veh.Ds
+            total_loaded_dist_traveled += veh.Ld
+            total_empty_dist_traveled += veh.Ds_empty
+            total_rebl_dist_traveled += veh.Dr
+            total_time_traveled_sec += veh.Ts
+            total_loaded_time_traveled_sec += veh.Lt
+            total_empty_time_traveled_sec += veh.Ts_empty
+            total_rebl_time_traveled_sec += veh.Tr
+
+        avg_dist_traveled_km = total_dist_traveled / 1000.0 / FLEET_SIZE
+        avg_empty_dist_traveled_km = total_empty_dist_traveled / 1000.0 / FLEET_SIZE
+        avg_rebl_dist_traveled_km = total_rebl_dist_traveled / 1000.0 / FLEET_SIZE
+        avg_time_traveled_s = total_time_traveled_sec / FLEET_SIZE
+        avg_empty_time_traveled_s = total_empty_time_traveled_sec / FLEET_SIZE
+        avg_rebl_time_traveled_s = total_rebl_time_traveled_sec / FLEET_SIZE
+        print(f"# Vehicles ({FLEET_SIZE})")
+        print(f"  - Travel Distance: total_dist = {total_dist_traveled / 1000.0:.2f} km, "
+              f"avg_dist = {avg_dist_traveled_km:.2f} km.")
+        print(f"  - Travel Duration: avg_time = {avg_time_traveled_s:.2f} s "
+              f"({100.0 * avg_time_traveled_s / 60 / SIMULATION_DURATION_MIN:.2f}% of the main simulation time).")
+        print(f"  - Empty Travel: avg_time = {avg_empty_time_traveled_s:.2f} s "
+              f"({100.0 * avg_empty_time_traveled_s / avg_time_traveled_s:.2f}%), "
+              f"avg_dist = {avg_empty_dist_traveled_km:.2f} km "
+              f"({100.0 * avg_empty_dist_traveled_km / avg_dist_traveled_km:.2f}%).")
+        print(f"  - Rebl Travel: avg_time = {avg_rebl_time_traveled_s:.2f} s "
+              f"({100.0 * avg_rebl_time_traveled_s / avg_time_traveled_s:.2f}%), "
+              f"avg_dist = {avg_rebl_dist_traveled_km:.2f} km "
+              f"({100.0 * avg_rebl_dist_traveled_km / avg_dist_traveled_km:.2f}%).")
+        print(f"  - Travel Load: average_load_dist = {total_loaded_dist_traveled / total_dist_traveled:.2f}, "
+              f"average_load_time = {total_loaded_time_traveled_sec / total_time_traveled_sec:.2f}.")
+
+        print(dividing_line)
