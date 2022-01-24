@@ -27,8 +27,8 @@ class VehicleStatus(Enum):
 # Dispatch Types
 ##################################################################################
 class DispatcherMethod(Enum):
-    GI = 1
-    SBA = 2
+    SBA = 1
+    OSP_NR = 2
     OSP = 3
 
 
@@ -47,15 +47,15 @@ class Step(object):
     Attributes:
         t: duration
         d: distance
-        nid: a list of nodes id
-        geo: geometry, a list of coordinates
+        nid_pair: [origin_node_id, destination_node_id]
+        geo_pair: [origin_node_geo, destination_node_geo]
     """
 
-    def __init__(self, t=0.0, d=0.0, nid: list[int] = [], geo: list[[float, float]] = []):
+    def __init__(self, t=0.0, d=0.0, nid: [int, int] = [], geo: [[float, float], [float, float]] = []):
         self.t = t
         self.d = d
-        self.nid = nid
-        self.geo = geo
+        self.nid_pair = nid
+        self.geo_pair = geo
 
 
 class Leg(object):

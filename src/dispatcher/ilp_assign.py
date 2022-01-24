@@ -7,7 +7,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 
-def ilp_assignment(veh_trip_pairs: list[[Veh, list[Req], list[[int, int, int, float, float]], float]],
+def ilp_assignment(veh_trip_pairs: list[[Veh, list[Req], list[(int, int, int, float)], float, float]],
                    considered_rids: list[int],
                    reqs: list[Req],
                    vehs: list[Veh],
@@ -26,6 +26,7 @@ def ilp_assignment(veh_trip_pairs: list[[Veh, list[Req], list[[int, int, int, fl
         # 1. Create a new model
         model = gp.Model("ilp")
         model.setParam("LogToConsole", 0)
+        # model.setParam("Threads", 6)
 
         # 2. Create variables
         var_vt_pair = []  # var_vt_pair[i] = 1 indicates selecting the i_th vehicle_trip_pair.
@@ -48,6 +49,13 @@ def ilp_assignment(veh_trip_pairs: list[[Veh, list[Req], list[[int, int, int, fl
         for idx, [veh, trip, sche, cost, score] in enumerate(veh_trip_pairs):
             vt_idx[veh.id].append(idx)
             for req in trip:
+                # DEBUG codes
+                if req.id not in considered_rids:
+                    print(f"[DEBUG2] req {req.id} {req.status}, "
+                          f"request time {req.Tr}, latest pickup {req.Clp}, pickup time {req.Tp}")
+                    print(f"veh {veh.id}, at {veh.state_time}s, onboard_rids {veh.onboard_rids}")
+                    print(f"sche {sche}")
+                    continue
                 rt_idx[considered_rids.index(req.id)].append(idx)
         #   (1) Add constraint 1: each vehicle (v) can only be assigned at most one schedule (trip).
         #     Σ var_vt_pair[i] * Θ_vt(v) = 1, ∀ v ∈ V (Θ_vt(v) = 1 if v is in vt).
@@ -90,7 +98,7 @@ def ilp_assignment(veh_trip_pairs: list[[Veh, list[Req], list[[int, int, int, fl
     return selected_veh_trip_pair_indices
 
 
-def greedy_assignment(veh_trip_pairs: list[[Veh, list[Req], list[[int, int, int, float, float]], float]]) -> list[int]:
+def greedy_assignment(veh_trip_pairs: list[[Veh, list[Req], list[(int, int, int, float)], float, float]]) -> list[int]:
     t = timer_start()
     if DEBUG_PRINT:
         print(f"                *Greedy assignment with {len(veh_trip_pairs)} pairs...", end=" ")

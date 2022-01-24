@@ -3,8 +3,8 @@
 
 import numpy as np
 import random
-from src.value_network.segment_tree import MinSegmentTree, SumSegmentTree
-from src.value_network.experience import Experience
+from src.value_function.segment_tree import MinSegmentTree, SumSegmentTree
+from src.value_function.experience import *
 
 
 class ReplayBuffer(object):

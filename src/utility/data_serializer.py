@@ -1,9 +1,9 @@
 
-import sys
-import pickle
 import pandas as pd
-sys.path.append("../..")
-from src.simulator.config import ROOT_PATH
+import sys
+import os
+ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.append(ROOT_PATH)
 from src.utility.utility_functions import *
 
 
@@ -66,5 +66,5 @@ if __name__ == '__main__':
     #     taxi_data = f"{ROOT_PATH}/datalog-gitignore/taxi-data/manhattan-taxi-201605{day}-peak.csv"
     #     load_request_data_from_csv_file_and_save_it_to_pickle_file(taxi_data)
 
-    taxi_data = f"{ROOT_PATH}/datalog-gitignore/taxi-data/manhattan-taxi-20160525-400k.csv"
+    taxi_data = f"{ROOT_PATH}/datalog-gitignore/taxi-data/manhattan-taxi-20160406.csv"
     load_request_data_from_csv_file_and_save_it_to_pickle_file(taxi_data)

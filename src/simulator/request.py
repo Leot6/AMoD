@@ -2,11 +2,7 @@
 definition of requests for the AMoD system
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from src.simulator.config import MAX_PICKUP_WAIT_TIME_MIN, MAX_ONBOARD_DETOUR
-from src.simulator.router_func import get_duration_from_origin_to_dest, get_distance_from_origin_to_dest
-from src.simulator.types import OrderStatus
+from src.simulator.route_functions import *
 
 
 class Req(object):
@@ -34,9 +30,11 @@ class Req(object):
         self.dnid = dnid
         self.Ts = get_duration_from_origin_to_dest(self.onid, self.dnid)
         self.Ds = get_distance_from_origin_to_dest(self.onid, self.dnid)
-        self.Clp = Tr + min(MAX_PICKUP_WAIT_TIME_MIN * 60, self.Ts * (2 - MAX_ONBOARD_DETOUR))
-        self.Cld = \
-            Tr + self.Ts + min(MAX_PICKUP_WAIT_TIME_MIN * 60 * 2, self.Clp - Tr + self.Ts * (MAX_ONBOARD_DETOUR - 1))
+        self.Clp = Tr + MAX_PICKUP_WAIT_TIME_MIN[0] * 60
+        self.Cld = Tr + self.Ts + MAX_PICKUP_WAIT_TIME_MIN[0] * 60 * 2
+        # self.Clp = Tr + min(MAX_PICKUP_WAIT_TIME_MIN[0] * 60, self.Ts * (2 - MAX_ONBOARD_DETOUR))
+        # self.Cld = \
+        #     Tr + self.Ts + min(MAX_PICKUP_WAIT_TIME_MIN[0] * 60 * 2, self.Clp - Tr + self.Ts * (MAX_ONBOARD_DETOUR - 1))
         self.Clp_backup = self.Clp
         self.Tp = -1.0
         self.Td = -1.0
@@ -44,6 +42,10 @@ class Req(object):
 
     def update_pick_info(self, t: int):
         self.Tp = t
+        #  DEBUG codes
+        if self.status != OrderStatus.PICKING:
+            print(f"[DEBUG1] req {self.id}, {self.status}, "
+                  f"request time {self.Tr}, latest pickup {self.Clp}, pickup time {self.Tp}")
         assert (self.status == OrderStatus.PICKING)
         self.status = OrderStatus.ONBOARD
 

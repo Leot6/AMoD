@@ -5,7 +5,8 @@ rebalancing algorithm for the AMoD system
 from src.dispatcher.ilp_assign import *
 
 
-def reposition_idle_vehicles_to_nearest_pending_orders(reqs: list[Req], vehs: list[Veh]):
+def reposition_idle_vehicles_to_nearest_pending_orders(reqs: list[Req], vehs: list[Veh], system_time_sec: int,
+                                                       num_of_new_reqs: int, value_func: ValueFunction):
     t = timer_start()
 
     # 1. Get a list of the unassigned orders.
@@ -27,11 +28,21 @@ def reposition_idle_vehicles_to_nearest_pending_orders(reqs: list[Req], vehs: li
     for rid in pending_rids:
         req = reqs[rid]
         for veh in vehs:
-            if not veh.status == VehicleStatus.IDLE:
+            if veh.status != VehicleStatus.IDLE:
                 continue
             rebl_dt = get_duration_from_origin_to_dest(veh.nid, req.onid)
-            rebl_sche = [(-1, 0, req.onid, rebl_dt * 1.2)]
+            detour_sec = 240  # A hyper parameter and 240 is probably not the best option.
+            #  A rebalancing vehicle is allowed to pick up new orders
+            #  if it can still visit the reposition waypoint with a small detour.
+            rebl_sche = [(-1, 0, req.onid, system_time_sec + rebl_dt + detour_sec)]
             rebl_veh_req_pairs.append([veh, [req], rebl_sche, rebl_dt, -rebl_dt])
+
+    # # 000. Score the rebalancing task using value functions.
+    # if len(rebl_veh_req_pairs) > 1:
+    #     expected_values = value_func.compute_expected_values_for_veh_trip_pairs(num_of_new_reqs, vehs,
+    #                                                                             rebl_veh_req_pairs, system_time_sec)
+    #     for idx, vr_pair in enumerate(rebl_veh_req_pairs):
+    #         vr_pair[4] = expected_values[idx]
 
     # 3. Select suitable rebalancing candidates. Greedily from the one with the shortest travel time.
     rebl_veh_req_pairs.sort(key=lambda e: -e[4])

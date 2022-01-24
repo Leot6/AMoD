@@ -2,13 +2,7 @@
 definition of vehicles for the AMoD system
 """
 
-import copy
-import numpy as np
-from collections import deque
-
-from src.simulator.request import Req
-from src.simulator.types import Step, Leg, VehicleStatus
-from src.simulator.router_func import build_route_from_origin_to_dest, get_node_geo
+from src.simulator.route_functions import *
 
 
 class Veh(object):
@@ -17,7 +11,7 @@ class Veh(object):
     Attributes:
         id: sequential unique id
         status: idle, working and rebalancing
-        T: system time at current state
+        state_time: system time at current state
         lat: current lngitude
         lng: current longtitude
         nid: current nearest node id in network
@@ -37,23 +31,24 @@ class Veh(object):
         Tr: accumulated rebalancing time traveled
         Lt: accumulated load, weighed by service time
         Ld: accumulated load, weighed by service distance
+        picking_rids: ids of requests currently waiting for this vehicle to pick
         onboard_rid: id of requests currently on board
         new_pick_rid: id of requests newly picked up in current interval
         new_drop_rid: id of requests newly dropped off in current interval
 
     """
 
-    def __init__(self, id: int, nid: int, lng: float, lat: float, capacity: int, T: float):
+    def __init__(self, id: int, nid: int, lng: float, lat: float, capacity: int, system_time_sec: float):
         self.id = id
         self.status = VehicleStatus.IDLE
-        self.T = T
+        self.state_time = system_time_sec
         self.lng = lng
         self.lat = lat
         self.nid = nid
         self.K = capacity
         self.step_to_nid = None
-        self.t_to_nid = 0
-        self.d_to_nid = 0
+        self.t_to_nid = 0.0
+        self.d_to_nid = 0.0
         self.tnid = self.nid
         self.load = 0
         self.sche = []
@@ -70,25 +65,18 @@ class Veh(object):
         self.Ld = 0.0
         self.picking_rids = []
         self.onboard_rids = []
-        self.served_rids = []
-        self.onboard_rids_STUDY = []
-        self.served_rids_STUDY = []
         self.new_picked_rids = []
         self.new_dropped_rids = []
         self.sche_has_been_updated_at_current_epoch = False
 
-        # debug code starts
-        self.route_record = []
-        # debug code ends
-
     # update the vehicle location as well as the route after moving to time T
-    def move_to_time(self, T: int, update_vehicle_statistics: bool) -> list:
-        dT = T - self.T
+    def move_to_time(self, system_time_sec: int, update_vehicle_statistics: bool) -> list:
+        dT = system_time_sec - self.state_time
         if dT <= 0:
             return []
         self.step_to_nid = None
-        self.t_to_nid = 0
-        self.d_to_nid = 0
+        self.t_to_nid = 0.0
+        self.d_to_nid = 0.0
         # done is a list of finished legs
         done = []
         self.new_picked_rids.clear()
@@ -98,7 +86,7 @@ class Veh(object):
             # if the first leg could be finished by then
             if leg.t < dT:
                 dT -= leg.t
-                self.T += leg.t
+                self.state_time += leg.t
                 if update_vehicle_statistics:
                     self.Ts += leg.t
                     self.Ds += leg.d
@@ -118,7 +106,7 @@ class Veh(object):
                     # if the first leg could not be finished, but the first step of the leg could be finished by then
                     if step.t < dT:
                         dT -= step.t
-                        self.T += step.t
+                        self.state_time += step.t
                         if update_vehicle_statistics:
                             self.Ts += step.t
                             self.Ds += step.d
@@ -131,7 +119,7 @@ class Veh(object):
                                 self.Tr += step.t
                                 self.Dr += step.d
 
-                        self.jump_to_location(step.nid[1], step.geo[1][0], step.geo[1][1])
+                        self.jump_to_location(step.nid_pair[1], step.geo_pair[1][0], step.geo_pair[1][1])
                         self.pop_step()
 
                         if len(leg.steps) == 0:
@@ -156,18 +144,18 @@ class Veh(object):
 
                         # find the exact location the vehicle stops and update the step
                         self.cut_step(pct)
-                        self.jump_to_location(step.nid[0], step.geo[0][0], step.geo[0][1])
-                        self.T = T
+                        self.jump_to_location(step.nid_pair[0], step.geo_pair[0][0], step.geo_pair[0][1])
+                        self.state_time = system_time_sec
                         return done
 
         # We've finished the whole schedule.
         assert dT > 0 or np.isclose(dT, 0.0)
-        assert self.T < T or np.isclose(self.T, T)
+        assert self.state_time < system_time_sec or np.isclose(self.state_time, system_time_sec)
         assert len(self.route) == len(self.sche) == 0
         assert self.load == len(self.onboard_rids) == len(self.picking_rids) == 0
         assert np.isclose(self.d, 0.0)
         assert np.isclose(self.t, 0.0)
-        self.T = T
+        self.state_time = system_time_sec
         self.d = 0.0
         self.t = 0.0
         self.status = VehicleStatus.IDLE
@@ -177,8 +165,7 @@ class Veh(object):
         self.jump_to_location(leg.tnid)
         self.load += leg.pod
         if leg.rid != -2:
-            done.append((leg.rid, leg.pod, self.T))
-            self.route_record.append((leg.rid, leg.pod))
+            done.append((leg.rid, leg.pod, self.state_time))
             finished_sche_step = self.sche.pop(0)
             assert finished_sche_step[0] == leg.rid
             if leg.pod == 1:
@@ -186,13 +173,12 @@ class Veh(object):
                 self.new_picked_rids.append(leg.rid)
                 self.onboard_rids.append(leg.rid)
                 # if DEBUG_PRINT:
-                #     print(f'            +vehicle #{self.id} picked up req #{leg.rid} at {self.T}s')
+                #     print(f"            +vehicle #{self.id} picked up req #{leg.rid} at {self.state_time}s")
             elif leg.pod == -1:
                 self.new_dropped_rids.append(leg.rid)
                 self.onboard_rids.remove(leg.rid)
-                self.served_rids.append(leg.rid)
                 # if DEBUG_PRINT:
-                #     print(f'            +vehicle #{self.id} dropped up req #{leg.rid} at {self.T}s')
+                #     print(f"            +vehicle #{self.id} dropped up req #{leg.rid} at {self.state_time}s")
         assert self.load == len(self.onboard_rids)
         # if set(self.new_picked_rids) & set(self.new_dropped_rids) != set():
         #     print('[INFO]', self.new_picked_rids, self.new_dropped_rids)
@@ -216,9 +202,9 @@ class Veh(object):
     # find the exact location the vehicle stops and update the step
     def cut_step(self, pct: float):
         step = self.route[0].steps[0]
-        step.nid[0] = step.nid[1]
-        step.geo[0][0] += pct * (step.geo[1][0] - step.geo[0][0])
-        step.geo[0][1] += pct * (step.geo[1][1] - step.geo[0][1])
+        step.nid_pair[0] = step.nid_pair[1]
+        step.geo_pair[0][0] += pct * (step.geo_pair[1][0] - step.geo_pair[0][0])
+        step.geo_pair[0][1] += pct * (step.geo_pair[1][1] - step.geo_pair[0][1])
         self.t_to_nid = step.t * (1 - pct)
         self.d_to_nid = step.d * (1 - pct)
         self.t -= step.t * pct
@@ -228,7 +214,7 @@ class Veh(object):
         self.route[0].steps[0].t -= step.t * pct
         self.route[0].steps[0].d -= step.d * pct
         self.step_to_nid = copy.deepcopy(self.route[0].steps[0])
-        assert self.route[0].steps[0].nid[0] == self.route[0].steps[0].nid[1]
+        assert self.route[0].steps[0].nid_pair[0] == self.route[0].steps[0].nid_pair[1]
         assert np.isclose(self.step_to_nid.t, self.t_to_nid)
         assert np.isclose(self.step_to_nid.d, self.d_to_nid)
 
@@ -258,24 +244,24 @@ class Veh(object):
         self.clear_route()
         self.sche = copy.copy(sche)
         if self.step_to_nid:
-            assert self.lng == self.step_to_nid.geo[0][0]
+            assert self.lng == self.step_to_nid.geo_pair[0][0]
             # add the unfinished step from last move updating
             rid = -2
             pod = 0
-            tnid = self.step_to_nid.nid[1]
-            tlng = self.step_to_nid.geo[1][0]
-            tlat = self.step_to_nid.geo[1][1]
-            ddl = self.T + self.step_to_nid.t
+            tnid = self.step_to_nid.nid_pair[1]
+            tlng = self.step_to_nid.geo_pair[1][0]
+            tlat = self.step_to_nid.geo_pair[1][1]
+            ddl = self.state_time + self.step_to_nid.t
             duration = self.step_to_nid.t
             distance = self.step_to_nid.d
             steps = [copy.deepcopy(self.step_to_nid), Step(0, 0, [tnid, tnid], [[tlng, tlat], [tlng, tlat]])]
             leg = Leg(rid, pod, tnid, ddl, duration, distance, steps)
             # the last step of a leg is always of length 2,
             # consisting of 2 identical points as a flag of the end of the leg
-            assert len(leg.steps[-1].geo) == 2
-            assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
+            assert len(leg.steps[-1].geo_pair) == 2
+            assert leg.steps[-1].geo_pair[0] == leg.steps[-1].geo_pair[1]
             self.route.append(leg)
-            self.tnid = leg.steps[-1].nid[1]
+            self.tnid = leg.steps[-1].nid_pair[1]
             self.d += leg.d
             self.t += leg.t
         if self.sche:
@@ -308,10 +294,10 @@ class Veh(object):
         # the last step of a leg is always of length 2,
         # consisting of 2 identical points as a flag of the end of the leg
         # (this check is due to using OSRM, might not necessary now)
-        assert len(leg.steps[-1].geo) == 2
-        assert leg.steps[-1].geo[0] == leg.steps[-1].geo[1]
+        assert len(leg.steps[-1].geo_pair) == 2
+        assert leg.steps[-1].geo_pair[0] == leg.steps[-1].geo_pair[1]
         self.route.append(leg)
-        self.tnid = leg.steps[-1].nid[1]
+        self.tnid = leg.steps[-1].nid_pair[1]
         self.d += leg.d
         self.t += leg.t
 

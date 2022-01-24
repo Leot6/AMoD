@@ -15,7 +15,7 @@ with open(PATH_TO_MEAN_TRAVEL_TIME_TABLE, "rb") as f:
     mean_travel_time_table = pickle.load(f)
 with open(PATH_TO_TRAVEL_DISTANCE_TABLE, "rb") as f:
     travel_distance_table = pickle.load(f)
-print(f"[INFO] Router_Func is ready. ({timer_end(t)})")
+print(f"[INFO] Route functions are ready. ({timer_end(t)})")
 
 
 # get the mean duration of the best route from origin to destination
@@ -33,7 +33,7 @@ def get_distance_from_origin_to_dest(onid: int, dnid: int) -> float:
 
 
 # get the best route from origin to destination
-def build_route_from_origin_to_dest(onid: int, dnid: int) -> (float, float, list):
+def build_route_from_origin_to_dest(onid: int, dnid: int) -> (float, float, list[tuple]):
     # 1. recover the best path from origin to destination from the path table
     path = [dnid]
     pre_node = shortest_path_table[onid - 1][dnid - 1]
