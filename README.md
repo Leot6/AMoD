@@ -29,6 +29,80 @@ The main function in `main.py` will simulate the system given input parameters f
 Note: Running dispatcher `sba`/`osp` needs [gurobi](https://www.gurobi.com/) (an commerical optimization solver, free to academic users) installed. If `gurobi` is not installed, the code can be run by replacing the uses of function `ILP_assignment` to `greedy_assignment` (do not forget to comment the codes using gurobi in file `ilp_assign`), with expected worse performances. 
 
 
+## Dependencies to Install
+```
+python 3.9 or above
+
+gurobipy
+matplotlib
+numpy
+pandas
+scipy
+tqdm
+```
+
+## Steps to Start
+1. Download data files from [files](https://github.com/Leot6/AMoD/releases) and put them into the root directory of the code. Files in `datalog-gitignore.zip` were generated using repository [Manhattan-Map](https://github.com/Leot6/Manhattan-Map).
+
+```
+|-- simulation_system_lite
+   |-- datalog-gitignore
+   |-- media-gitignore
+   |-- src
+```
+
+2. Run `data_serializer.py` to load taxi data and map data files in advance and store them in pickle files. This is to accelerate the initialization time of the simulator.
+```
+cd src/utility
+python3 data_serializer.py
+```
+
+3. Run `main.py` to start the simulation. Set `DEBUG_PRINT = True` in `src/simulator/config.py` will print a detailed log in terminal.
+
+```
+cd ../..
+python3 main.py
+```
+
+## An Example Simulation Result
+
+```
+Initializing the simulator ...
+[INFO] Router_Func is ready. (0.371s)
+[INFO] Demand Generator is ready. (0.743s)
+[INFO] Platform is ready.
+------------------------------------------------------------------------------------------
+# Simulation Runtime
+  - Start: 2023-06-05 10:14:52, End: 0000-00-00 00:00:00, Time: 0:00:00.
+  - Main Simulation: init_time = 1.55 s, runtime = 0:00:00, avg_time = 0.00 s. 
+# System Configurations
+  - From 18:30:00 to 20:39:00. (main simulation between 19:00:00 and 20:00:00).
+  - Fleet Config: size = 200, capacity = 6. (60 + 120 + 78 = 258 epochs).
+  - Order Config: density = 0.05 (20160525-400k), max_wait = 300 s. (Δt = 30 s).
+  - Dispatch Config: dispatcher = SBA, rebalancer = NPO.
+------------------------------------------------------------------------------------------
+AMoD: 100%|█████████████████████████████████████████████| 258/258 [00:18<00:00, 13.86it/s]
+------------------------------------------------------------------------------------------
+# Simulation Runtime
+  - Start: 2023-06-05 10:14:52, End: 2023-06-05 10:15:10, Time: 0:00:18.
+  - Main Simulation: init_time = 1.55 s, runtime = 0:00:08, avg_time = 0.07 s. 
+# System Configurations
+  - From 18:30:00 to 20:39:00. (main simulation between 19:00:00 and 20:00:00).
+  - Fleet Config: size = 200, capacity = 6. (60 + 120 + 78 = 258 epochs).
+  - Order Config: density = 0.05 (20160525-400k), max_wait = 300 s. (Δt = 30 s).
+  - Dispatch Config: dispatcher = SBA, rebalancer = NPO.
+# Orders (1053/1348)
+  - complete = 1053 (78.12%), onboard = 0 (0.00%), total_service = 1053 (78.12%).
+  - avg_shortest_travel = 0.64 s, avg_wait = 169.60 s, avg_delay = 274.37 s.
+# Vehicles (200)
+  - Travel Distance: total_dist = 3521.11 km, avg_dist = 17.61 km.
+  - Travel Duration: avg_time = 3575.07 s (99.31% of the main simulation time).
+  - Empty Travel: avg_time = 308.56 s (8.63%), avg_dist = 1.34 km (7.63%).
+  - Rebl Travel: avg_time = 580.06 s (16.23%), avg_dist = 3.07 km (17.42%).
+  - Travel Load: average_load_dist = 1.05, average_load_time = 1.06.
+------------------------------------------------------------------------------------------
+
+
 ## References
 
 1. Jian Wen. amod-abm. https://github.com/wenjian0202/amod-abm, 2017
